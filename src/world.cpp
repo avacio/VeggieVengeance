@@ -9,8 +9,7 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	//globals can be declared here
-	const size_t MAX_PLAYERS = 2;
+	const size_t MAX_FIGHTERS = 2;
 
 	namespace
 	{
@@ -23,7 +22,8 @@ namespace
 
 World::World()
 {
-	srand(time(NULL));
+	// Seeding rng with random device
+	m_rng = std::default_random_engine(std::random_device()());
 }
 
 World::~World()
@@ -113,7 +113,7 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 
-	return true;
+	return m_water.init();
 }
 
 // Releases all the associated resources
@@ -129,7 +129,10 @@ void World::destroy()
 		Mix_FreeChunk(m_salmon_eat_sound);
 
 	Mix_CloseAudio();
-
+	
+	for (auto& fighter : m_fighters)
+		fighter.destroy();
+	m_fighters.clear();
 	glfwDestroyWindow(m_window);
 }
 
@@ -139,9 +142,43 @@ bool World::update(float elapsed_ms)
 	int w, h;
         glfwGetFramebufferSize(m_window, &w, &h);
 	vec2 screen = { (float)w, (float)h };
+
 	
-	// Updating all entities, making the players
+	// Updating all entities, making the turtle and fish
 	// faster based on current
+	for (auto& fighter : m_fighters)
+		fighter.update(elapsed_ms * m_current_speed);
+
+	// Removing out of screen bubbles
+	auto fighter_it = m_fighters.begin();
+	while (fighter_it != m_fighters.end())
+	{
+		float w = fighter_it->get_bounding_box().x / 2;
+		if (fighter_it->get_position().x + w < 0.f)
+		{
+			fighter_it = m_fighters.erase(fighter_it);
+			continue;
+		}
+
+		++fighter_it;
+	}
+
+
+	
+
+	// Spawning new bubbles
+	if (m_fighters.size() <= MAX_FIGHTERS)
+	{
+		if (!spawn_fighter())
+			return false;
+
+		Fighter& new_fighter = m_fighters.back();
+
+		// Setting random initial position
+		new_fighter.set_position({ screen.x - 250.f, screen.y - 250.f });
+	}
+
+
 
 	return true;
 }
@@ -156,6 +193,11 @@ void World::draw()
 	// Getting size of window
 	int w, h;
     glfwGetFramebufferSize(m_window, &w, &h);
+
+	// Updating window title with points
+	std::stringstream title_ss;
+	title_ss << "Veggie Vegeance";
+	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
 	// First render to the custom framebuffer
@@ -182,8 +224,10 @@ void World::draw()
 	float ty = -(top + bottom) / (top - bottom);
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
-	// Drawing entities !!!
-	//for each player/ai, call draw here
+	// Drawing entities
+	for (auto& fighter : m_fighters)
+		fighter.draw(projection_2D);
+
 
 	/////////////////////
 	// Truely render to the screen
@@ -200,6 +244,8 @@ void World::draw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
+	m_water.draw(projection_2D);
+
 	//////////////////
 	// Presenting
 	glfwSwapBuffers(m_window);
@@ -211,23 +257,57 @@ bool World::is_over()const
 	return glfwWindowShouldClose(m_window);
 }
 
+// Creates a new bubble and if successful, addis it to the list of bubbles
+bool World::spawn_fighter()
+{
+	Fighter fighter;
+	if (fighter.init())
+	{
+		m_fighters.emplace_back(fighter);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn fighter");
+	return false;
+}
+
+
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 {
-	if (action == GLFW_PRESS && key == GLFW_KEY_A)
-		m_fighter.set_movement(0);
-	if (action == GLFW_PRESS && key == GLFW_KEY_D)
-		m_fighter.set_movement(1);
-	if (action == GLFW_PRESS && key == GLFW_KEY_W)
-		m_fighter.set_movement(2);
-	if (action == GLFW_PRESS && key == GLFW_KEY_S)
-		m_fighter.set_movement(3);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_A)
-		m_fighter.set_movement(4);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_D)
-		m_fighter.set_movement(5);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_S)
-		m_fighter.set_movement(6);
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// HANDLE SALMON MOVEMENT HERE
+	// key is of 'type' GLFW_KEY_
+	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	vec2 movement = { 0.0, 0.0 };
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN) {
+		movement = { 0.0, 15.0f };
+	}
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP)
+		movement = { 0.0, -15.0f };
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT)
+		movement = { 15.0f, 0.0 };
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT)
+		movement = { -15.0f, 0.0 };
+
+	// Resetting game
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	{
+		int w, h;
+		glfwGetWindowSize(m_window, &w, &h);
+
+		m_fighters.clear();
+		m_water.reset_salmon_dead_time();
+		m_current_speed = 1.f;
+	}
+
+	// Control the current speed with `<` `>`
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&  key == GLFW_KEY_COMMA)
+		m_current_speed -= 0.1f;
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+		m_current_speed += 0.1f;
+	
+	m_current_speed = fmax(0.f, m_current_speed);
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)

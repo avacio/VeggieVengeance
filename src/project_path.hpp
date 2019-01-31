@@ -2,4 +2,4 @@
 
 // Please don't change the content of this header
 
-#define PROJECT_SOURCE_DIR "C:/Users/grafm/Desktop/school stuff/436D/Intro_Assn/assginment1/"
+#define PROJECT_SOURCE_DIR "C:/Users/jen_d/Desktop/CPSC 436D/team09game/"

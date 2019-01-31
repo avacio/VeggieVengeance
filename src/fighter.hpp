@@ -1,60 +1,44 @@
 #pragma once
 
 #include "common.hpp"
+#include <random>
 
+// Salmon enemy 
 class Fighter : public Renderable
 {
+	// Shared between all bubbles, no need to load one for each instance
+	static Texture fighter_texture;
+
 public:
 	// Creates all the associated render resources and default transform
 	bool init();
 
-	// Releases all associated resources
+	// Releases all the associated resources
 	void destroy();
-	
-	// Update salmon position based on direction
+
+	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
 	void update(float ms);
-	
+
 	// Renders the salmon
+	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
-	// Returns the current salmon position
+	// Returns the current bubble position
 	vec2 get_position()const;
 
-	// Moves the salmon's position by the specified offset
-	void move(vec2 off);
+	// Sets the new bubble position
+	void set_position(vec2 position);
 
-	// Changes salmon velocity by the specified offset
-	void change_velocity(vec2 off);
-
-	// Set salmon rotation in radians
-	void set_rotation(float radians);
-
-	// True if the salmon is alive
-	bool is_alive()const;
-
-	// Kills the salmon, changing its alive state and triggering on death events
-	void kill();
-
-	// Set fighter's movements
-	void set_movement(int mov);
-
-	// jumping function
-	void jump();
-
-	// crouching function
-	void crouch();
+	// Returns the bubble' bounding box for collision detection, called by collides_with()
+	vec2 get_bounding_box()const;
 
 private:
-	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
-	size_t m_num_indices; // passed to glDrawElements
-	vec2 m_velocity; //determined by what keys are pressed, range 1 to -1
-	bool is_idle;
-	bool moving_forward;
-	bool moving_backward;
-	bool is_jumping;
-	bool is_crouching;
+
+	// C++ rng
+	std::default_random_engine m_rng;
+	std::uniform_real_distribution<float> m_dist; // default 0..1
 };

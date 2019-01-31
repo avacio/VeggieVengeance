@@ -12,12 +12,6 @@ layout(location = 0) out vec4 color;
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vec2 distort(vec2 uv) {
 	vec2 coord = uv.xy;
-	float pi = 3.14159;
-    float A = 0.005;
-    float w = 5.0 * pi;
-    float z = sin( w*coord.x + time) * A;
-	coord.x = coord.x+z;
-	coord.y = coord.y+z;
     return coord;
 }
 
@@ -26,7 +20,7 @@ vec2 distort(vec2 uv) {
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vec4 color_shift(vec4 in_color) {
 	vec4 color = in_color;
-	color +=  vec4(0, 0, 0.5, 0);
+	color +=  vec4(0.1, 0.1, 0.1, 0);
 	return color;
 }
 
