@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+set(CMAKE_RC_COMPILER "C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/rc.exe")
+=======
+set(CMAKE_RC_COMPILER "rc")
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+=======
+set(CMAKE_RC_COMPILER "rc")
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+set(CMAKE_RC_COMPILER_ARG1 "")
+set(CMAKE_RC_COMPILER_LOADED 1)
+set(CMAKE_RC_SOURCE_FILE_EXTENSIONS rc;RC)
+set(CMAKE_RC_OUTPUT_EXTENSION .res)
+set(CMAKE_RC_COMPILER_ENV_VAR "RC")

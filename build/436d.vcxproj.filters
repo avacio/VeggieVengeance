@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\a1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\fighter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\ai.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\world.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    <ClCompile Include="..\src\water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+=======
+    <ClCompile Include="..\src\water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\project_path.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\common.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\fighter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\player.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\ai.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\src\world.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    <ClInclude Include="..\src\water.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+=======
+    <ClInclude Include="..\src\water.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\jen_d\Desktop\CPSC 436D\team09game\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{4C142AD5-4F3B-35CD-AB81-D7E7BC569B04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{35A2B7DA-465C-3A07-84EA-EFEA63DE2BD2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+<<<<<<< HEAD
+<<<<<<< HEAD
+</Project>
+=======
+</Project>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
+=======
+</Project>
+>>>>>>> d335786d54dd655c9f503f8ec7a4e721fb6aaaa8
