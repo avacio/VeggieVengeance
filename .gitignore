@@ -288,4 +288,5 @@ __pycache__/
 
 
 .vscode
-build
+build/*
+.DS_Store
