@@ -66,6 +66,12 @@ bool Fighter::init()
 	m_rotation = 0.f;
 
 	m_position = { 50.f, 100.f };
+
+	m_name = "Veg"; // default
+	m_maxHP = 100;
+	m_currentHP = m_maxHP;
+	m_speedStat = 3;
+	m_strengthStat = 3;
 	return true;
 }
 
@@ -138,6 +144,16 @@ void Fighter::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
+Fighter::Fighter(std::string name, int maxHP, int speedStat, int strengthStat)
+{
+	m_name = name;
+	m_maxHP = maxHP;
+	m_currentHP = maxHP;
+	m_speedStat = speedStat;
+	m_strengthStat = strengthStat;
+}
+
+
 vec2 Fighter::get_position()const
 {
 	return m_position;
@@ -153,4 +169,9 @@ vec2 Fighter::get_bounding_box()const
 {
 	// fabs is to avoid negative scale due to the facing direction
 	return { std::fabs(m_scale.x) * fighter_texture.width, std::fabs(m_scale.y) * fighter_texture.height };
+}
+
+void Fighter::take_damage(int dmg)
+{
+	m_currentHP -= dmg;
 }

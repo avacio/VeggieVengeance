@@ -10,6 +10,8 @@ class Fighter : public Renderable
 	static Texture fighter_texture;
 
 public:
+	Fighter(std::string name, int maxHP, int speedStat, int strengthStat);
+
 	// Creates all the associated render resources and default transform
 	bool init();
 
@@ -33,10 +35,19 @@ public:
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box()const;
 
+	// decrements m_currentHP
+	void take_damage(int dmg);
+
 private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
+
+	std::string m_name;
+	int m_maxHP;
+	int m_currentHP;
+	int m_speedStat;	// int from range of 1 -> 5
+	int m_strengthStat;	// int from range of 1 -> 5
 
 	// C++ rng
 	std::default_random_engine m_rng;
