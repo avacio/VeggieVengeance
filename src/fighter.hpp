@@ -30,6 +30,14 @@ public:
 	// Sets the new bubble position
 	void set_position(vec2 position);
 
+	void move(vec2 off);
+
+	// Set fighter's movements
+	void set_movement(int mov);
+
+	// Returns the current health
+	int get_health()const;
+
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box()const;
 
@@ -37,6 +45,16 @@ private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
+	int m_health;
+	bool is_alive;
+	bool is_idle;
+	bool facing_front;
+	bool moving_forward;
+	bool moving_backward;
+	bool is_jumping;
+	bool is_crouching;
+	bool is_punching;
+	//float angle;
 
 	// C++ rng
 	std::default_random_engine m_rng;

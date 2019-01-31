@@ -56,8 +56,12 @@ private:
 	// Water effect
 	Water m_water;
 
+	// GUI text renderer
+	
+
 
 	// Game entities
+	Fighter m_fighter1;
 	std::vector<Fighter> m_fighters;
 
 	float m_current_speed;
@@ -65,6 +69,7 @@ private:
 	Mix_Music* m_background_music;
 	Mix_Chunk* m_salmon_dead_sound;
 	Mix_Chunk* m_salmon_eat_sound;
+
 
 	// C++ rng
 	std::default_random_engine m_rng;

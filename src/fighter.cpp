@@ -1,6 +1,8 @@
 // Header
 #include "fighter.hpp"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <cmath>
 
 Texture Fighter::fighter_texture;
@@ -61,11 +63,15 @@ bool Fighter::init()
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
+	is_alive = true;
+	is_idle = true;
+	facing_front = true;
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
 	m_rotation = 0.f;
+	m_health = 100;
 
-	m_position = { 50.f, 100.f };
+	m_position = { 250.f, 550.f };
 	return true;
 }
 
@@ -84,9 +90,50 @@ void Fighter::destroy()
 
 void Fighter::update(float ms)
 {
-	// Move fish along -Y based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	//
+	float MOVING_SPEED = 5.0;
+	if (is_alive) {
+		if (moving_forward) {
+			if (!facing_front) {
+				m_scale.x = -m_scale.x;
+				facing_front = true;
+			}
+			move({ MOVING_SPEED, 0.0 });
+		}
+		if (moving_backward) {
+			if (facing_front) {
+				m_scale.x = -m_scale.x;
+				facing_front = false;
+			}
+			move({ -MOVING_SPEED, 0.0 });
+		}		
+		if (is_jumping) {
+			/*
+			angle += M_PI / 18;
+			if ((roundf(abs(sin(angle)) * 10) / 10) != 0.0)
+				angle += M_PI / 18;
+			else
+				angle = 0.0;
+			move({ 0.0, sin(angle) * 5 });
+			*/
+		}
+
+		if (is_crouching) {
+
+		}
+			
+
+		if (is_punching) {
+			m_health -= 1;
+			if (m_health <= 0)
+				is_alive = false;
+		}
+	}
+	else {
+		if (facing_front)
+			m_rotation = -M_PI / 2;
+		else
+			m_rotation = M_PI / 2;
+	}
 }
 
 void Fighter::draw(const mat3& projection)
@@ -143,9 +190,16 @@ vec2 Fighter::get_position()const
 	return m_position;
 }
 
+
+
 void Fighter::set_position(vec2 position)
 {
 	m_position = position;
+}
+
+void Fighter::move(vec2 off)
+{
+	m_position.x += off.x; m_position.y += off.y;
 }
 
 //// Returns the local bounding coordinates scaled by the current size of the bubble 
@@ -153,4 +207,51 @@ vec2 Fighter::get_bounding_box()const
 {
 	// fabs is to avoid negative scale due to the facing direction
 	return { std::fabs(m_scale.x) * fighter_texture.width, std::fabs(m_scale.y) * fighter_texture.height };
+}
+
+// set fighter's movements
+void Fighter::set_movement(int mov) {
+	switch (mov) {
+	case 0:
+		moving_forward = true;
+		is_idle = false;
+		break;
+	case 1:
+		moving_backward = true;
+		is_idle = false;
+		break;
+	case 2:
+		is_jumping = true;
+		is_idle = false;
+		break;
+	case 3:
+		is_crouching = true;
+		is_idle = false;
+		break;
+	case 4:
+		is_punching = true;
+		is_idle = false;
+		break;
+	case 5:
+		moving_forward = false;
+		is_idle = true;
+		break;
+	case 6:
+		moving_backward = false;
+		is_idle = true;
+		break;
+	case 7:
+		is_crouching = false;
+		is_idle = true;
+		break;
+	case 8:
+		is_punching = false;
+		is_idle = true;
+		break;
+	}
+}
+
+int Fighter::get_health()const
+{
+	return m_health;
 }

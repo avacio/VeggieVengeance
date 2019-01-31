@@ -113,7 +113,7 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 
-	return m_water.init();
+	return m_water.init() && m_fighter1.init();
 }
 
 // Releases all the associated resources
@@ -146,6 +146,7 @@ bool World::update(float elapsed_ms)
 	
 	// Updating all entities, making the turtle and fish
 	// faster based on current
+	m_fighter1.update(elapsed_ms);
 	for (auto& fighter : m_fighters)
 		fighter.update(elapsed_ms * m_current_speed);
 
@@ -167,6 +168,7 @@ bool World::update(float elapsed_ms)
 	
 
 	// Spawning new bubbles
+
 	if (m_fighters.size() <= MAX_FIGHTERS)
 	{
 		if (!spawn_fighter())
@@ -196,7 +198,7 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Veggie Vengeance";
+	title_ss << "Veggie Vengeance  -  Player's Health: " << m_fighter1.get_health();
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -225,8 +227,10 @@ void World::draw()
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
 	// Drawing entities
+	m_fighter1.draw(projection_2D);
 	for (auto& fighter : m_fighters)
 		fighter.draw(projection_2D);
+
 
 
 	/////////////////////
@@ -279,23 +283,32 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	vec2 movement = { 0.0, 0.0 };
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_DOWN) {
-		movement = { 0.0, 15.0f };
-	}
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP)
-		movement = { 0.0, -15.0f };
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_RIGHT)
-		movement = { 15.0f, 0.0 };
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_LEFT)
-		movement = { -15.0f, 0.0 };
+	if (action == GLFW_PRESS && key == GLFW_KEY_D)
+		m_fighter1.set_movement(0);
+	if (action == GLFW_PRESS && key == GLFW_KEY_A)
+		m_fighter1.set_movement(1);
+	if (action == GLFW_PRESS && key == GLFW_KEY_W)
+		m_fighter1.set_movement(2);
+	if (action == GLFW_PRESS && key == GLFW_KEY_S)
+		m_fighter1.set_movement(3);
+	if (action == GLFW_PRESS && key == GLFW_KEY_E)
+		m_fighter1.set_movement(4);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+		m_fighter1.set_movement(5);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_A)
+		m_fighter1.set_movement(6);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+		m_fighter1.set_movement(7);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+		m_fighter1.set_movement(8);
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-
+		m_fighter1.destroy();
+		m_fighter1.init();
 		m_fighters.clear();
 		m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
