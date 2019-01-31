@@ -130,6 +130,7 @@ void World::destroy()
 
 	Mix_CloseAudio();
 	
+	m_fighter1.destroy();
 	for (auto& fighter : m_fighters)
 		fighter.destroy();
 	m_fighters.clear();
@@ -307,7 +308,7 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-		m_fighter1.destroy();
+		//m_fighter1.destroy();
 		m_fighter1.init();
 		m_fighters.clear();
 		m_water.reset_salmon_dead_time();
