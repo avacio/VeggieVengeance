@@ -214,7 +214,20 @@ bool World::is_over()const
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 {
-
+	if (action == GLFW_PRESS && key == GLFW_KEY_A)
+		m_fighter.set_movement(0);
+	if (action == GLFW_PRESS && key == GLFW_KEY_D)
+		m_fighter.set_movement(1);
+	if (action == GLFW_PRESS && key == GLFW_KEY_W)
+		m_fighter.set_movement(2);
+	if (action == GLFW_PRESS && key == GLFW_KEY_S)
+		m_fighter.set_movement(3);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_A)
+		m_fighter.set_movement(4);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+		m_fighter.set_movement(5);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+		m_fighter.set_movement(6);
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)

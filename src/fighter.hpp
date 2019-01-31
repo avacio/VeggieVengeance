@@ -36,6 +36,15 @@ public:
 	// Kills the salmon, changing its alive state and triggering on death events
 	void kill();
 
+	// Set fighter's movements
+	void set_movement(int mov);
+
+	// jumping function
+	void jump();
+
+	// crouching function
+	void crouch();
+
 private:
 	bool m_is_alive; // True if the salmon is alive
 	vec2 m_position; // Window coordinates
@@ -43,4 +52,9 @@ private:
 	float m_rotation; // in radians
 	size_t m_num_indices; // passed to glDrawElements
 	vec2 m_velocity; //determined by what keys are pressed, range 1 to -1
+	bool is_idle;
+	bool moving_forward;
+	bool moving_backward;
+	bool is_jumping;
+	bool is_crouching;
 };

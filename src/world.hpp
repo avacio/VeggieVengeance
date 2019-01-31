@@ -51,6 +51,9 @@ private:
 	GLuint m_frame_buffer;
 	Texture m_screen_tex;
 
+	// Game entities
+	Fighter m_fighter;
+
 	float m_current_speed;
 	
 	Mix_Music* m_background_music;
