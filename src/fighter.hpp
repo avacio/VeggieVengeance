@@ -46,6 +46,8 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	int m_health;
+	int m_speed;	// each fighter has different speed and strength stats
+	int m_strength;
 	bool is_alive;
 	bool is_idle;
 	bool facing_front;
@@ -54,6 +56,7 @@ private:
 	bool is_jumping;
 	bool is_crouching;
 	bool is_punching;
+	bool is_hurt;
 	//float angle;
 
 	// C++ rng

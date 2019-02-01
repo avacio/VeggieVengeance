@@ -235,7 +235,7 @@ void World::draw()
 
 
 	/////////////////////
-	// Truely render to the screen
+	// Truly render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Clearing backbuffer
