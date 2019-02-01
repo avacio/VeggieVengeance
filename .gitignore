@@ -290,3 +290,4 @@ __pycache__/
 .vscode
 build/*
 .DS_Store
+src/project_path.hpp
