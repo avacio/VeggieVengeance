@@ -130,6 +130,7 @@ void Fighter::update(float ms)
 
 		if (is_punching) {
 			is_hurt = true;
+
 			m_health -= 1;
 			if (m_health <= 0)
 				is_alive = false;
@@ -166,7 +167,7 @@ void Fighter::draw(const mat3& projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
-
+	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
 	glBindVertexArray(mesh.vao);
@@ -191,6 +192,8 @@ void Fighter::draw(const mat3& projection)
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 	glUniform1i(is_hurt_uloc, is_hurt);
+	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);

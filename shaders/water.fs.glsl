@@ -2,6 +2,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform float dead_timer;
+uniform bool is_wavy;
 
 in vec2 uv;
 
@@ -11,8 +12,8 @@ layout(location = 0) out vec4 color;
 // HANDLE THE WATER WAVE DISTORTION HERE (you may want to try sin/cos)
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vec2 distort(vec2 uv) {
-	vec2 coord = uv.xy;
-    return coord;
+    uv.y += cos(uv.x*25.0) * 0.01 * cos(time);
+    return uv;
 }
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -34,9 +35,15 @@ vec4 fade_color(vec4 in_color) {
 
 void main()
 {
-	vec2 coord = distort(uv);
-
+//    if (is_wavy) {
+//        vec2 coord = distort(uv);
+//        vec4 in_color = texture(screen_texture, coord);
+//        color = color_shift(in_color);
+//    }
+    vec2 coord;
+     if (is_wavy) { coord = distort(uv); } else { coord = uv; }
     vec4 in_color = texture(screen_texture, coord);
     color = color_shift(in_color);
     color = fade_color(color);
+//     color = vec4(0.0, 1.0, 0.0, 1.0);
 }
