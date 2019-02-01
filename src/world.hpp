@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "water.hpp"
 #include "fighter.hpp"
+#include "player.hpp"
+#include "ai.hpp"
 
 // stlib
 #include <vector>
@@ -37,10 +39,10 @@ public:
 	bool is_over()const;
 
 private:
-	// Generates a new bubble
-	bool spawn_fighter();
+	// Generates a new fighter
+	bool spawn_ai();
 
-	// !!! INPUT CALLBACK FUNCTIONS
+	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow*, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
 
@@ -61,8 +63,9 @@ private:
 
 
 	// Game entities
-	Fighter m_fighter1;
-	std::vector<Fighter> m_fighters;
+	Player m_player1;
+	Player m_player2;
+	std::vector<Ai> m_ais;
 
 	float m_current_speed;
 	

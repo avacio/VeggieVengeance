@@ -63,9 +63,6 @@ bool Fighter::init()
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
-	is_alive = true;
-	is_idle = true;
-	facing_front = true;
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
 	m_rotation = 0.f;
@@ -90,6 +87,9 @@ void Fighter::destroy()
 
 void Fighter::update(float ms)
 {
+	if (m_health <= 0)
+		is_alive = false;
+
 	float MOVING_SPEED = 5.0;
 	if (is_alive) {
 		if (moving_forward) {
@@ -124,8 +124,6 @@ void Fighter::update(float ms)
 
 		if (is_punching) {
 			m_health -= 1;
-			if (m_health <= 0)
-				is_alive = false;
 		}
 	}
 	else {

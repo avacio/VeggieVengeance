@@ -9,7 +9,11 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const size_t MAX_FIGHTERS = 2;
+	const size_t MAX_FIGHTERS = 4;
+	//NOTE: Since we do not currently have a menu, these constants determine the amount of
+	//fighters that will be spawned in at the beginning of a game
+	const int MAX_PLAYERS = 2;
+	const int MAX_AI = 1;
 
 	namespace
 	{
@@ -24,6 +28,12 @@ World::World()
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
+	if (MAX_PLAYERS >= 1) {
+		m_player1.set_in_play(true);
+	}
+	if (MAX_PLAYERS >= 2) {
+		m_player2.set_in_play(true);
+	}
 }
 
 World::~World()
@@ -113,7 +123,23 @@ bool World::init(vec2 screen)
 
 	m_current_speed = 1.f;
 
-	return m_water.init() && m_fighter1.init();
+	//spawn fighters below
+	//indicates success of initialization operations, if even one failure occurs it should be false
+	bool initSuccess = true;
+
+	if (m_player1.get_in_play()) {
+		initSuccess = initSuccess && m_player1.init();
+	}
+
+	if (m_player2.get_in_play()) {
+		initSuccess = initSuccess && m_player2.init();
+	}
+
+	for (int i = 0; i < MAX_AI; i++) {
+		initSuccess = initSuccess && spawn_ai();
+	}
+
+	return m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -130,10 +156,15 @@ void World::destroy()
 
 	Mix_CloseAudio();
 	
-	m_fighter1.destroy();
-	for (auto& fighter : m_fighters)
-		fighter.destroy();
-	m_fighters.clear();
+	if (m_player1.get_in_play()) {
+		m_player1.destroy();
+	}
+	if (m_player2.get_in_play()) {
+		m_player2.destroy();
+	}
+	for (auto& ai : m_ais)
+		ai.destroy();
+	m_ais.clear();
 	glfwDestroyWindow(m_window);
 }
 
@@ -145,43 +176,17 @@ bool World::update(float elapsed_ms)
 	vec2 screen = { (float)w, (float)h };
 
 	
-	// Updating all entities, making the turtle and fish
+	// Updating all entities, making the entities
 	// faster based on current
-	m_fighter1.update(elapsed_ms);
-	for (auto& fighter : m_fighters)
-		fighter.update(elapsed_ms * m_current_speed);
-
-	// Removing out of screen bubbles
-	auto fighter_it = m_fighters.begin();
-	while (fighter_it != m_fighters.end())
-	{
-		float w = fighter_it->get_bounding_box().x / 2;
-		if (fighter_it->get_position().x + w < 0.f)
-		{
-			fighter_it = m_fighters.erase(fighter_it);
-			continue;
-		}
-
-		++fighter_it;
+	if (m_player1.get_in_play()) {
+		m_player1.update(elapsed_ms);
 	}
-
-
+	if (m_player2.get_in_play()) {
+		m_player2.update(elapsed_ms);
+	}
 	
-
-	// Spawning new bubbles
-
-	if (m_fighters.size() <= MAX_FIGHTERS)
-	{
-		if (!spawn_fighter())
-			return false;
-
-		Fighter& new_fighter = m_fighters.back();
-
-		// Setting random initial position
-		new_fighter.set_position({ screen.x - 250.f, screen.y - 250.f });
-	}
-
-
+	for (auto& ai : m_ais)
+		ai.update(elapsed_ms * m_current_speed);
 
 	return true;
 }
@@ -199,7 +204,11 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	title_ss << "Veggie Vengeance  -  Player's Health: " << m_fighter1.get_health();
+	int health_display = 0;
+	if (m_player1.get_in_play()) {
+		health_display = m_player1.get_health();
+	}
+	title_ss << "Veggie Vengeance  -  Player's Health: " << health_display;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -228,8 +237,13 @@ void World::draw()
 	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
 
 	// Drawing entities
-	m_fighter1.draw(projection_2D);
-	for (auto& fighter : m_fighters)
+	if (m_player1.get_in_play()) {
+		m_player1.draw(projection_2D);
+	}
+	if (m_player2.get_in_play()) {
+		m_player2.draw(projection_2D);
+	}
+	for (auto& fighter : m_ais)
 		fighter.draw(projection_2D);
 
 
@@ -262,13 +276,13 @@ bool World::is_over()const
 	return glfwWindowShouldClose(m_window);
 }
 
-// Creates a new bubble and if successful, addis it to the list of bubbles
-bool World::spawn_fighter()
-{
-	Fighter fighter;
-	if (fighter.init())
+// Creates a ai and if successful, adds it to the list of ai
+bool World::spawn_ai()
+{	
+	Ai ai;
+	if (ai.init())
 	{
-		m_fighters.emplace_back(fighter);
+		m_ais.emplace_back(ai);
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
@@ -279,49 +293,76 @@ bool World::spawn_fighter()
 // On key callback
 void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if (action == GLFW_PRESS && key == GLFW_KEY_D)
-		m_fighter1.set_movement(0);
-	if (action == GLFW_PRESS && key == GLFW_KEY_A)
-		m_fighter1.set_movement(1);
-	if (action == GLFW_PRESS && key == GLFW_KEY_W)
-		m_fighter1.set_movement(2);
-	if (action == GLFW_PRESS && key == GLFW_KEY_S)
-		m_fighter1.set_movement(3);
-	if (action == GLFW_PRESS && key == GLFW_KEY_E)
-		m_fighter1.set_movement(4);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_D)
-		m_fighter1.set_movement(5);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_A)
-		m_fighter1.set_movement(6);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_S)
-		m_fighter1.set_movement(7);
-	if (action == GLFW_RELEASE && key == GLFW_KEY_E)
-		m_fighter1.set_movement(8);
+	// Handle player movement here
+	if (m_player1.get_in_play()) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_D)
+			m_player1.set_movement(0);
+		if (action == GLFW_PRESS && key == GLFW_KEY_A)
+			m_player1.set_movement(1);
+		if (action == GLFW_PRESS && key == GLFW_KEY_W)
+			m_player1.set_movement(2);
+		if (action == GLFW_PRESS && key == GLFW_KEY_S)
+			m_player1.set_movement(3);
+		if (action == GLFW_PRESS && key == GLFW_KEY_E)
+			m_player1.set_movement(4);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+			m_player1.set_movement(5);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
+			m_player1.set_movement(6);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+			m_player1.set_movement(7);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+			m_player1.set_movement(8);
+	}
+
+	if (m_player2.get_in_play()) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_L)
+			m_player2.set_movement(0);
+		if (action == GLFW_PRESS && key == GLFW_KEY_J)
+			m_player2.set_movement(1);
+		if (action == GLFW_PRESS && key == GLFW_KEY_I)
+			m_player2.set_movement(2);
+		if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			m_player2.set_movement(3);
+		if (action == GLFW_PRESS && key == GLFW_KEY_O)
+			m_player2.set_movement(4);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
+			m_player2.set_movement(5);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
+			m_player2.set_movement(6);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+			m_player2.set_movement(7);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_O)
+			m_player2.set_movement(8);
+	}
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
+		//!!! DESPITE MY EFFORTS THIS IS STILL BUGGY, ERROR
+		//LIKELY TO DO WITH DESTROYING FIGHTERS
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-		//m_fighter1.destroy();
-		m_fighter1.init();
-		m_fighters.clear();
-		m_water.reset_salmon_dead_time();
+		if (m_player1.get_in_play()) {
+			m_player1.destroy();
+			m_player1.set_in_play(true);
+			m_player1.init();
+		}
+		if (m_player2.get_in_play()) {
+			m_player2.destroy();
+			m_player2.set_in_play(true);
+			m_player2.init();
+		}
+		//m_fighters.clear();
+		for (auto& ai : m_ais) {
+			ai.destroy();
+			ai.init();
+		}
+		//m_ais.clear();
+		//m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 	}
 
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) &&  key == GLFW_KEY_COMMA)
-		m_current_speed -= 0.1f;
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-		m_current_speed += 0.1f;
-	
-	m_current_speed = fmax(0.f, m_current_speed);
 }
 
 void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
