@@ -224,15 +224,6 @@ void World::draw()
 		health_display2 = m_player2.get_health();
 	}
 	title_ss << "Veggie Vengeance  -  Player 1's Health: " << health_display1 << " || Player 2's Health: " << health_display2;
-	if (health_display2 == 0) {
-		title_ss.str("");
-		title_ss << "Veggie Vengeance  -  Player 1 Wins!";
-	}
-	if (health_display1 == 0) {
-		title_ss.str("");
-		title_ss << "Veggie Vengeance  -  Player 2 Wins!";
-	}
-		
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -304,7 +295,7 @@ bool World::is_over() const
 bool World::spawn_ai()
 {
 	AI ai;
-	if (ai.init(1))
+	if (ai.init(2))
 	{
 		m_ais.emplace_back(ai);
 		return true;
@@ -327,11 +318,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_S)
 			m_player1.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_E)
 			m_player1.set_movement(4);
-			m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
-		} else { m_water.set_is_wavy(false); } // STUB ENVIRONMENT EFFECT
-
 		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 			m_player1.set_movement(5);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
@@ -364,6 +352,13 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(8);
 	}
 
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER) {
+		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
+	}
+
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
@@ -387,7 +382,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		for (auto &ai : m_ais)
 		{
 			ai.destroy();
-			ai.init(1);
+			ai.init(2);
 		}
 		//m_ais.clear();
 		//m_water.reset_salmon_dead_time();
