@@ -13,7 +13,7 @@ const size_t MAX_FIGHTERS = 4;
 //NOTE: Since we do not currently have a menu, these constants determine the amount of
 //fighters that will be spawned in at the beginning of a game
 const int MAX_PLAYERS = 2;
-const int MAX_AI = 1;
+const int MAX_AI = 2;
 
 namespace
 {
@@ -140,7 +140,11 @@ bool World::init(vec2 screen)
 
 	for (int i = 0; i < MAX_AI; i++)
 	{
-		initSuccess = initSuccess && spawn_ai();
+		aiType type = AVOID;
+		if (i % 2 == 0) {
+			type = CHASE;
+		}
+		initSuccess = initSuccess && spawn_ai(type);
 	}
 
 	return m_water.init() && initSuccess;
@@ -292,9 +296,9 @@ bool World::is_over() const
 }
 
 // Creates a ai and if successful, adds it to the list of ai
-bool World::spawn_ai()
+bool World::spawn_ai(aiType type)
 {
-	AI ai;
+	AI ai(type);
 	if (ai.init(3))
 	{
 		m_ais.emplace_back(ai);

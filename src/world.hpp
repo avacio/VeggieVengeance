@@ -40,7 +40,7 @@ public:
 
 private:
 	// Generates a new fighter
-	bool spawn_ai();
+	bool spawn_ai(aiType type);
 
 	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow*, int key, int, int action, int mod);

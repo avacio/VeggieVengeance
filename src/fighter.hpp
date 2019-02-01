@@ -14,7 +14,7 @@ class Fighter : public Renderable
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init(int type);
+	bool init(int init_position);
 
 	// Releases all the associated resources
 	void destroy();
@@ -51,8 +51,10 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	int m_health;
+	int m_lives; //counter for lives/stock remaining
 	int m_speed;	// each fighter has different speed and strength stats
 	int m_strength;
+	int respawn_timer = 0;
 
 	bool is_alive = true;
 	bool is_idle = true;

@@ -118,6 +118,8 @@ void Fighter::update(float ms)
 		if (jumpcounter > 0) {
 			jumpstate = FALLING;
 		}
+		//if stock remaining, set the respawn timer
+
 	}
 
 	//Fall regardless whether alive or not
