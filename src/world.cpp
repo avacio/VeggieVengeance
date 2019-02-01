@@ -213,12 +213,17 @@ void World::draw()
 
 	// Updating window title with points
 	std::stringstream title_ss;
-	int health_display = 0;
+	int health_display1 = 0;
+	int health_display2 = 0;
 	if (m_player1.get_in_play())
 	{
-		health_display = m_player1.get_health();
+		health_display1 = m_player1.get_health();
 	}
-	title_ss << "Veggie Vengeance  -  Player's Health: " << health_display;
+	if (m_player2.get_in_play())
+	{
+		health_display2 = m_player2.get_health();
+	}
+	title_ss << "Veggie Vengeance  -  Player 1's Health: " << health_display1 << " || Player 2's Health: " << health_display2;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
