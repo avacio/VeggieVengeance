@@ -104,14 +104,14 @@ bool World::init(vec2 screen)
 		return false;
 	}
 
-	m_background_music = Mix_LoadMUS(audio_path("music.wav"));
+	m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
 	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
 	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 
 	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-				audio_path("music.wav"),
+				audio_path("Abandoned Hopes.wav"),
 				audio_path("salmon_dead.wav"),
 				audio_path("salmon_eat.wav"));
 		return false;
@@ -192,8 +192,10 @@ bool World::update(float elapsed_ms)
 		m_player2.update(elapsed_ms);
 	}
 
-	for (auto &ai : m_ais)
-		ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
+	if (m_player1.get_in_play()) {
+		for (auto &ai : m_ais)
+			ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
+	}
 
 	return true;
 }
