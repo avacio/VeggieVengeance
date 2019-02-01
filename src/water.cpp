@@ -3,7 +3,7 @@
 #include <iostream>
 
 bool Water::init() {
-	m_dead_time = -1;
+	//m_dead_time = -1;
 	m_is_wavy = false;
 
 	// Since we are not going to apply transformation to this screen geometry
@@ -44,18 +44,6 @@ void Water::destroy() {
 	glDeleteShader(effect.program);
 }
 
-void Water::set_salmon_dead() {
-	m_dead_time = glfwGetTime();
-}
-
-void Water::reset_salmon_dead_time() {
-	m_dead_time = -1;
-}
-
-float Water::get_salmon_dead_time() const {
-	return (float) glfwGetTime() - m_dead_time;
-}
-
 void Water::set_is_wavy(bool is_wavy) {
 	m_is_wavy = is_wavy;
 }
@@ -77,7 +65,6 @@ void Water::draw(const mat3& projection) {
 
 	glUniform1i(screen_text_uloc, 0);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
-	glUniform1f(dead_timer_uloc, (m_dead_time > 0) ? (float)((glfwGetTime() - m_dead_time) * 10.0f) : -1);
 	glUniform1i(is_wavy_uloc, m_is_wavy);
 
 

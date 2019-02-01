@@ -97,14 +97,29 @@ void Fighter::destroy()
 
 void Fighter::update(float ms)
 {
-	if (m_health <= 0)
-		is_alive = false;
-
 	float MOVING_SPEED = 5.0;
 	//!!! cant use ms for jumping until we have collision since ms
 	//is inconsistent per update and will result in Fighter ending u
 	//at a different ypos than at initially
-	float JUMP_SPEED = 5.0;  
+	float JUMP_SPEED = 5.0;
+
+	//IF JUST DIED
+	if (m_health <= 0) {
+		is_alive = false;
+		//fall to ground if dead
+		if (jumpstate == JUMPING) {
+			jumpstate = FALLING;
+		}
+	}
+
+	//Fall regardless whether alive or not
+	if (jumpstate == FALLING) {
+		jumpcounter--;
+		move({ 0.0, JUMP_SPEED });
+		if (jumpcounter <= 0)
+			jumpstate = GROUNDED;
+	}
+ 
 	if (is_alive) {
 		if (moving_forward) {
 			if (!facing_front) {
@@ -126,12 +141,7 @@ void Fighter::update(float ms)
 			if (jumpcounter >= MAX_JUMP)
 				jumpstate = FALLING;
 		}
-		else if (jumpstate == FALLING) {
-			jumpcounter--;
-			move({ 0.0, JUMP_SPEED });
-			if (jumpcounter <= 0)
-				jumpstate = GROUNDED;
-		}
+		
 
 		if (crouchstate == CROUCH_PRESSED) {
 			m_scale.y = 0.1f;

@@ -15,14 +15,8 @@ public:
 	// Renders the water
 	void draw(const mat3& projection)override;
 
-	// Set dead time
-	void set_salmon_dead();
-	void reset_salmon_dead_time();
-	float get_salmon_dead_time() const;
 	void set_is_wavy(bool is_wavy);
 
 private:
-	// When salmon is alive, the time is set to -1
-	float m_dead_time;
 	bool m_is_wavy;
 };
