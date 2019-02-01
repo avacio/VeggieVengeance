@@ -9,36 +9,37 @@
 // Same as static in c, local to compilation unit
 namespace
 {
-	const size_t MAX_FIGHTERS = 4;
-	//NOTE: Since we do not currently have a menu, these constants determine the amount of
-	//fighters that will be spawned in at the beginning of a game
-	const int MAX_PLAYERS = 2;
-	const int MAX_AI = 1;
+const size_t MAX_FIGHTERS = 4;
+//NOTE: Since we do not currently have a menu, these constants determine the amount of
+//fighters that will be spawned in at the beginning of a game
+const int MAX_PLAYERS = 2;
+const int MAX_AI = 1;
 
-	namespace
-	{
-		void glfw_err_cb(int error, const char* desc)
-		{
-			fprintf(stderr, "%d: %s", error, desc);
-		}
-	}
+namespace
+{
+void glfw_err_cb(int error, const char *desc)
+{
+	fprintf(stderr, "%d: %s", error, desc);
 }
+} // namespace
+} // namespace
 
 World::World()
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
-	if (MAX_PLAYERS >= 1) {
+	if (MAX_PLAYERS >= 1)
+	{
 		m_player1.set_in_play(true);
 	}
-	if (MAX_PLAYERS >= 2) {
+	if (MAX_PLAYERS >= 2)
+	{
 		m_player2.set_in_play(true);
 	}
 }
 
 World::~World()
 {
-
 }
 
 // World initialization
@@ -76,8 +77,8 @@ bool World::init(vec2 screen)
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(m_window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((World*)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((World*)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
+	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3) { ((World *)glfwGetWindowUserPointer(wnd))->on_key(wnd, _0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1) { ((World *)glfwGetWindowUserPointer(wnd))->on_mouse_move(wnd, _0, _1); };
 	glfwSetKeyCallback(m_window, key_redirect);
 	glfwSetCursorPosCallback(m_window, cursor_pos_redirect);
 
@@ -110,15 +111,15 @@ bool World::init(vec2 screen)
 	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("music.wav"),
-			audio_path("salmon_dead.wav"),
-			audio_path("salmon_eat.wav"));
+				audio_path("music.wav"),
+				audio_path("salmon_dead.wav"),
+				audio_path("salmon_eat.wav"));
 		return false;
 	}
 
 	// Playing background music undefinitely
 	Mix_PlayMusic(m_background_music, -1);
-	
+
 	fprintf(stderr, "Loaded music\n");
 
 	m_current_speed = 1.f;
@@ -127,15 +128,18 @@ bool World::init(vec2 screen)
 	//indicates success of initialization operations, if even one failure occurs it should be false
 	bool initSuccess = true;
 
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		initSuccess = initSuccess && m_player1.init();
 	}
 
-	if (m_player2.get_in_play()) {
+	if (m_player2.get_in_play())
+	{
 		initSuccess = initSuccess && m_player2.init();
 	}
 
-	for (int i = 0; i < MAX_AI; i++) {
+	for (int i = 0; i < MAX_AI; i++)
+	{
 		initSuccess = initSuccess && spawn_ai();
 	}
 
@@ -155,14 +159,16 @@ void World::destroy()
 		Mix_FreeChunk(m_salmon_eat_sound);
 
 	Mix_CloseAudio();
-	
-	if (m_player1.get_in_play()) {
+
+	if (m_player1.get_in_play())
+	{
 		m_player1.destroy();
 	}
-	if (m_player2.get_in_play()) {
+	if (m_player2.get_in_play())
+	{
 		m_player2.destroy();
 	}
-	for (auto& ai : m_ais)
+	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
 	glfwDestroyWindow(m_window);
@@ -172,21 +178,22 @@ void World::destroy()
 bool World::update(float elapsed_ms)
 {
 	int w, h;
-        glfwGetFramebufferSize(m_window, &w, &h);
-	vec2 screen = { (float)w, (float)h };
+	glfwGetFramebufferSize(m_window, &w, &h);
+	vec2 screen = {(float)w, (float)h};
 
-	
 	// Updating all entities, making the entities
 	// faster based on current
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		m_player1.update(elapsed_ms);
 	}
-	if (m_player2.get_in_play()) {
+	if (m_player2.get_in_play())
+	{
 		m_player2.update(elapsed_ms);
 	}
-	
-	for (auto& ai : m_ais)
-		ai.update(elapsed_ms * m_current_speed);
+
+	for (auto &ai : m_ais)
+		ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
 
 	return true;
 }
@@ -200,12 +207,13 @@ void World::draw()
 
 	// Getting size of window
 	int w, h;
-    glfwGetFramebufferSize(m_window, &w, &h);
+	glfwGetFramebufferSize(m_window, &w, &h);
 
 	// Updating window title with points
 	std::stringstream title_ss;
 	int health_display = 0;
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		health_display = m_player1.get_health();
 	}
 	title_ss << "Veggie Vengeance  -  Player's Health: " << health_display;
@@ -218,35 +226,35 @@ void World::draw()
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
 	glDepthRange(0.00001, 10);
-	const float clear_color[3] = { 0.3f, 0.3f, 0.8f };
+	const float clear_color[3] = {0.3f, 0.3f, 0.8f};
 	glClearColor(clear_color[0], clear_color[1], clear_color[2], 1.0);
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Fake projection matrix, scales with respect to window coordinates
 	// PS: 1.f / w in [1][1] is correct.. do you know why ? (:
-	float left = 0.f;// *-0.5;
-	float top = 0.f;// (float)h * -0.5;
-	float right = (float)w;// *0.5;
-	float bottom = (float)h;// *0.5;
+	float left = 0.f;		 // *-0.5;
+	float top = 0.f;		 // (float)h * -0.5;
+	float right = (float)w;  // *0.5;
+	float bottom = (float)h; // *0.5;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	mat3 projection_2D{ { sx, 0.f, 0.f },{ 0.f, sy, 0.f },{ tx, ty, 1.f } };
+	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		m_player1.draw(projection_2D);
 	}
-	if (m_player2.get_in_play()) {
+	if (m_player2.get_in_play())
+	{
 		m_player2.draw(projection_2D);
 	}
-	for (auto& fighter : m_ais)
+	for (auto &fighter : m_ais)
 		fighter.draw(projection_2D);
-
-
 
 	/////////////////////
 	// Truely render to the screen
@@ -271,15 +279,15 @@ void World::draw()
 }
 
 // Should the game be over ?
-bool World::is_over()const
+bool World::is_over() const
 {
 	return glfwWindowShouldClose(m_window);
 }
 
 // Creates a ai and if successful, adds it to the list of ai
 bool World::spawn_ai()
-{	
-	Ai ai;
+{
+	AI ai;
 	if (ai.init())
 	{
 		m_ais.emplace_back(ai);
@@ -289,12 +297,12 @@ bool World::spawn_ai()
 	return false;
 }
 
-
 // On key callback
-void World::on_key(GLFWwindow*, int key, int, int action, int mod)
+void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
 	// Handle player movement here
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_D)
 			m_player1.set_movement(0);
 		if (action == GLFW_PRESS && key == GLFW_KEY_A)
@@ -315,7 +323,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			m_player1.set_movement(8);
 	}
 
-	if (m_player2.get_in_play()) {
+	if (m_player2.get_in_play())
+	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_L)
 			m_player2.set_movement(0);
 		if (action == GLFW_PRESS && key == GLFW_KEY_J)
@@ -343,18 +352,21 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		//LIKELY TO DO WITH DESTROYING FIGHTERS
 		int w, h;
 		glfwGetWindowSize(m_window, &w, &h);
-		if (m_player1.get_in_play()) {
+		if (m_player1.get_in_play())
+		{
 			m_player1.destroy();
 			m_player1.set_in_play(true);
 			m_player1.init();
 		}
-		if (m_player2.get_in_play()) {
+		if (m_player2.get_in_play())
+		{
 			m_player2.destroy();
 			m_player2.set_in_play(true);
 			m_player2.init();
 		}
 		//m_fighters.clear();
-		for (auto& ai : m_ais) {
+		for (auto &ai : m_ais)
+		{
 			ai.destroy();
 			ai.init();
 		}
@@ -362,10 +374,8 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 		//m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
 	}
-
 }
 
-void World::on_mouse_move(GLFWwindow* window, double xpos, double ypos)
+void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
-
 }

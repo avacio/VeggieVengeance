@@ -65,7 +65,7 @@ private:
 	// Game entities
 	Player m_player1;
 	Player m_player2;
-	std::vector<Ai> m_ais;
+	std::vector<AI> m_ais;
 
 	float m_current_speed;
 	
