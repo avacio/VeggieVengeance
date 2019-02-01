@@ -51,10 +51,10 @@ void AI::update(float ms, vec2 player1Position)
 			t = time(0);
 		}
 
-		if (this->get_position().x < 161) { //Left boundary detector
+		if (this->get_position().x < 0) { //Left boundary detector
 			randNum = 0;
 		}
-		if (this->get_position().x > 2074) { //Right boundary detector
+		if (this->get_position().x > 1200) { //Right boundary detector
 			randNum = 1;
 		}
 		if (randNum == 2) {
