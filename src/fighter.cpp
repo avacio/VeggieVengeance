@@ -7,7 +7,7 @@
 
 Texture Fighter::fighter_texture;
 
-bool Fighter::init(int type)
+bool Fighter::init(int init_position)
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -77,13 +77,16 @@ bool Fighter::init(int type)
 	m_health = 100;
 	m_speed = 5;
 	m_strength = 5;
-	if (type == 1) {
+	if (init_position == 1) {
 		m_position = { 250.f, 550.f };
 	}
-	if (type == 2) {
+	else if (init_position == 2) {
 		m_position = { 950.f, 550.f };
 	}
-	
+	else {
+		m_position = { 550.f, 550.f };
+	}
+
 	return true;
 }
 
@@ -111,8 +114,8 @@ void Fighter::update(float ms)
 	//IF JUST DIED
 	if (m_health <= 0) {
 		is_alive = false;
-		//fall to ground if dead
-		if (jumpstate == JUMPING) {
+		//fall to ground if still in the air
+		if (jumpcounter > 0) {
 			jumpstate = FALLING;
 		}
 	}

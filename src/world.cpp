@@ -295,7 +295,7 @@ bool World::is_over() const
 bool World::spawn_ai()
 {
 	AI ai;
-	if (ai.init(2))
+	if (ai.init(3))
 	{
 		m_ais.emplace_back(ai);
 		return true;
@@ -382,7 +382,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		for (auto &ai : m_ais)
 		{
 			ai.destroy();
-			ai.init(2);
+			ai.init(3);
 		}
 		//m_ais.clear();
 		//m_water.reset_salmon_dead_time();
