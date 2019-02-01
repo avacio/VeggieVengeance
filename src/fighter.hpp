@@ -14,7 +14,7 @@ class Fighter : public Renderable
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init();
+	bool init(int type);
 
 	// Releases all the associated resources
 	void destroy();

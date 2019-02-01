@@ -130,12 +130,12 @@ bool World::init(vec2 screen)
 
 	if (m_player1.get_in_play())
 	{
-		initSuccess = initSuccess && m_player1.init();
+		initSuccess = initSuccess && m_player1.init(1);
 	}
 
 	if (m_player2.get_in_play())
 	{
-		initSuccess = initSuccess && m_player2.init();
+		initSuccess = initSuccess && m_player2.init(2);
 	}
 
 	for (int i = 0; i < MAX_AI; i++)
@@ -224,6 +224,15 @@ void World::draw()
 		health_display2 = m_player2.get_health();
 	}
 	title_ss << "Veggie Vengeance  -  Player 1's Health: " << health_display1 << " || Player 2's Health: " << health_display2;
+	if (health_display2 == 0) {
+		title_ss.str("");
+		title_ss << "Veggie Vengeance  -  Player 1 Wins!";
+	}
+	if (health_display1 == 0) {
+		title_ss.str("");
+		title_ss << "Veggie Vengeance  -  Player 2 Wins!";
+	}
+		
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -295,7 +304,7 @@ bool World::is_over() const
 bool World::spawn_ai()
 {
 	AI ai;
-	if (ai.init())
+	if (ai.init(1))
 	{
 		m_ais.emplace_back(ai);
 		return true;
@@ -366,19 +375,19 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		{
 			m_player1.destroy();
 			m_player1.set_in_play(true);
-			m_player1.init();
+			m_player1.init(1);
 		}
 		if (m_player2.get_in_play())
 		{
 			m_player2.destroy();
 			m_player2.set_in_play(true);
-			m_player2.init();
+			m_player2.init(2);
 		}
 		//m_fighters.clear();
 		for (auto &ai : m_ais)
 		{
 			ai.destroy();
-			ai.init();
+			ai.init(1);
 		}
 		//m_ais.clear();
 		//m_water.reset_salmon_dead_time();

@@ -7,7 +7,7 @@
 
 Texture Fighter::fighter_texture;
 
-bool Fighter::init()
+bool Fighter::init(int type)
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -77,8 +77,13 @@ bool Fighter::init()
 	m_health = 100;
 	m_speed = 5;
 	m_strength = 5;
-
-	m_position = { 250.f, 550.f };
+	if (type == 1) {
+		m_position = { 250.f, 550.f };
+	}
+	if (type == 2) {
+		m_position = { 950.f, 550.f };
+	}
+	
 	return true;
 }
 
@@ -143,7 +148,6 @@ void Fighter::update(float ms)
 			m_position.y -= 15.f;
 			crouchstate = NOT_CROUCHING;
 		}
-			
 
 		if (is_punching) {
 			is_hurt = true;
