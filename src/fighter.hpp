@@ -3,6 +3,8 @@
 #include "common.hpp"
 #include <random>
 
+enum jumpState {JUMPING, FALLING, GROUNDED};
+
 // Salmon enemy 
 class Fighter : public Renderable
 {
@@ -41,6 +43,8 @@ public:
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box()const;
 
+	jumpState get_jumpstate()const;
+
 private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
@@ -49,16 +53,21 @@ private:
 	int m_speed;	// each fighter has different speed and strength stats
 	int m_strength;
 
-	bool is_alive;
-	bool is_idle;
-	bool facing_front;
-	bool moving_forward;
-	bool moving_backward;
-	bool is_jumping;
-	bool is_crouching;
-	bool is_punching;
-	bool is_hurt;
+	bool is_alive = true;
+	bool is_idle = true;
+	bool facing_front = true;
+	bool moving_forward = false;
+	bool moving_backward = false;
+	bool is_crouching = false;
+	bool is_punching = false;
+	bool is_hurt = false;
+
+	jumpState jumpstate = GROUNDED;
+	int jumpcounter = 0;
 	//float angle;
+
+	//CONST VALUES
+	int MAX_JUMP = 20;
 
 	// C++ rng
 	std::default_random_engine m_rng;

@@ -314,7 +314,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(0);
 		if (action == GLFW_PRESS && key == GLFW_KEY_A)
 			m_player1.set_movement(1);
-		if (action == GLFW_PRESS && key == GLFW_KEY_W)
+		if (action == GLFW_PRESS && key == GLFW_KEY_W && m_player1.get_jumpstate() == GROUNDED)
 			m_player1.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_S)
 			m_player1.set_movement(3);

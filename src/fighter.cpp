@@ -101,6 +101,10 @@ void Fighter::update(float ms)
 		is_alive = false;
 
 	float MOVING_SPEED = 5.0;
+	//!!! cant use ms for jumping until we have collision since ms
+	//is inconsistent per update and will result in Fighter ending u
+	//at a different ypos than at initially
+	float JUMP_SPEED = 5.0;  
 	if (is_alive) {
 		if (moving_forward) {
 			if (!facing_front) {
@@ -116,15 +120,17 @@ void Fighter::update(float ms)
 			}
 			move({ -MOVING_SPEED, 0.0 });
 		}		
-		if (is_jumping) {
-			/*
-			angle += M_PI / 18;
-			if ((roundf(abs(sin(angle)) * 10) / 10) != 0.0)
-				angle += M_PI / 18;
-			else
-				angle = 0.0;
-			move({ 0.0, sin(angle) * 5 });
-			*/
+		if (jumpstate == JUMPING) {
+			jumpcounter++;
+			move({ 0.0, -JUMP_SPEED });
+			if (jumpcounter >= MAX_JUMP)
+				jumpstate = FALLING;
+		}
+		else if (jumpstate == FALLING) {
+			jumpcounter--;
+			move({ 0.0, JUMP_SPEED });
+			if (jumpcounter <= 0)
+				jumpstate = GROUNDED;
 		}
 
 		if (is_crouching) {
@@ -152,7 +158,7 @@ void Fighter::draw(const mat3& projection)
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
-	transform_translate(m_position);
+	transform_translate(get_position());
 	transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();
@@ -236,7 +242,7 @@ void Fighter::set_movement(int mov) {
 		is_idle = false;
 		break;
 	case 2:
-		is_jumping = true;
+		jumpstate = JUMPING;
 		is_idle = false;
 		break;
 	case 3:
@@ -269,4 +275,9 @@ void Fighter::set_movement(int mov) {
 int Fighter::get_health()const
 {
 	return m_health;
+}
+
+jumpState Fighter::get_jumpstate()const
+{
+	return jumpstate;
 }
