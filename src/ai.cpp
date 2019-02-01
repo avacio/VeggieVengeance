@@ -19,7 +19,7 @@ void AI::update(float ms, vec2 player1Position)
     {
         this->set_movement(0);
     }
-    else
+    else if(player1Position.x < this->get_position().x)
     {
         this->set_movement(1);
     }
