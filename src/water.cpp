@@ -4,6 +4,7 @@
 
 bool Water::init() {
 	m_dead_time = -1;
+	m_is_wavy = false;
 
 	// Since we are not going to apply transformation to this screen geometry
 	// The coordinates are set to fill the standard openGL window [-1, -1 .. 1, 1]
@@ -52,7 +53,11 @@ void Water::reset_salmon_dead_time() {
 }
 
 float Water::get_salmon_dead_time() const {
-	return glfwGetTime() - m_dead_time;
+	return (float) glfwGetTime() - m_dead_time;
+}
+
+void Water::set_is_wavy(bool is_wavy) {
+	m_is_wavy = is_wavy;
 }
 
 void Water::draw(const mat3& projection) {
@@ -68,9 +73,13 @@ void Water::draw(const mat3& projection) {
 	GLuint screen_text_uloc = glGetUniformLocation(effect.program, "screen_texture");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(effect.program, "dead_timer");
+	GLuint is_wavy_uloc = glGetUniformLocation(effect.program, "is_wavy");
+
 	glUniform1i(screen_text_uloc, 0);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	glUniform1f(dead_timer_uloc, (m_dead_time > 0) ? (float)((glfwGetTime() - m_dead_time) * 10.0f) : -1);
+	glUniform1i(is_wavy_uloc, m_is_wavy);
+
 
 	// Draw the screen texture on the quad geometry
 	// Setting vertices

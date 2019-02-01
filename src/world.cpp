@@ -249,7 +249,7 @@ void World::draw()
 
 
 	/////////////////////
-	// Truely render to the screen
+	// Truly render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Clearing backbuffer
@@ -303,8 +303,11 @@ void World::on_key(GLFWwindow*, int key, int, int action, int mod)
 			m_player1.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_S)
 			m_player1.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_E)
+		if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 			m_player1.set_movement(4);
+			m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
+		} else { m_water.set_is_wavy(false); } // STUB ENVIRONMENT EFFECT
+
 		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 			m_player1.set_movement(5);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_A)

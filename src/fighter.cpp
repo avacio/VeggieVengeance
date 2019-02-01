@@ -57,16 +57,26 @@ bool Fighter::init()
 	// Loading shaders
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
+	if (!effect.load_from_file(shader_path("fighter.vs.glsl"), shader_path("fighter.fs.glsl")))
+		return false;
 
 	m_rng = std::default_random_engine(std::random_device()());
 	float rng = m_dist(m_rng);
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
+
+	is_alive = true;
+	is_idle = true;
+	facing_front = true;
+	is_hurt = false;
+
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
 	m_rotation = 0.f;
 	m_health = 100;
+	m_speed = 5;
+	m_strength = 5;
 
 	m_position = { 250.f, 550.f };
 	return true;
@@ -123,8 +133,11 @@ void Fighter::update(float ms)
 			
 
 		if (is_punching) {
+			is_hurt = true;
+
 			m_health -= 1;
 		}
+		else { is_hurt = false; }
 	}
 	else {
 		if (facing_front)
@@ -155,6 +168,8 @@ void Fighter::draw(const mat3& projection)
 	GLint transform_uloc = glGetUniformLocation(effect.program, "transform");
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
+	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
+	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
 	glBindVertexArray(mesh.vao);
@@ -178,6 +193,9 @@ void Fighter::draw(const mat3& projection)
 	float color[] = { 1.f, 1.f, 1.f };
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+	glUniform1i(is_hurt_uloc, is_hurt);
+	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -187,7 +205,6 @@ vec2 Fighter::get_position()const
 {
 	return m_position;
 }
-
 
 
 void Fighter::set_position(vec2 position)
