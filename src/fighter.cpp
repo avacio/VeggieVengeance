@@ -133,8 +133,15 @@ void Fighter::update(float ms)
 				jumpstate = GROUNDED;
 		}
 
-		if (is_crouching) {
-
+		if (crouchstate == CROUCH_PRESSED) {
+			m_scale.y = 0.1f;
+			m_position.y += 15.f;
+			crouchstate = IS_CROUCHING;
+		}
+		if (crouchstate == CROUCH_RELEASED) {
+			m_scale.y = 0.2f;
+			m_position.y -= 15.f;
+			crouchstate = NOT_CROUCHING;
 		}
 			
 
@@ -246,7 +253,7 @@ void Fighter::set_movement(int mov) {
 		is_idle = false;
 		break;
 	case 3:
-		is_crouching = true;
+		crouchstate = CROUCH_PRESSED;
 		is_idle = false;
 		break;
 	case 4:
@@ -262,7 +269,7 @@ void Fighter::set_movement(int mov) {
 		is_idle = true;
 		break;
 	case 7:
-		is_crouching = false;
+		crouchstate = CROUCH_RELEASED;
 		is_idle = true;
 		break;
 	case 8:

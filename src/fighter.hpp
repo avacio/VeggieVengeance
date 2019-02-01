@@ -4,6 +4,7 @@
 #include <random>
 
 enum jumpState {JUMPING, FALLING, GROUNDED};
+enum crouchState {NOT_CROUCHING, CROUCH_PRESSED, IS_CROUCHING, CROUCH_RELEASED};
 
 // Salmon enemy 
 class Fighter : public Renderable
@@ -58,12 +59,12 @@ private:
 	bool facing_front = true;
 	bool moving_forward = false;
 	bool moving_backward = false;
-	bool is_crouching = false;
 	bool is_punching = false;
 	bool is_hurt = false;
 
 	jumpState jumpstate = GROUNDED;
 	int jumpcounter = 0;
+	crouchState crouchstate = NOT_CROUCHING;
 	//float angle;
 
 	//CONST VALUES
