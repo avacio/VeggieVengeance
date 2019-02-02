@@ -74,9 +74,10 @@ bool Fighter::init(int init_position)
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
 	m_rotation = 0.f;
-	m_health = 100;
+	m_health = MAX_HEALTH;
 	m_speed = 5;
 	m_strength = 5;
+	m_lives = STARTING_LIVES;
 	if (init_position == 1) {
 		m_position = { 250.f, 550.f };
 	}
@@ -112,14 +113,38 @@ void Fighter::update(float ms)
 	float JUMP_SPEED = 5.0;
 
 	//IF JUST DIED
-	if (m_health <= 0) {
+	if (m_health <= 0 && is_alive) {
 		is_alive = false;
+		m_lives--;
 		//fall to ground if still in the air
 		if (jumpcounter > 0) {
 			jumpstate = FALLING;
 		}
 		//if stock remaining, set the respawn timer
+		if (m_lives > 0) {
+			respawn_timer = RESPAWN_TIME;
+			respawn_flag = true;
 
+		}
+
+	}
+
+	//If respawn pending
+	if (respawn_flag) {
+		if (respawn_timer > 0) {
+			//count down by time passed
+			respawn_timer -= ms;
+		}
+		else {
+			//reset flags and revive
+			respawn_flag = false;
+			respawn_timer = 0;
+			is_alive = true;
+			is_hurt = false;
+			m_health = MAX_HEALTH;
+			//unrotate the potate
+			m_rotation = 0;
+		}
 	}
 
 	//Fall regardless whether alive or not
@@ -302,6 +327,12 @@ int Fighter::get_health()const
 {
 	return m_health;
 }
+
+int Fighter::get_lives()const
+{
+	return m_lives;
+}
+
 
 jumpState Fighter::get_jumpstate()const
 {

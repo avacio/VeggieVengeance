@@ -41,6 +41,8 @@ public:
 	// Returns the current health
 	int get_health()const;
 
+	int get_lives()const;
+
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box()const;
 
@@ -51,10 +53,8 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	int m_health;
-	int m_lives; //counter for lives/stock remaining
 	int m_speed;	// each fighter has different speed and strength stats
 	int m_strength;
-	int respawn_timer = 0;
 
 	bool is_alive = true;
 	bool is_idle = true;
@@ -64,6 +64,11 @@ private:
 	bool is_punching = false;
 	bool is_hurt = false;
 
+	//lives system
+	int m_lives; //counter for lives/stock remaining
+	int respawn_timer = 0;
+	bool respawn_flag = false;
+
 	jumpState jumpstate = GROUNDED;
 	int jumpcounter = 0;
 	crouchState crouchstate = NOT_CROUCHING;
@@ -71,6 +76,9 @@ private:
 
 	//CONST VALUES
 	int MAX_JUMP = 20;
+	int RESPAWN_TIME = 1000;  //in ms
+	int STARTING_LIVES = 3;
+	int MAX_HEALTH = 100;
 
 	// C++ rng
 	std::default_random_engine m_rng;
