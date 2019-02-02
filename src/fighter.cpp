@@ -180,12 +180,12 @@ void Fighter::update(float ms)
 
 		if (crouchstate == CROUCH_PRESSED) {
 			m_scale.y = 0.1f;
-			m_position.y += 15.f;
+			m_position.y += 25.f;
 			crouchstate = IS_CROUCHING;
 		}
 		if (crouchstate == CROUCH_RELEASED) {
 			m_scale.y = 0.2f;
-			m_position.y -= 15.f;
+			m_position.y -= 25.f;
 			crouchstate = NOT_CROUCHING;
 		}
 
