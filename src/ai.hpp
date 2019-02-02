@@ -3,12 +3,10 @@
 #include "common.hpp"
 #include "fighter.hpp"
 
-enum aiType {CHASE, AVOID};
-
 class AI : public Fighter
 {
   public:
-	 AI(aiType type);
+    AI(AIType type);
 
     bool get_in_play() const;
     void set_in_play(bool value);
@@ -17,6 +15,5 @@ class AI : public Fighter
 
   private:
     bool in_play = false; // denotes if a player object is currently in play, false by default
-	aiType aitype;
-	
+    AIType aitype;
 };

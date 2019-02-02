@@ -3,16 +3,13 @@
 #include "common.hpp"
 #include <random>
 
-enum jumpState {JUMPING, FALLING, GROUNDED};
-enum crouchState {NOT_CROUCHING, CROUCH_PRESSED, IS_CROUCHING, CROUCH_RELEASED};
-
-// Salmon enemy 
+// Salmon enemy
 class Fighter : public Renderable
 {
 	// Shared between all bubbles, no need to load one for each instance
 	static Texture fighter_texture;
 
-public:
+  public:
 	// Creates all the associated render resources and default transform
 	bool init(int init_position);
 
@@ -25,10 +22,10 @@ public:
 
 	// Renders the salmon
 	// projection is the 2D orthographic projection matrix
-	void draw(const mat3& projection)override;
+	void draw(const mat3 &projection) override;
 
 	// Returns the current bubble position
-	vec2 get_position()const;
+	vec2 get_position() const;
 
 	// Sets the new bubble position
 	void set_position(vec2 position);
@@ -39,46 +36,46 @@ public:
 	void set_movement(int mov);
 
 	// Returns the current health
-	int get_health()const;
+	int get_health() const;
 
-	int get_lives()const;
+	int get_lives() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
-	vec2 get_bounding_box()const;
+	vec2 get_bounding_box() const;
 
-	jumpState get_jumpstate()const;
+	JumpState get_jumpstate() const;
 
-private:
-	vec2 m_position; // Window coordinates
-	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+  private:
+	vec2 m_position;  // Window coordinates
+	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	int m_health;
-	int m_speed;	// each fighter has different speed and strength stats
+	int m_speed; // each fighter has different speed and strength stats
 	int m_strength;
 
-	bool is_alive = true;
-	bool is_idle = true;
-	bool facing_front = true;
-	bool moving_forward = false;
-	bool moving_backward = false;
-	bool is_punching = false;
-	bool is_hurt = false;
+	bool m_is_alive = true;
+	bool m_is_idle = true;
+	bool m_facing_front = true;
+	bool m_moving_forward = false;
+	bool m_moving_backward = false;
+	bool m_is_punching = false;
+	bool m_is_hurt = false;
 
 	//lives system
 	int m_lives; //counter for lives/stock remaining
-	int respawn_timer = 0;
-	bool respawn_flag = false;
+	int m_respawn_timer = 0;
+	bool m_respawn_flag = false;
 
-	jumpState jumpstate = GROUNDED;
-	int jumpcounter = 0;
-	crouchState crouchstate = NOT_CROUCHING;
+	JumpState m_jump_state = GROUNDED;
+	int m_jump_counter = 0;
+	CrouchState m_crouch_state = NOT_CROUCHING;
 	//float angle;
 
 	//CONST VALUES
-	int MAX_JUMP = 20;
-	int RESPAWN_TIME = 1000;  //in ms
-	int STARTING_LIVES = 3;
-	int MAX_HEALTH = 100;
+	const int MAX_JUMP = 20;
+	const int RESPAWN_TIME = 1000; //in ms
+	const int STARTING_LIVES = 3;
+	const int MAX_HEALTH = 100;
 
 	// C++ rng
 	std::default_random_engine m_rng;
