@@ -369,7 +369,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 
 	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	/*if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		//!!! DESPITE MY EFFORTS THIS IS STILL BUGGY, ERROR
 		//LIKELY TO DO WITH DESTROYING FIGHTERS
@@ -396,7 +396,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		//m_ais.clear();
 		//m_water.reset_salmon_dead_time();
 		m_current_speed = 1.f;
-	}
+	}*/
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
