@@ -15,11 +15,11 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-// Container for all our entities and game logic. Individual rendering / update is 
+// Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class World
 {
-public:
+  public:
 	World();
 	~World();
 
@@ -36,19 +36,19 @@ public:
 	void draw();
 
 	// Should the game be over ?
-	bool is_over()const;
+	bool is_over() const;
 
-private:
+  private:
 	// Generates a new fighter
-	bool spawn_ai(aiType type);
+	bool spawn_ai(AIType type);
 
 	//INPUT CALLBACK FUNCTIONS
-	void on_key(GLFWwindow*, int key, int, int action, int mod);
-	void on_mouse_move(GLFWwindow* window, double xpos, double ypos);
+	void on_key(GLFWwindow *, int key, int, int action, int mod);
+	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
-private:
+  private:
 	// Window handle
-	GLFWwindow* m_window;
+	GLFWwindow *m_window;
 
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
@@ -59,8 +59,6 @@ private:
 	Water m_water;
 
 	// GUI text renderer
-	
-
 
 	// Game entities
 	Player m_player1;
@@ -68,11 +66,10 @@ private:
 	std::vector<AI> m_ais;
 
 	float m_current_speed;
-	
-	Mix_Music* m_background_music;
-	Mix_Chunk* m_salmon_dead_sound;
-	Mix_Chunk* m_salmon_eat_sound;
 
+	Mix_Music *m_background_music;
+	Mix_Chunk *m_salmon_dead_sound;
+	Mix_Chunk *m_salmon_eat_sound;
 
 	// C++ rng
 	std::default_random_engine m_rng;

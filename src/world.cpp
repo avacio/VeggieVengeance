@@ -140,8 +140,9 @@ bool World::init(vec2 screen)
 
 	for (int i = 0; i < MAX_AI; i++)
 	{
-		aiType type = AVOID;
-		if (i % 2 == 0) {
+		AIType type = AVOID;
+		if (i % 2 == 0)
+		{
 			type = CHASE;
 		}
 		initSuccess = initSuccess && spawn_ai(type);
@@ -196,7 +197,8 @@ bool World::update(float elapsed_ms)
 		m_player2.update(elapsed_ms);
 	}
 
-	if (m_player1.get_in_play()) {
+	if (m_player1.get_in_play())
+	{
 		for (auto &ai : m_ais)
 			ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
 	}
@@ -231,8 +233,7 @@ void World::draw()
 		health_display2 = m_player2.get_health();
 		stock_display2 = m_player2.get_lives();
 	}
-	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " <<
-		health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
+	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " << health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
@@ -301,7 +302,7 @@ bool World::is_over() const
 }
 
 // Creates a ai and if successful, adds it to the list of ai
-bool World::spawn_ai(aiType type)
+bool World::spawn_ai(AIType type)
 {
 	AI ai(type);
 	if (ai.init(3))
@@ -361,10 +362,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(8);
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER)
+	{
 		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
 	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER)
+	{
 		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
 	}
 
