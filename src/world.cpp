@@ -148,7 +148,7 @@ bool World::init(vec2 screen)
 		initSuccess = initSuccess && spawn_ai(type);
 	}
 
-	return m_water.init() && initSuccess;
+	return m_water.init() && m_bg.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -243,7 +243,7 @@ void World::draw()
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
 	glDepthRange(0.00001, 10);
-	const float clear_color[3] = {0.3f, 0.3f, 0.8f};
+	const float clear_color[3] = {1.f, 1.f, 1.f};
 	glClearColor(clear_color[0], clear_color[1], clear_color[2], 1.0);
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -262,6 +262,7 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
+	m_bg.draw(projection_2D);
 	if (m_player1.get_in_play())
 	{
 		m_player1.draw(projection_2D);

@@ -6,6 +6,7 @@
 #include "fighter.hpp"
 #include "player.hpp"
 #include "ai.hpp"
+#include "background.hpp"
 
 // stlib
 #include <vector>
@@ -61,6 +62,7 @@ class World
 	// GUI text renderer
 
 	// Game entities
+	Background m_bg;
 	Player m_player1;
 	Player m_player2;
 	std::vector<AI> m_ais;

@@ -80,15 +80,15 @@ bool Fighter::init(int init_position)
 	m_lives = STARTING_LIVES;
 	if (init_position == 1)
 	{
-		m_position = {250.f, 550.f};
+		m_position = {250.f, 525.f};
 	}
 	else if (init_position == 2)
 	{
-		m_position = {950.f, 550.f};
+		m_position = {950.f, 525.f};
 	}
 	else
 	{
-		m_position = {550.f, 550.f};
+		m_position = {550.f, 525.f};
 	}
 
 	return true;
