@@ -38,6 +38,7 @@ set(SOURCE_FILES
 	src/ai.cpp
 	src/world.cpp
 	src/water.cpp
+	src/background.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -46,6 +47,7 @@ set(SOURCE_FILES
 	src/ai.hpp
 	src/world.hpp
 	src/water.hpp
+	src/background.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
