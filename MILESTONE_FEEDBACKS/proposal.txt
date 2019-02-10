@@ -1,0 +1,10 @@
+Team 9 Comments; GRADE: 80
+Grader: Shayan
+
+Rendering (-5): For the rendering component it seems that you will always be using sprites, what about more complex geometry or other rendering features?
+
+Physics (-5): Details are missing and information is inconsistent. A projective can certainly benefit from particle physics, but how is it going to need rigid body dynamics? You also mention that you are going to use 2-D sprites for the characters; How are going to do collision detection accurate enough to simulate a fight for 2-D sprites (detecting the hand hitting the head for example). For example, are you going to use pixel perfect collision detection, or are you going to have a background mesh, or ...? 
+
+Logic/AI(-5): How is finding player in a 2-D fighter game going to be more than ``go towards the player direction’’? Why would you need A*? You need more features to satisfy the Gameplay and Logic requirements. You can think of concrete examples of desired AI behaviours and how to implement them.
+
+Advanced Features (-5): The information here is inconsistent with the technical elements part. Here, you say that you will be using geometric meshes for characters, but in the technical elements part you, say that you will be using sprites. Also, pixel perfect collision detection does not necessarily need meshes. It can refer to the process of checking for cases where two geometries are rendered on the same pixel and can be done for textured sprites. Consider moving some of the plans from the advanced features to the technical elements part (e.g., the general AI states).
