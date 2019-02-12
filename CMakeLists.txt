@@ -39,6 +39,7 @@ set(SOURCE_FILES
 	src/world.cpp
 	src/water.cpp
 	src/background.cpp
+	src/freeType.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -48,6 +49,7 @@ set(SOURCE_FILES
 	src/world.hpp
 	src/water.hpp
 	src/background.hpp
+	src/freeType.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
@@ -81,6 +83,8 @@ if (IS_OS_LINUX OR IS_OS_MAC)
 
     pkg_search_module(SDL2 REQURIED sdl2)
     pkg_search_module(SDL2MIXER REQURIED SDL2_mixer)
+
+    pkg_search_module(FREETYPE REQURIED freetype)
     
     # Link Frameworks on OSX
     if (IS_OS_MAC)
@@ -92,26 +96,32 @@ elseif (IS_OS_WINDOWS)
 # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(GLFW_FOUND TRUE)
     set(SDL2_FOUND TRUE)
+set(FREETYPE_FOUND TRUE)
     
     set(GLFW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
     set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/include/SDL")
+set(FREETYPE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/include")
     
     if (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
         set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
         set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.lib")
 	set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.lib")
+	set(FREETYPE_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/win64/freetype.lib")
 
 	set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x64.dll")
 	set(SDL_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.dll")
 	set(SDLMIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.dll")
+	set(FREETYPE_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/win64/freetype.dll")
     else()
         set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x86.lib")
         set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x86.lib")
 	set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.lib")
+	set(FREETYPE_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/win32/freetype.lib")
 	
 	set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x86.dll")
 	set(SDL_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x86.dll")
 	set(SDLMIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.dll")
+	set(FREETYPE_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/win32/freetype.dll")
     endif()
 
     # Copy and rename dlls
@@ -127,21 +137,29 @@ elseif (IS_OS_WINDOWS)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDLMIXER_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2_mixer.dll")
+ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FREETYPE_DLL}"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/freetype.dll")
 endif()
 
 # Can't find the include and lib. Quit.
-if (NOT GLFW_FOUND OR NOT SDL2_FOUND)
+if (NOT GLFW_FOUND OR NOT SDL2_FOUND OR NOT FREETYPE_FOUND)
    if (NOT GLFW_FOUND)
       message(FATAL_ERROR "Can't find GLFW." )
-   else ()
+   if (NOT SDL2_FOUND)
       message(FATAL_ERROR "Can't find SDL." )
+   else ()
+      message(FATAL_ERROR "Can't find FREETYPE." )
+   endif()
    endif()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${FREETYPE_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 # Needed to add this
 if(IS_OS_LINUX)

@@ -15,6 +15,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_mixer.h>
+//#include <SDL_ttf.h>
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods

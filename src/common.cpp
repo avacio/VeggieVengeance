@@ -3,6 +3,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 
+//#define SDL_TEXT_RENDER
+//#include <SDL_ttf.h>
+//#include <SDL_pixels.h>
+
+
 // stlib
 #include <vector>
 #include <iostream>
@@ -150,6 +155,45 @@ bool Texture::is_valid()const
 {
 	return id != 0;
 }
+
+//bool Text::load_font(int fontSize)
+//{
+//	mainFont = TTF_OpenFont(fonts_path("Xoxoxa.ttf"), fontSize);
+//	if (mainFont == NULL)
+//	{
+//		fprintf(stderr, "Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+//		return false;
+//	}
+//	else {
+//		SDL_Color textColor = { 0, 0, 0 };
+//	}
+//}
+//
+//bool Text::load_from_rendered_text(std::string textureText, SDL_Color textColor)
+//{
+//	//stbi_uc* data = stbi_load(path, &width, &height, NULL, 4);
+//	//if (data == NULL)
+//	//	return false;
+//
+//	//gl_flush_errors();
+//	//glGenTextures(1, &id);
+//	//glBindTexture(GL_TEXTURE_2D, id);
+//	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	//stbi_image_free(data);
+//	//return !gl_has_errors();
+//
+//	SDL_Surface* textSurface = TTF_RenderText_Solid(mainFont, textureText.c_str(), textColor);
+//	if (textSurface == NULL)
+//	{
+//		fprintf(stderr, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+//	} else
+//	{
+//		mTexture = SDL_CreateTextureFromSurface()
+//	}
+//	return true;
+//}
 
 namespace
 {

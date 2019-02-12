@@ -8,6 +8,9 @@
 #include <gl3w.h>
 #include <GLFW/glfw3.h>
 
+//#include <SDL_ttf.h> // TODO
+//#include <SDL_pixels.h>
+
 // Simple utility macros to avoid mistyping directory name, name has to be a string literal
 // audio_path("audio.ogg") -> data/audio/audio.ogg
 // Get defintion of PROJECT_SOURCE_DIR from:
@@ -19,6 +22,8 @@
 #define textures_path(name) data_path "/textures/" name
 #define audio_path(name) data_path "/audio/" name
 #define mesh_path(name) data_path "/meshes/" name
+#define fonts_path(name) data_path "/fonts/" name // TODO
+
 
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..
@@ -73,6 +78,7 @@ struct Texture
 
 	// Loads texture from file specified by path
 	bool load_from_file(const char *path);
+
 	// Screen texture
 	bool create_from_screen(GLFWwindow const *const window);
 	bool is_valid() const; // True if texture is valid

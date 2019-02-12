@@ -63,7 +63,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "VEGGIE VENGEANCE", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
