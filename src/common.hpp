@@ -127,12 +127,6 @@ enum AIType
 	AVOID
 };
 
-enum JumpState
-{
-	JUMPING,
-	FALLING,
-	GROUNDED
-};
 enum CrouchState
 {
 	NOT_CROUCHING,
