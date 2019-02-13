@@ -78,6 +78,7 @@ bool Fighter::init(int init_position)
 	m_speed = 5;
 	m_strength = 5;
 	m_lives = STARTING_LIVES;
+	m_vertical_velocity = 0.0;
 	if (init_position == 1)
 	{
 		m_position = {250.f, 525.f};
@@ -109,23 +110,18 @@ void Fighter::destroy()
 
 void Fighter::update(float ms)
 {
-	float MOVING_SPEED = 5.0;
+	const float MOVING_SPEED = 5.0;
 	//!!! cant use ms for jumping until we have collision since ms
 	//is inconsistent per update and will result in Fighter ending u
 	//at a different ypos than at initially
-	float JUMP_SPEED = 5.0;
+	const float JUMP_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
 	{
 		m_is_alive = false;
 		m_lives--;
-		//fall to ground if still in the air
-		if (m_jump_counter > 0)
-		{
-			m_jump_state = FALLING;
-		}
-		//if stock remaining, set the respawn timer
+
 		if (m_lives > 0)
 		{
 			m_respawn_timer = RESPAWN_TIME;
@@ -154,14 +150,7 @@ void Fighter::update(float ms)
 		}
 	}
 
-	//Fall regardless whether alive or not
-	if (m_jump_state == FALLING)
-	{
-		m_jump_counter--;
-		move({0.0, JUMP_SPEED});
-		if (m_jump_counter <= 0)
-			m_jump_state = GROUNDED;
-	}
+	jump_update();
 
 	if (m_is_alive)
 	{
@@ -182,13 +171,6 @@ void Fighter::update(float ms)
 				m_facing_front = false;
 			}
 			move({-MOVING_SPEED, 0.0});
-		}
-		if (m_jump_state == JUMPING)
-		{
-			m_jump_counter++;
-			move({0.0, -JUMP_SPEED});
-			if (m_jump_counter >= MAX_JUMP)
-				m_jump_state = FALLING;
 		}
 
 		if (m_crouch_state == CROUCH_PRESSED)
@@ -315,8 +297,7 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case START_JUMPING:
-		m_jump_state = JUMPING;
-		m_is_idle = false;
+		start_jumping();
 		break;
 	case CROUCHING:
 		m_crouch_state = CROUCH_PRESSED;
@@ -355,7 +336,32 @@ int Fighter::get_lives() const
 	return m_lives;
 }
 
-JumpState Fighter::get_jumpstate() const
+void Fighter::start_jumping()  
 {
-	return m_jump_state;
+	if (!m_is_jumping) 
+	{
+		m_is_jumping = true;
+		m_is_idle = false;
+		m_vertical_velocity = INITIAL_VELOCITY;
+	}
+}
+
+void Fighter::jump_update() 
+{
+	if (m_is_jumping) 
+	{
+		move({0.0, -m_vertical_velocity});
+		m_vertical_velocity += ACCELERATION;
+	}
+
+	if (m_vertical_velocity < -INITIAL_VELOCITY) 
+	{
+		m_is_jumping = false;
+		m_vertical_velocity = 0.0;
+	}
+}
+
+bool Fighter::is_jumping() const 
+{
+	return m_is_jumping;
 }

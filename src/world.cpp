@@ -200,7 +200,7 @@ bool World::update(float elapsed_ms)
 	if (m_player1.get_in_play())
 	{
 		for (auto &ai : m_ais)
-			ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
+			ai.update(elapsed_ms * 0.5, m_player1.get_position());
 	}
 
 	return true;
@@ -322,45 +322,45 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	if (m_player1.get_in_play())
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_D)
-			m_player1.set_movement(0);
+			m_player1.set_movement(MOVING_FORWARD);
 		if (action == GLFW_PRESS && key == GLFW_KEY_A)
-			m_player1.set_movement(1);
-		if (action == GLFW_PRESS && key == GLFW_KEY_W && m_player1.get_jumpstate() == GROUNDED)
-			m_player1.set_movement(2);
+			m_player1.set_movement(MOVING_BACKWARD);
+		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
+			m_player1.set_movement(START_JUMPING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_S)
-			m_player1.set_movement(3);
+			m_player1.set_movement(CROUCHING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_E)
-			m_player1.set_movement(4);
+			m_player1.set_movement(PUNCHING);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
-			m_player1.set_movement(5);
+			m_player1.set_movement(STOP_MOVING_FORWARD);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
-			m_player1.set_movement(6);
+			m_player1.set_movement(STOP_MOVING_BACKWARD);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
-			m_player1.set_movement(7);
+			m_player1.set_movement(RELEASE_CROUCH);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_E)
-			m_player1.set_movement(8);
+			m_player1.set_movement(STOP_PUNCHING);
 	}
 
 	if (m_player2.get_in_play())
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_L)
-			m_player2.set_movement(0);
+			m_player2.set_movement(MOVING_FORWARD);
 		if (action == GLFW_PRESS && key == GLFW_KEY_J)
-			m_player2.set_movement(1);
-		if (action == GLFW_PRESS && key == GLFW_KEY_I && m_player2.get_jumpstate() == GROUNDED)
-			m_player2.set_movement(2);
+			m_player2.set_movement(MOVING_BACKWARD);
+		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
+			m_player2.set_movement(START_JUMPING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_K)
-			m_player2.set_movement(3);
+			m_player2.set_movement(CROUCHING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_O)
-			m_player2.set_movement(4);
+			m_player2.set_movement(PUNCHING);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
-			m_player2.set_movement(5);
+			m_player2.set_movement(STOP_MOVING_FORWARD);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
-			m_player2.set_movement(6);
+			m_player2.set_movement(STOP_MOVING_BACKWARD);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_K)
-			m_player2.set_movement(7);
+			m_player2.set_movement(RELEASE_CROUCH);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_O)
-			m_player2.set_movement(8);
+			m_player2.set_movement(STOP_PUNCHING);
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER)

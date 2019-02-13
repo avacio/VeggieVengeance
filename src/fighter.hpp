@@ -43,7 +43,11 @@ class Fighter : public Renderable
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
 
-	JumpState get_jumpstate() const;
+	void start_jumping();
+
+	void jump_update();
+
+	bool is_jumping() const;
 
   private:
 	vec2 m_position;  // Window coordinates
@@ -52,6 +56,7 @@ class Fighter : public Renderable
 	int m_health;
 	int m_speed; // each fighter has different speed and strength stats
 	int m_strength;
+	float m_vertical_velocity;
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
@@ -60,13 +65,13 @@ class Fighter : public Renderable
 	bool m_moving_backward = false;
 	bool m_is_punching = false;
 	bool m_is_hurt = false;
+	bool m_is_jumping = false;
 
 	//lives system
 	int m_lives; //counter for lives/stock remaining
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
-	JumpState m_jump_state = GROUNDED;
 	int m_jump_counter = 0;
 	CrouchState m_crouch_state = NOT_CROUCHING;
 	//float angle;
@@ -76,6 +81,8 @@ class Fighter : public Renderable
 	const int RESPAWN_TIME = 1000; //in ms
 	const int STARTING_LIVES = 3;
 	const int MAX_HEALTH = 100;
+	const float INITIAL_VELOCITY = 10.0;
+	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
 
 	// C++ rng
 	std::default_random_engine m_rng;
