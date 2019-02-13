@@ -39,7 +39,7 @@ set(SOURCE_FILES
 	src/world.cpp
 	src/water.cpp
 	src/background.cpp
-	src/freeType.cpp
+	src/textRenderer.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -49,7 +49,7 @@ set(SOURCE_FILES
 	src/world.hpp
 	src/water.hpp
 	src/background.hpp
-	src/freeType.hpp
+	src/textRenderer.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
@@ -96,11 +96,11 @@ elseif (IS_OS_WINDOWS)
 # https://stackoverflow.com/questions/17126860/cmake-link-precompiled-library-depending-on-os-and-architecture
     set(GLFW_FOUND TRUE)
     set(SDL2_FOUND TRUE)
-set(FREETYPE_FOUND TRUE)
+	set(FREETYPE_FOUND TRUE)
     
     set(GLFW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include")
     set(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/include/SDL")
-set(FREETYPE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/include")
+	set(FREETYPE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/include")
     
     if (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
         set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")

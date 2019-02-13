@@ -1,16 +1,13 @@
-#version 330 
-// Input attributes
-//in vec3 in_position;
-layout (location = 0) in vec4 vertex;
+#version 330 core
+layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
+out vec2 TexCoords;
 
-// Passed to fragment shader
-out vec2 texcoord;
-
-// Application data
-uniform mat4 projection;
+uniform mat3 projection;
+uniform mat3 transform;
 
 void main()
 {
-	texcoord = vertex.zw;
-	gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+    vec3 pos = projection * transform * vec3(vertex.xy, 1.0);
+    gl_Position = vec4(pos, 1.0);
+    TexCoords = vertex.zw;
 }

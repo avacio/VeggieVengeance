@@ -2,14 +2,12 @@
 
 // stlib
 #include <fstream> // stdout, stderr..
+#include <sstream>
 
 // glfw
 #define NOMINMAX
 #include <gl3w.h>
 #include <GLFW/glfw3.h>
-
-//#include <SDL_ttf.h> // TODO
-//#include <SDL_pixels.h>
 
 // Simple utility macros to avoid mistyping directory name, name has to be a string literal
 // audio_path("audio.ogg") -> data/audio/audio.ogg
@@ -22,8 +20,9 @@
 #define textures_path(name) data_path "/textures/" name
 #define audio_path(name) data_path "/audio/" name
 #define mesh_path(name) data_path "/meshes/" name
-#define fonts_path(name) data_path "/fonts/" name // TODO
 
+std::string fonts_path(std::string name);
+static const std::string mainFont = "HABESHAPIXELS.ttf";
 
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..

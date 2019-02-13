@@ -7,6 +7,7 @@
 #include "player.hpp"
 #include "ai.hpp"
 #include "background.hpp"
+#include "textRenderer.hpp"
 
 // stlib
 #include <vector>
@@ -15,7 +16,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_mixer.h>
-//#include <SDL_ttf.h>
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -61,6 +61,7 @@ class World
 	Water m_water;
 
 	// GUI text renderer
+	TextRenderer* text;
 
 	// Game entities
 	Background m_bg;

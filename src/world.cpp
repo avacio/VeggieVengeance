@@ -122,6 +122,17 @@ bool World::init(vec2 screen)
 
 	fprintf(stderr, "Loaded music\n");
 
+	////// TEXT
+	//text = new TextRenderer(mainFont, 40);
+
+	//int text_width = text->get_width_of_string("HEALTH: 100"); // TODO
+	////text->setPosition({ screen.x / 33.3f, screen.y - 10.f });
+	//text->setPosition({ 50.f, 100.f});
+	////text->setPosition({ screen.x / 2.f, screen.y/2.f });
+	////text->setColor({ 255.0f,0.0f,0.0f });
+
+	//fprintf(stderr, "Loaded text\n");
+
 	m_current_speed = 1.f;
 
 	//spawn fighters below
@@ -218,7 +229,7 @@ void World::draw()
 	glfwGetFramebufferSize(m_window, &w, &h);
 
 	// Updating window title with points
-	std::stringstream title_ss;
+	/*std::stringstream title_ss;
 	int stock_display1 = 0;
 	int stock_display2 = 0;
 	int health_display1 = 0;
@@ -235,6 +246,8 @@ void World::draw()
 	}
 	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " << health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
+*/
+	m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
 
 	/////////////////////////////////////
 	// First render to the custom framebuffer
@@ -289,7 +302,15 @@ void World::draw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
+	////////////////////////////
+
+
+	//text->renderString(projection_2D, "Health: 100");
+
 	m_water.draw(projection_2D);
+	//text->renderString(mat3{}, "Health: 100");
+	//text->renderString(projection_2D, "Health: 100");
+
 
 	//////////////////
 	// Presenting
