@@ -3,6 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 
+
 // stlib
 #include <vector>
 #include <iostream>
@@ -251,6 +252,13 @@ void Effect::release()
 	glDeleteProgram(program);
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
+}
+
+std::string fonts_path(std::string name) {
+	std::stringstream ss;
+
+	ss << data_path << "/fonts/" << name;
+	return ss.str();
 }
 
 void Renderable::transform_begin()

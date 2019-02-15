@@ -7,6 +7,7 @@
 #include "player.hpp"
 #include "ai.hpp"
 #include "background.hpp"
+#include "textRenderer.hpp"
 
 // stlib
 #include <vector>
@@ -60,6 +61,7 @@ class World
 	Water m_water;
 
 	// GUI text renderer
+	TextRenderer* text;
 
 	// Game entities
 	Background m_bg;

@@ -62,6 +62,24 @@ bool Background::init()
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
+	////////////////
+	//// TEXT
+	health1 = new TextRenderer(mainFont, 44);
+	health2 = new TextRenderer(mainFont, 44);
+	int width = health1->get_width_of_string("HEALTH: 100"); // TODO
+	//text->setPosition({ screen.x / 33.3f, screen.y - 10.f });
+	health1->setPosition({ 50.f, 100.f });
+	health2->setPosition({ 900.f, 100.f });
+
+	lives1 = new TextRenderer(mainFont, 70);
+	lives2 = new TextRenderer(mainFont, 70);
+	lives1->setPosition({ 50.f, 180.f });
+	lives2->setPosition({ 950.f, 180.f });
+	//text->setPosition({ screen.x / 2.f - width / 2, screen.y - 10 });
+	//text->setColor({ 0.0f,0.0f,0.0f });
+
+	fprintf(stderr, "Loaded text\n");
+
 	return true;
 }
 
@@ -125,9 +143,11 @@ void Background::draw(const mat3& projection)
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
+	/////////////////////////
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	drawPlayerInfo(projection);
 }
 
 vec2 Background::get_position()const
@@ -139,4 +159,43 @@ vec2 Background::get_position()const
 void Background::set_position(vec2 position)
 {
 	m_position = position;
+}
+
+void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
+	this->p1Lives = p1Lives;
+	this->p1HP = p1HP;
+	this->p2Lives = p2Lives;
+	this->p2HP = p2HP;
+}
+
+void Background::drawPlayerInfo(const mat3& projection) {
+	std::stringstream ss1, ss2;
+	ss1 << "Health: " << p1HP;
+	ss2 << "Health: " << p2HP;
+
+	health1->renderString(projection, ss1.str());
+	health2->renderString(projection, ss2.str());
+
+	switch (p1Lives) {
+	case 3:
+		lives1->renderString(projection, "XXX");
+		break;
+	case 2:
+		lives1->renderString(projection, "XX");
+		break;
+	case 1:
+		lives1->renderString(projection, "X");
+		break;
+	}
+	switch (p2Lives) {
+	case 3:
+		lives2->renderString(projection, "XXX");
+		break;
+	case 2:
+		lives2->renderString(projection, "XX");
+		break;
+	case 1:
+		lives2->renderString(projection, "X");
+		break;
+	}
 }
