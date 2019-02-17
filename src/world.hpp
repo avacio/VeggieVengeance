@@ -26,7 +26,7 @@ class World
 	~World();
 
 	// Creates a window, sets up events and begins the game
-	bool init(vec2 screen);
+	bool init(vec2 screen, GameMode mode);
 
 	// Releases all associated resources
 	void destroy();
@@ -61,7 +61,7 @@ class World
 	Water m_water;
 
 	// GUI text renderer
-	TextRenderer* text;
+	TextRenderer *text;
 
 	// Game entities
 	Background m_bg;
@@ -72,6 +72,8 @@ class World
 	float m_current_speed;
 
 	Mix_Music *m_background_music;
+
+	GameMode m_mode;
 
 	// C++ rng
 	std::default_random_engine m_rng;

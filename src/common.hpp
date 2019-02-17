@@ -152,3 +152,10 @@ enum FighterMovementState
 	RELEASE_CROUCH = 7,
 	STOP_PUNCHING = 8
 };
+
+enum GameMode
+{
+	PVP,
+	TUTORIAL,
+	DEV
+};

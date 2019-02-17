@@ -111,10 +111,6 @@ void Fighter::destroy()
 void Fighter::update(float ms)
 {
 	const float MOVING_SPEED = 5.0;
-	//!!! cant use ms for jumping until we have collision since ms
-	//is inconsistent per update and will result in Fighter ending u
-	//at a different ypos than at initially
-	const float JUMP_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
@@ -338,7 +334,7 @@ int Fighter::get_lives() const
 
 void Fighter::start_jumping()  
 {
-	if (!m_is_jumping) 
+	if (!m_is_jumping && m_is_alive) 
 	{
 		m_is_jumping = true;
 		m_is_idle = false;

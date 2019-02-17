@@ -28,14 +28,6 @@ World::World()
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
-	if (MAX_PLAYERS >= 1)
-	{
-		m_player1.set_in_play(true);
-	}
-	if (MAX_PLAYERS >= 2)
-	{
-		m_player2.set_in_play(true);
-	}
 }
 
 World::~World()
@@ -43,7 +35,7 @@ World::~World()
 }
 
 // World initialization
-bool World::init(vec2 screen)
+bool World::init(vec2 screen, GameMode mode)
 {
 	//-------------------------------------------------------------------------
 	// GLFW / OGL Initialization
@@ -135,24 +127,48 @@ bool World::init(vec2 screen)
 	//indicates success of initialization operations, if even one failure occurs it should be false
 	bool initSuccess = true;
 
-	if (m_player1.get_in_play())
+	m_mode = mode;
+	if (mode == DEV)
 	{
-		initSuccess = initSuccess && m_player1.init(1);
-	}
-
-	if (m_player2.get_in_play())
-	{
-		initSuccess = initSuccess && m_player2.init(2);
-	}
-
-	for (int i = 0; i < MAX_AI; i++)
-	{
-		AIType type = AVOID;
-		if (i % 2 == 0)
+		if (MAX_PLAYERS >= 1)
 		{
-			type = CHASE;
+			m_player1.set_in_play(true);
 		}
-		initSuccess = initSuccess && spawn_ai(type);
+		if (MAX_PLAYERS >= 2)
+		{
+			m_player2.set_in_play(true);
+		}
+
+		if (m_player1.get_in_play())
+		{
+			initSuccess = initSuccess && m_player1.init(1);
+		}
+
+		if (m_player2.get_in_play())
+		{
+			initSuccess = initSuccess && m_player2.init(2);
+		}
+
+		for (int i = 0; i < MAX_AI; i++)
+		{
+			AIType type = AVOID;
+			if (i % 2 == 0)
+			{
+				type = CHASE;
+			}
+			initSuccess = initSuccess && spawn_ai(type);
+		}
+	}
+	else if (mode == PVP)
+	{
+		m_player1.set_in_play(true);
+		m_player2.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2);
+	}
+	else if (mode == TUTORIAL)
+	{
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
 	}
 
 	return m_water.init() && m_bg.init() && initSuccess;
@@ -239,7 +255,15 @@ void World::draw()
 	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " << health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
 	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 */
-	m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
+	if (m_mode == DEV || m_mode == PVP)
+	{
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
+	}
+	else if (m_mode == TUTORIAL)
+	{
+		AI ai = m_ais.front();
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), ai.get_lives(), ai.get_health());
+	}
 
 	/////////////////////////////////////
 	// First render to the custom framebuffer
@@ -296,13 +320,11 @@ void World::draw()
 
 	////////////////////////////
 
-
 	//text->renderString(projection_2D, "Health: 100");
 
 	m_water.draw(projection_2D);
 	//text->renderString(mat3{}, "Health: 100");
 	//text->renderString(projection_2D, "Health: 100");
-
 
 	//////////////////
 	// Presenting
@@ -411,7 +433,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			ai.init(3);
 		}
 		//m_ais.clear();
-		//m_water.reset_salmon_dead_time();
+		
 		m_current_speed = 1.f;
 	}*/
 }

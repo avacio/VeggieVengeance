@@ -23,7 +23,7 @@ const char* title = "VEGGIE VENGEANCE";
 int main(int argc, char* argv[])
 {
 	// Initializing world (after renderer.init().. sorry)
-	if (!world.init({ (float)width, (float)height }))
+	if (!world.init({ (float)width, (float)height },  DEV))
 	{
 		// Time to read the error message
 		std::cout << "Press any key to exit" << std::endl;
