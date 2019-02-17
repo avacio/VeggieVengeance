@@ -3,7 +3,6 @@
 #include "common.hpp"
 #include <random>
 
-// Salmon enemy
 class Fighter : public Renderable
 {
 	// Shared between all bubbles, no need to load one for each instance
@@ -20,7 +19,6 @@ class Fighter : public Renderable
 	// ms represents the number of milliseconds elapsed from the previous update() call
 	void update(float ms);
 
-	// Renders the salmon
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 

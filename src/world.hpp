@@ -72,8 +72,6 @@ class World
 	float m_current_speed;
 
 	Mix_Music *m_background_music;
-	Mix_Chunk *m_salmon_dead_sound;
-	Mix_Chunk *m_salmon_eat_sound;
 
 	// C++ rng
 	std::default_random_engine m_rng;

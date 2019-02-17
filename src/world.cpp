@@ -105,15 +105,11 @@ bool World::init(vec2 screen)
 	}
 
 	m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
-	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
-	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr)
+	if (m_background_music == nullptr)
 	{
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-				audio_path("Abandoned Hopes.wav"),
-				audio_path("salmon_dead.wav"),
-				audio_path("salmon_eat.wav"));
+		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
+				audio_path("Abandoned Hopes.wav"));
 		return false;
 	}
 
@@ -169,10 +165,6 @@ void World::destroy()
 
 	if (m_background_music != nullptr)
 		Mix_FreeMusic(m_background_music);
-	if (m_salmon_dead_sound != nullptr)
-		Mix_FreeChunk(m_salmon_dead_sound);
-	if (m_salmon_eat_sound != nullptr)
-		Mix_FreeChunk(m_salmon_eat_sound);
 
 	Mix_CloseAudio();
 

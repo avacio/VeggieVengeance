@@ -22,7 +22,6 @@ public:
 	// Releases all the associated resources
 	void destroy();
 
-	// Renders the salmon
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3& projection)override;
 
