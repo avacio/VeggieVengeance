@@ -332,9 +332,9 @@ int Fighter::get_lives() const
 	return m_lives;
 }
 
-void Fighter::start_jumping()  
+void Fighter::start_jumping()
 {
-	if (!m_is_jumping && m_is_alive) 
+	if (!m_is_jumping && m_is_alive)
 	{
 		m_is_jumping = true;
 		m_is_idle = false;
@@ -342,22 +342,45 @@ void Fighter::start_jumping()
 	}
 }
 
-void Fighter::jump_update() 
+void Fighter::jump_update()
 {
-	if (m_is_jumping) 
+	if (m_is_jumping)
 	{
 		move({0.0, -m_vertical_velocity});
 		m_vertical_velocity += ACCELERATION;
 	}
 
-	if (m_vertical_velocity < -INITIAL_VELOCITY) 
+	if (m_vertical_velocity < -INITIAL_VELOCITY)
 	{
 		m_is_jumping = false;
 		m_vertical_velocity = 0.0;
 	}
 }
 
-bool Fighter::is_jumping() const 
+bool Fighter::is_jumping() const
 {
 	return m_is_jumping;
+}
+
+void Fighter::reset(int init_position)
+{
+	m_health = MAX_HEALTH;
+	m_lives = STARTING_LIVES;
+	m_is_alive = true;
+	m_rotation = 0;
+	m_is_jumping = false;
+	m_vertical_velocity = 0;
+
+	if (init_position == 1)
+	{
+		m_position = {250.f, 525.f};
+	}
+	else if (init_position == 2)
+	{
+		m_position = {950.f, 525.f};
+	}
+	else
+	{
+		m_position = {550.f, 525.f};
+	}
 }

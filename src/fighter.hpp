@@ -47,11 +47,20 @@ class Fighter : public Renderable
 
 	bool is_jumping() const;
 
-  private:
+	void reset(int init_position);
+
+  protected:
+  	const int MAX_HEALTH = 100;
+	const int STARTING_LIVES = 3;
+
+	int m_health;
+	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
+
+  private:
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
-	int m_health;
+	
 	int m_speed; // each fighter has different speed and strength stats
 	int m_strength;
 	float m_vertical_velocity;
@@ -64,21 +73,16 @@ class Fighter : public Renderable
 	bool m_is_punching = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
-
-	//lives system
-	int m_lives; //counter for lives/stock remaining
+	
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
-	int m_jump_counter = 0;
 	CrouchState m_crouch_state = NOT_CROUCHING;
-	//float angle;
 
 	//CONST VALUES
 	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
-	const int STARTING_LIVES = 3;
-	const int MAX_HEALTH = 100;
+	
 	const float INITIAL_VELOCITY = 10.0;
 	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
 

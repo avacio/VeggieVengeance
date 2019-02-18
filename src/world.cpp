@@ -121,8 +121,6 @@ bool World::init(vec2 screen, GameMode mode)
 
 	//fprintf(stderr, "Loaded text\n");
 
-	m_current_speed = 1.f;
-
 	//spawn fighters below
 	//indicates success of initialization operations, if even one failure occurs it should be false
 	bool initSuccess = true;
@@ -408,34 +406,38 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 
 	// Resetting game
-	/*if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_B)
 	{
-		//!!! DESPITE MY EFFORTS THIS IS STILL BUGGY, ERROR
-		//LIKELY TO DO WITH DESTROYING FIGHTERS
-		int w, h;
-		glfwGetWindowSize(m_window, &w, &h);
-		if (m_player1.get_in_play())
+		reset();
+	}
+}
+
+void World::reset()
+{
+	if (m_mode == DEV)
+	{
+		m_player1.reset(1);
+		m_player2.reset(2);
+
+		for (AI ai : m_ais)
 		{
-			m_player1.destroy();
-			m_player1.set_in_play(true);
-			m_player1.init(1);
+			ai.reset(3);
 		}
-		if (m_player2.get_in_play())
+	}
+	else if (m_mode == PVP)
+	{
+		m_player1.reset(1);
+		m_player2.reset(2);
+	}
+	else if (m_mode == TUTORIAL)
+	{
+		m_player1.reset(1);
+
+		for (AI ai : m_ais)
 		{
-			m_player2.destroy();
-			m_player2.set_in_play(true);
-			m_player2.init(2);
+			ai.reset(3);
 		}
-		//m_fighters.clear();
-		for (auto &ai : m_ais)
-		{
-			ai.destroy();
-			ai.init(3);
-		}
-		//m_ais.clear();
-		
-		m_current_speed = 1.f;
-	}*/
+	}
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)

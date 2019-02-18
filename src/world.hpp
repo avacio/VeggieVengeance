@@ -44,6 +44,8 @@ class World
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
 
+	void reset();
+
 	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
@@ -68,8 +70,6 @@ class World
 	Player m_player1;
 	Player m_player2;
 	std::vector<AI> m_ais;
-
-	float m_current_speed;
 
 	Mix_Music *m_background_music;
 
