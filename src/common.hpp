@@ -158,10 +158,11 @@ enum FighterMovementState
 enum GameMode
 {
 	MENU = 0,
-	PVP,
+	PVC, // single player
+	PVP, // 2 player
 	TUTORIAL,
 	DEV
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };

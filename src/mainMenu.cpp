@@ -69,12 +69,14 @@ bool MainMenu::init(vec2 screen)
 
 	////////////////
 	//// TEXT
-	//title = new TextRenderer(mainFontBold, 100);
-	title = new TextRenderer(mainFont, 100);
+	title = new TextRenderer(mainFontBold, 90);
+	//title = new TextRenderer(mainFont, 100);
+	title->setColor({ 0.f,0.f,0.f });
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
 	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
+	init_buttons();
 
-	fprintf(stderr, "Loaded text\n");
+	//fprintf(stderr, "Loaded text\n");
 
 	return true;
 }
@@ -144,6 +146,8 @@ void MainMenu::draw(const mat3& projection)
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	title->renderString(projection, "VEGGIE VENGEANCE");
+	buttons[0]->renderString(projection, "ONE-PLAYER");
+	buttons[1]->renderString(projection, "TWO-PLAYER");
 }
 
 vec2 MainMenu::get_position()const
@@ -154,4 +158,49 @@ vec2 MainMenu::get_position()const
 void MainMenu::set_position(vec2 position)
 {
 	m_position = position;
+}
+
+void MainMenu::init_buttons()
+{
+	selectedButtonIndex = 0; // default: first button selected
+	TextRenderer* play1 = new TextRenderer(mainFont, 60);
+	TextRenderer* play2 = new TextRenderer(mainFont, 60);
+
+	play1->setColor(selectedColor);
+	play2->setColor(defaultColor);
+
+	int width = play1->get_width_of_string("ONE-PLAYER");
+	play1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-50.f });
+	width = play2->get_width_of_string("TWO-PLAYER");
+	play2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) +50.f });
+	buttons.emplace_back(play1);
+	buttons.emplace_back(play2);
+}
+
+// TODO: may want to change design so that selection does not loop
+//void MainMenu::change_selection(int direction) // -1 for down, 1 for up
+void MainMenu::change_selection()
+{
+	if (selectedButtonIndex == 0) {
+		selectedButtonIndex = 1;
+		buttons[0]->setColor(defaultColor);
+		buttons[1]->setColor(selectedColor);
+	}
+	else {
+		selectedButtonIndex = 0;
+		buttons[1]->setColor(defaultColor);
+		buttons[0]->setColor(selectedColor);
+	}
+}
+
+GameMode MainMenu::get_selected()
+{
+	switch (selectedButtonIndex) {
+	case 0:
+		return PVC;
+		break;
+	case 1:
+		return PVP;
+		break;
+	}
 }

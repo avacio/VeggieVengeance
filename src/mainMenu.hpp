@@ -27,9 +27,19 @@ public:
 	// Sets the new bubble position
 	void set_position(vec2 position);
 
+	void init_buttons();
+	//void change_selection(int direction); // -1 for down, 1 for up
+	void change_selection();
+	GameMode get_selected();
+
 private:
 	vec2 screen;
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
+
+	int selectedButtonIndex = -1;
+	std::vector<TextRenderer*> buttons;
+	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
+	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
 };
