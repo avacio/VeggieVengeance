@@ -123,53 +123,13 @@ bool World::init(vec2 screen, GameMode mode)
 
 	//spawn fighters below
 	//indicates success of initialization operations, if even one failure occurs it should be false
-	bool initSuccess = true;
 
-	m_mode = mode;
-	if (mode == DEV)
-	{
-		if (MAX_PLAYERS >= 1)
-		{
-			m_player1.set_in_play(true);
-		}
-		if (MAX_PLAYERS >= 2)
-		{
-			m_player2.set_in_play(true);
-		}
+	m_screen = screen; // to pass on screen size to renderables
+	bool initSuccess = set_mode(mode);
 
-		if (m_player1.get_in_play())
-		{
-			initSuccess = initSuccess && m_player1.init(1);
-		}
-
-		if (m_player2.get_in_play())
-		{
-			initSuccess = initSuccess && m_player2.init(2);
-		}
-
-		for (int i = 0; i < MAX_AI; i++)
-		{
-			AIType type = AVOID;
-			if (i % 2 == 0)
-			{
-				type = CHASE;
-			}
-			initSuccess = initSuccess && spawn_ai(type);
-		}
-	}
-	else if (mode == PVP)
-	{
-		m_player1.set_in_play(true);
-		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2);
-	}
-	else if (mode == TUTORIAL)
-	{
-		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
-	}
-
-	return m_water.init() && m_bg.init() && initSuccess;
+	//return m_water.init() && m_bg.init(screen) && initSuccess;
+	//return initSuccess;
+	return m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -289,7 +249,9 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	m_bg.draw(projection_2D);
+	if (m_mode == MENU) { m_menu.draw(projection_2D); }
+	else { m_bg.draw(projection_2D); }
+	
 	if (m_player1.get_in_play())
 	{
 		m_player1.draw(projection_2D);
@@ -318,7 +280,6 @@ void World::draw()
 
 	////////////////////////////
 
-	//text->renderString(projection_2D, "Health: 100");
 
 	m_water.draw(projection_2D);
 	//text->renderString(mat3{}, "Health: 100");
@@ -414,8 +375,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
-	if (m_mode == DEV)
-	{
+	switch (m_mode) {
+	case DEV:
 		m_player1.reset(1);
 		m_player2.reset(2);
 
@@ -423,21 +384,80 @@ void World::reset()
 		{
 			ai.reset(3);
 		}
-	}
-	else if (m_mode == PVP)
-	{
+		break;
+	case PVP:
 		m_player1.reset(1);
 		m_player2.reset(2);
-	}
-	else if (m_mode == TUTORIAL)
-	{
+		break;
+	case TUTORIAL:
 		m_player1.reset(1);
 
 		for (AI ai : m_ais)
 		{
 			ai.reset(3);
 		}
+		break;
+	case MENU:	// TESTING TRANSITIONS
+		set_mode(DEV);
+		break;
 	}
+}
+
+bool World::set_mode(GameMode mode) {
+	m_mode = mode;
+	bool initSuccess = true;
+	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
+
+	switch (mode) {
+	case MENU:
+		m_player1.set_in_play(true); // needed to make AI respond
+									 //initSuccess = initSuccess && spawn_ai(AVOID);
+		//initSuccess = initSuccess && spawn_ai(AVOID) && m_menu.init(screen);
+		initSuccess = initSuccess && spawn_ai(AVOID) && m_menu.init(m_screen);
+		break;
+	case DEV:
+		if (MAX_PLAYERS >= 1)
+		{
+			m_player1.set_in_play(true);
+		}
+		if (MAX_PLAYERS >= 2)
+		{
+			m_player2.set_in_play(true);
+		}
+
+		if (m_player1.get_in_play())
+		{
+			initSuccess = initSuccess && m_player1.init(1);
+		}
+
+		if (m_player2.get_in_play())
+		{
+			initSuccess = initSuccess && m_player2.init(2);
+		}
+
+		for (int i = 0; i < MAX_AI; i++)
+		{
+			AIType type = AVOID;
+			if (i % 2 == 0)
+			{
+				type = CHASE;
+			}
+			initSuccess = initSuccess && spawn_ai(type);
+		}
+		initSuccess = initSuccess && m_bg.init(m_screen);
+		break;
+	case PVP:
+		m_player1.set_in_play(true);
+		m_player2.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2) && m_bg.init(m_screen);
+		break;
+	case TUTORIAL:
+		m_player1.set_in_play(true);
+		//initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		break;
+	}
+	return initSuccess;
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)

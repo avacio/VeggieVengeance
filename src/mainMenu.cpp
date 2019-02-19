@@ -1,14 +1,18 @@
 // Header
-#include "background.hpp"
+#include "mainMenu.hpp"
 
-Texture Background::bg_texture;
+Texture MainMenu::m_texture;
 
-bool Background::init(vec2 screen)
+///////////////
+// NOTE: REPEAT FROM BACKGROUND.HPP MIGHT NOT BE NECESSARY
+// if we only want a monocolour background (i.e. water) we can copy that format instead
+
+bool MainMenu::init(vec2 screen)
 {
 	// Load shared texture
-	if (!bg_texture.is_valid())
+	if (!m_texture.is_valid())
 	{
-		if (!bg_texture.load_from_file(textures_path("background.png")))
+		if (!m_texture.load_from_file(textures_path("background.png")))
 		{
 			fprintf(stderr, "Failed to load background texture!");
 			return false;
@@ -17,8 +21,8 @@ bool Background::init(vec2 screen)
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
-	float wr = bg_texture.width * 3.5f;
-	float hr = bg_texture.height * 3.5f;
+	float wr = m_texture.width * 3.5f;
+	float hr = m_texture.height * 3.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -65,19 +69,10 @@ bool Background::init(vec2 screen)
 
 	////////////////
 	//// TEXT
-	health1 = new TextRenderer(mainFont, 44);
-	health2 = new TextRenderer(mainFont, 44);
-	int width = health1->get_width_of_string("HP: 100"); // TODO
-	health1->setPosition({ 50.f, 100.f });
-	health2->setPosition({ screen.x-(width*1.15f), 100.f });
-	//health2->setPosition({ screen.x - width, 100.f });
-
-
-	lives1 = new TextRenderer(mainFont, 70);
-	lives2 = new TextRenderer(mainFont, 70);
-	width = lives2->get_width_of_string("XXX");
-	lives1->setPosition({ 50.f, 180.f });
-	lives2->setPosition({ screen.x-(width*1.05f), 180.f });
+	//title = new TextRenderer(mainFontBold, 100);
+	title = new TextRenderer(mainFont, 100);
+	int width = title->get_width_of_string("VEGGIEVENGEANCE");
+	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 
 	fprintf(stderr, "Loaded text\n");
 
@@ -86,7 +81,7 @@ bool Background::init(vec2 screen)
 
 // Call if init() was successful
 // Releases all graphics resources
-void Background::destroy()
+void MainMenu::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -97,14 +92,14 @@ void Background::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Background::draw(const mat3& projection)
+void MainMenu::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(get_position());
 	//transform_rotate(m_rotation);
-	transform_scale(m_scale);
+	//transform_scale(m_scale);
 	transform_end();
 
 	// Setting shaders
@@ -135,7 +130,7 @@ void Background::draw(const mat3& projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bg_texture.id);
+	glBindTexture(GL_TEXTURE_2D, m_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float*)&transform);
@@ -148,56 +143,15 @@ void Background::draw(const mat3& projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	//if (p1Lives != -1 && p2Lives != -1) { drawPlayerInfo(projection); }
-	drawPlayerInfo(projection);
+	title->renderString(projection, "VEGGIE VENGEANCE");
 }
 
-vec2 Background::get_position()const
+vec2 MainMenu::get_position()const
 {
 	return m_position;
 }
 
-
-void Background::set_position(vec2 position)
+void MainMenu::set_position(vec2 position)
 {
 	m_position = position;
-}
-
-void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
-	this->p1Lives = p1Lives;
-	this->p1HP = p1HP;
-	this->p2Lives = p2Lives;
-	this->p2HP = p2HP;
-}
-
-void Background::drawPlayerInfo(const mat3& projection) {
-	std::stringstream ss1, ss2;
-	ss1 << "HP: " << p1HP;
-	ss2 << "HP: " << p2HP;
-
-	health1->renderString(projection, ss1.str());
-	health2->renderString(projection, ss2.str());
-
-	switch (p1Lives) {
-	case 3:
-		lives1->renderString(projection, "XXX");
-		break;
-	case 2:
-		lives1->renderString(projection, "XX");
-		break;
-	case 1:
-		lives1->renderString(projection, "X");
-		break;
-	}
-	switch (p2Lives) {
-	case 3:
-		lives2->renderString(projection, "XXX");
-		break;
-	case 2:
-		lives2->renderString(projection, "XX");
-		break;
-	case 1:
-		lives2->renderString(projection, "X");
-		break;
-	}
 }
