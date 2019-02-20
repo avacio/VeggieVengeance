@@ -24,12 +24,14 @@ void glfw_err_cb(int error, const char *desc)
 } // namespace
 } // namespace
 
-World::World()
+//set up player values
+//give p1 id =1, p2 id =2 
+World::World() : m_player1(1), m_player2(2)
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
 	if (MAX_PLAYERS >= 1)
-	{
+	{	
 		m_player1.set_in_play(true);
 	}
 	if (MAX_PLAYERS >= 2)
@@ -188,6 +190,34 @@ bool World::update(float elapsed_ms)
 
 	// Updating all entities, making the entities
 	// faster based on current
+	for (unsigned int i = 0; i < m_damageEffects.size(); i++) {
+		if (m_player1.get_in_play()) {
+			BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
+			if (m_damageEffects[i].id != m_player1.get_id() && check_collision(m_damageEffects[i].bounding_box, *b1)) {
+				//incur damage
+				m_player1.decrease_health(m_damageEffects[i].damage);
+			}
+			delete b1;
+		}
+		if (m_player2.get_in_play()) {
+			BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
+			if (m_damageEffects[i].id != m_player2.get_id() && check_collision(m_damageEffects[i].bounding_box, *b2)) {
+				//incur damage
+				m_player2.decrease_health(m_damageEffects[i].damage);
+			}
+			delete b2;
+		}
+		for (unsigned int j = 0; j < m_ais.size(); j++) {
+			BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
+			if (m_damageEffects[i].id != m_ais[j].get_id() && check_collision(m_damageEffects[i].bounding_box, *b3)) {
+				//incur damage
+				m_ais[j].decrease_health(m_damageEffects[i].damage);
+			}
+			delete b3;
+		}
+	}
+	m_damageEffects.clear();
+
 	if (m_player1.get_in_play())
 	{
 		m_player1.update(elapsed_ms);
@@ -305,9 +335,12 @@ bool World::is_over() const
 // Creates a ai and if successful, adds it to the list of ai
 bool World::spawn_ai(AIType type)
 {
-	AI ai(type);
+	//intialize ai with next ID and provided type
+	AI ai(idCounter, type);
 	if (ai.init(3))
 	{
+		//assure the next ID given is unique
+		idCounter++;
 		m_ais.emplace_back(ai);
 		return true;
 	}
@@ -329,16 +362,18 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_S)
 			m_player1.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_E)
-			m_player1.set_movement(4);
+		if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+			DamageEffect* p = punch(m_player1);
+			m_damageEffects.push_back(*p);
+		}
 		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 			m_player1.set_movement(5);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 			m_player1.set_movement(6);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
 			m_player1.set_movement(7);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_E)
-			m_player1.set_movement(8);
+		//if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+			//m_player1.set_movement(8);
 	}
 
 	if (m_player2.get_in_play())
@@ -351,16 +386,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_K)
 			m_player2.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_O)
-			m_player2.set_movement(4);
+		//if (action == GLFW_PRESS && key == GLFW_KEY_O)
+			//m_player2.set_movement(4);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 			m_player2.set_movement(5);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 			m_player2.set_movement(6);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_K)
 			m_player2.set_movement(7);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_O)
-			m_player2.set_movement(8);
+		//if (action == GLFW_RELEASE && key == GLFW_KEY_O)
+			//m_player2.set_movement(8);
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER)
@@ -403,6 +438,23 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}*/
 }
 
+DamageEffect * World::punch(Fighter f) {
+	//create the bounding box based on fighter position
+	return new DamageEffect(f.get_position().x, f.get_position().y, f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id());
+}
+
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
+}
+
+bool World::check_collision(BoundingBox b1, BoundingBox b2) {
+	if (b1.xpos < b2.xpos + b2.width &&
+		b1.xpos + b1.width > b2.xpos &&
+		b1.ypos < b2.ypos + b2.height &&
+		b1.ypos + b1.height > b2.ypos) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }

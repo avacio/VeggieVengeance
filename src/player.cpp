@@ -4,6 +4,11 @@
 
 //implement player specific functions here
 
+//call superclass intializer
+Player::Player(unsigned int id) : Fighter(id) {
+
+}
+
 bool Player::get_in_play() const
 {
 	return m_in_play;

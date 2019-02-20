@@ -10,6 +10,7 @@ class Fighter : public Renderable
 	static Texture fighter_texture;
 
   public:
+	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
 	bool init(int init_position);
 
@@ -35,6 +36,10 @@ class Fighter : public Renderable
 	// Set fighter's movements
 	void set_movement(int mov);
 
+	void set_hurt(bool hurt);
+
+	void decrease_health(unsigned int damage);
+
 	// Returns the current health
 	int get_health() const;
 
@@ -44,6 +49,8 @@ class Fighter : public Renderable
 	vec2 get_bounding_box() const;
 
 	JumpState get_jumpstate() const;
+
+	unsigned int get_id() const;
 
   private:
 	vec2 m_position;  // Window coordinates
@@ -76,6 +83,8 @@ class Fighter : public Renderable
 	const int RESPAWN_TIME = 1000; //in ms
 	const int STARTING_LIVES = 3;
 	const int MAX_HEALTH = 100;
+
+	const unsigned int m_id; //unique identifier given when created
 
 	// C++ rng
 	std::default_random_engine m_rng;

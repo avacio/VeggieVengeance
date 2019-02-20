@@ -7,6 +7,10 @@
 
 Texture Fighter::fighter_texture;
 
+Fighter::Fighter(unsigned int id) : m_id(id) {
+
+}
+
 bool Fighter::init(int init_position)
 {
 	// Load shared texture
@@ -345,6 +349,19 @@ void Fighter::set_movement(int mov)
 	}
 }
 
+void Fighter::set_hurt(bool hurt) {
+	m_is_hurt = hurt;
+}
+
+void Fighter::decrease_health(unsigned int damage) {
+	if (damage <= m_health) {
+		m_health -= damage;
+	}
+	else {
+		m_health = 0;
+	}
+}
+
 int Fighter::get_health() const
 {
 	return m_health;
@@ -358,4 +375,9 @@ int Fighter::get_lives() const
 JumpState Fighter::get_jumpstate() const
 {
 	return m_jump_state;
+}
+
+unsigned int Fighter::get_id() const
+{
+	return m_id;
 }

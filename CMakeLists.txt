@@ -39,6 +39,8 @@ set(SOURCE_FILES
 	src/world.cpp
 	src/water.cpp
 	src/background.cpp
+	src/damageEffect.cpp
+	src/boundingbox.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -48,6 +50,8 @@ set(SOURCE_FILES
 	src/world.hpp
 	src/water.hpp
 	src/background.hpp
+	src/damageEffect.hpp
+	src/boundingbox.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
