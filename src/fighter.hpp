@@ -47,6 +47,10 @@ class Fighter : public Renderable
 
 	bool is_jumping() const;
 
+	int get_crouch_state();
+
+	void set_crouch_state(CrouchState cs);
+
 	void reset(int init_position);
 
   protected:

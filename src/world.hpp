@@ -74,6 +74,7 @@ class World
 	Mix_Music *m_background_music;
 
 	GameMode m_mode;
+	bool m_paused;
 
 	// C++ rng
 	std::default_random_engine m_rng;
