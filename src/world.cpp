@@ -168,6 +168,7 @@ bool World::init(vec2 screen, GameMode mode)
 		m_player1.set_in_play(true);
 		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
 	}
+	paused = false;
 
 	return m_water.init() && m_bg.init() && initSuccess;
 }
@@ -205,20 +206,26 @@ bool World::update(float elapsed_ms)
 
 	// Updating all entities, making the entities
 	// faster based on current
-	if (m_player1.get_in_play())
-	{
-		m_player1.update(elapsed_ms);
+	if (paused) {
+		return true;
 	}
-	if (m_player2.get_in_play())
-	{
-		m_player2.update(elapsed_ms);
-	}
+	if (!paused) {
+		if (m_player1.get_in_play())
+		{
+			m_player1.update(elapsed_ms);
+		}
+		if (m_player2.get_in_play())
+		{
+			m_player2.update(elapsed_ms);
+		}
 
-	if (m_player1.get_in_play())
-	{
-		for (auto &ai : m_ais)
-			ai.update(elapsed_ms * 0.5, m_player1.get_position());
+		if (m_player1.get_in_play())
+		{
+			for (auto &ai : m_ais)
+				ai.update(elapsed_ms * 0.5, m_player1.get_position());
+		}
 	}
+	
 
 	return true;
 }
@@ -403,6 +410,11 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER)
 	{
 		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
+	}
+
+	// Pausing and resuming game
+	if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
+		paused = !paused;
 	}
 
 	// Resetting game
