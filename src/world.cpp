@@ -168,7 +168,7 @@ bool World::init(vec2 screen, GameMode mode)
 		m_player1.set_in_play(true);
 		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
 	}
-	paused = false;
+	m_paused = false;
 
 	return m_water.init() && m_bg.init() && initSuccess;
 }
@@ -206,10 +206,10 @@ bool World::update(float elapsed_ms)
 
 	// Updating all entities, making the entities
 	// faster based on current
-	if (paused) {
+	if (m_paused) {
 		return true;
 	}
-	if (!paused) {
+	if (!m_paused) {
 		if (m_player1.get_in_play())
 		{
 			m_player1.update(elapsed_ms);
@@ -359,7 +359,7 @@ bool World::spawn_ai(AIType type)
 void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
 	// Handle player movement here
-	if (m_player1.get_in_play() && !paused)
+	if (m_player1.get_in_play() && !m_paused)
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_D)
 			m_player1.set_movement(MOVING_FORWARD);
@@ -381,7 +381,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(STOP_PUNCHING);
 	}
 
-	if (m_player2.get_in_play() && !paused)
+	if (m_player2.get_in_play() && !m_paused)
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_L)
 			m_player2.set_movement(MOVING_FORWARD);
@@ -403,11 +403,11 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_PUNCHING);
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !paused)
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
 	{
 		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
 	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !paused)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !m_paused)
 	{
 		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
 	}
@@ -421,7 +421,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
 			m_player2.set_crouch_state(CROUCH_RELEASED);
 		}
-		paused = !paused;
+		m_paused = !m_paused;
 	}
 
 	// Resetting game
