@@ -190,12 +190,27 @@ bool World::update(float elapsed_ms)
 
 	// Updating all entities, making the entities
 	// faster based on current
-	for (unsigned int i = 0; i < m_damageEffects.size(); i++) {
+
+	if (m_player1.get_in_play() && m_player1.get_alive()) {
+		m_player1.set_hurt(false);
+	}
+	if (m_player2.get_in_play() && m_player2.get_alive()) {
+		m_player2.set_hurt(false);
+	}
+	for (int i = 0; i < m_ais.size(); i++) {
+		if (m_ais[i].get_alive()) {
+			m_ais[i].set_hurt(false);
+		}
+	}
+
+	//damage effect collision loop
+	for (int i = 0; i < m_damageEffects.size(); i++) {
 		if (m_player1.get_in_play()) {
 			BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
 			if (m_damageEffects[i].id != m_player1.get_id() && check_collision(m_damageEffects[i].bounding_box, *b1)) {
 				//incur damage
 				m_player1.decrease_health(m_damageEffects[i].damage);
+				m_player1.set_hurt(true);
 			}
 			delete b1;
 		}
@@ -204,19 +219,30 @@ bool World::update(float elapsed_ms)
 			if (m_damageEffects[i].id != m_player2.get_id() && check_collision(m_damageEffects[i].bounding_box, *b2)) {
 				//incur damage
 				m_player2.decrease_health(m_damageEffects[i].damage);
+				m_player2.set_hurt(true);
 			}
 			delete b2;
 		}
-		for (unsigned int j = 0; j < m_ais.size(); j++) {
+		for (int j = 0; j < m_ais.size(); j++) {
 			BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
 			if (m_damageEffects[i].id != m_ais[j].get_id() && check_collision(m_damageEffects[i].bounding_box, *b3)) {
 				//incur damage
 				m_ais[j].decrease_health(m_damageEffects[i].damage);
+				m_ais[j].set_hurt(true);
 			}
 			delete b3;
 		}
 	}
-	m_damageEffects.clear();
+
+	//damage effect removal loop
+	for (int i = 0; i < m_damageEffects.size(); i++) {
+		if (m_damageEffects[i].delete_when == AFTER_UPDATE ||
+			(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter)) {
+			//remove from list
+			m_damageEffects.erase(m_damageEffects.begin() + i);
+			i--;
+		}
+	}
 
 	if (m_player1.get_in_play())
 	{
@@ -386,8 +412,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(2);
 		if (action == GLFW_PRESS && key == GLFW_KEY_K)
 			m_player2.set_movement(3);
-		//if (action == GLFW_PRESS && key == GLFW_KEY_O)
-			//m_player2.set_movement(4);
+		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+			DamageEffect* p = punch(m_player2);
+			m_damageEffects.push_back(*p);
+		}
 		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 			m_player2.set_movement(5);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
@@ -440,7 +468,15 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 DamageEffect * World::punch(Fighter f) {
 	//create the bounding box based on fighter position
-	return new DamageEffect(f.get_position().x, f.get_position().y, f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id());
+	int sizeMultiplier = 4;
+	if (f.get_facing_front()) {
+		//right facing
+		return new DamageEffect(f.get_position().x, f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(f.get_position().x - ((sizeMultiplier - 1) * f.get_bounding_box().x), f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
+	}
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)

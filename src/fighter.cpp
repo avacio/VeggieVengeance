@@ -207,17 +207,6 @@ void Fighter::update(float ms)
 			m_position.y -= 25.f;
 			m_crouch_state = NOT_CROUCHING;
 		}
-
-		if (m_is_punching)
-		{
-			m_is_hurt = true;
-
-			m_health -= 1;
-		}
-		else
-		{
-			m_is_hurt = false;
-		}
 	}
 	else
 	{
@@ -370,6 +359,16 @@ int Fighter::get_health() const
 int Fighter::get_lives() const
 {
 	return m_lives;
+}
+
+int Fighter::get_alive() const
+{
+	return m_is_alive;
+}
+
+bool Fighter::get_facing_front() const
+{
+	return m_facing_front;
 }
 
 JumpState Fighter::get_jumpstate() const

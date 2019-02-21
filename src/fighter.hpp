@@ -45,6 +45,10 @@ class Fighter : public Renderable
 
 	int get_lives() const;
 
+	int get_alive() const;
+
+	bool get_facing_front() const;
+
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
 

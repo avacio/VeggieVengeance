@@ -153,3 +153,10 @@ enum FighterMovementState
 	RELEASE_CROUCH = 7,
 	STOP_PUNCHING = 8
 };
+
+enum DeletionTime
+{
+	AFTER_UPDATE,
+	AFTER_HIT,
+	AFTER_OUT_OF_BOUNDS
+};
