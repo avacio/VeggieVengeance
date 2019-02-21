@@ -362,6 +362,14 @@ bool Fighter::is_jumping() const
 	return m_is_jumping;
 }
 
+int Fighter::get_crouch_state() {
+	return m_crouch_state;
+}
+
+void Fighter::set_crouch_state(CrouchState cs) {
+	m_crouch_state = cs;
+}
+
 void Fighter::reset(int init_position)
 {
 	m_health = MAX_HEALTH;

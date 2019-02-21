@@ -359,7 +359,7 @@ bool World::spawn_ai(AIType type)
 void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
 	// Handle player movement here
-	if (m_player1.get_in_play())
+	if (m_player1.get_in_play() && !paused)
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_D)
 			m_player1.set_movement(MOVING_FORWARD);
@@ -381,7 +381,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(STOP_PUNCHING);
 	}
 
-	if (m_player2.get_in_play())
+	if (m_player2.get_in_play() && !paused)
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_L)
 			m_player2.set_movement(MOVING_FORWARD);
@@ -403,17 +403,24 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_PUNCHING);
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER)
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !paused)
 	{
 		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
 	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER)
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !paused)
 	{
 		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
 	}
 
 	// Pausing and resuming game
 	if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
+		if (m_player1.get_in_play() && m_player1.get_crouch_state() == IS_CROUCHING) {
+			m_player1.set_crouch_state(CROUCH_RELEASED);
+		}
+			
+		if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
+			m_player2.set_crouch_state(CROUCH_RELEASED);
+		}
 		paused = !paused;
 	}
 
@@ -422,6 +429,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	{
 		reset();
 	}
+
+	// Music control
+	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_UP)
+		Mix_VolumeMusic(Mix_VolumeMusic(-1) + 20);
+	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_DOWN)
+		Mix_VolumeMusic(Mix_VolumeMusic(-1) - 20);
+	if (action == GLFW_PRESS && key == GLFW_KEY_END && !Mix_PausedMusic())
+		Mix_PauseMusic();
+	if (action == GLFW_PRESS && key == GLFW_KEY_HOME && Mix_PausedMusic())
+		Mix_ResumeMusic();
 }
 
 void World::reset()
