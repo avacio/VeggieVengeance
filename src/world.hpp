@@ -4,7 +4,6 @@
 #include "common.hpp"
 #include "water.hpp"
 #include "fighter.hpp"
-#include "player.hpp"
 #include "player1.hpp"
 #include "player2.hpp"
 #include "ai.hpp"
