@@ -12,7 +12,7 @@ bool MainMenu::init(vec2 screen)
 	// Load shared texture
 	if (!m_texture.is_valid())
 	{
-		if (!m_texture.load_from_file(textures_path("background.png")))
+		if (!m_texture.load_from_file(textures_path("mainMenu.jpg")))
 		{
 			fprintf(stderr, "Failed to load background texture!");
 			return false;
@@ -62,15 +62,16 @@ bool MainMenu::init(vec2 screen)
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 
-	m_scale.x = 0.1725f;
-	m_scale.y = 0.1725f;
+	//m_scale.x = 0.1725f;
+	//m_scale.y = 0.1725f;
+	m_scale.x = 0.04f;
+	m_scale.y = 0.04f;
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
 	////////////////
 	//// TEXT
 	title = new TextRenderer(mainFontBold, 90);
-	//title = new TextRenderer(mainFont, 100);
 	title->setColor({ 0.f,0.f,0.f });
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
 	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
@@ -100,8 +101,8 @@ void MainMenu::draw(const mat3& projection)
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(get_position());
-	//transform_rotate(m_rotation);
-	//transform_scale(m_scale);
+	transform_rotate(m_rotation);
+	transform_scale(m_scale);
 	transform_end();
 
 	// Setting shaders

@@ -33,7 +33,9 @@ public:
 
 	void setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP); // set to -1 if player is not initialized
 	void drawPlayerInfo(const mat3& projection);
-
+	void addNameplate(TextRenderer* td, std::string name);
+	void drawNameplates(const mat3& projection);
+	void clearNameplates();
 
 private:
 	vec2 screen;
@@ -45,4 +47,6 @@ private:
 	int p1HP = -1;
 	int p2Lives = -1;
 	int p2HP = -1;
+
+	std::map<TextRenderer*, std::string> nameplates;
 };

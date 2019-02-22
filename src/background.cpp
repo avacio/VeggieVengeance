@@ -95,6 +95,7 @@ void Background::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	nameplates.clear();
 }
 
 void Background::draw(const mat3& projection)
@@ -150,6 +151,7 @@ void Background::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	//if (p1Lives != -1 && p2Lives != -1) { drawPlayerInfo(projection); }
 	drawPlayerInfo(projection);
+	drawNameplates(projection);
 }
 
 vec2 Background::get_position()const
@@ -200,4 +202,21 @@ void Background::drawPlayerInfo(const mat3& projection) {
 		lives2->renderString(projection, "X");
 		break;
 	}
+}
+
+void Background::addNameplate(TextRenderer* td, std::string name) {
+	nameplates.insert(std::make_pair(td, name));
+}
+void Background::drawNameplates(const mat3& projection) {
+	std::map<TextRenderer*, std::string>::iterator it = nameplates.begin();
+	while (it != nameplates.end())
+	{
+		//std::cout << it->first << " :: " << it->second << std::endl;
+		it->first->renderString(projection, it->second);
+		it++;
+	}
+}
+
+void Background::clearNameplates() {
+	nameplates.clear();
 }

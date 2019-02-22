@@ -137,6 +137,8 @@ void World::destroy()
 	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
+	m_fighters.clear();
+	m_bg.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -277,9 +279,10 @@ bool World::is_over() const
 bool World::spawn_ai(AIType type)
 {
 	AI ai(type);
-	if (ai.init(3))
+	if (ai.init(3, "AI"))
 	{
 		m_ais.emplace_back(ai);
+		m_fighters.emplace_back(ai);
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
@@ -292,23 +295,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	////////////// TEST MODES
 	if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
 	{
-		m_player1.set_in_play(false);
-		m_player2.set_in_play(false);
-		m_ais.clear();
 		set_mode(DEV);
 	}
 	if (action == GLFW_RELEASE && key == GLFW_KEY_2) // TEST
 	{
-		m_player1.set_in_play(false);
-		m_player2.set_in_play(false);
-		m_ais.clear();
 		set_mode(PVC);
 	}
 	if (action == GLFW_RELEASE && key == GLFW_KEY_3) // TEST
 	{
-		m_player1.set_in_play(false);
-		m_player2.set_in_play(false);
-		m_ais.clear();
 		set_mode(PVP);
 	}
 	//////////////////////
@@ -465,6 +459,12 @@ void World::reset()
 }
 
 bool World::set_mode(GameMode mode) {
+	m_player1.set_in_play(false);
+	m_player2.set_in_play(false);
+	m_ais.clear();
+	m_fighters.clear();
+	m_bg.clearNameplates();
+	
 	m_mode = mode;
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
@@ -488,12 +488,14 @@ bool World::set_mode(GameMode mode) {
 
 		if (m_player1.get_in_play())
 		{
-			initSuccess = initSuccess && m_player1.init(1);
+			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
+			m_fighters.emplace_back(m_player1);
 		}
 
 		if (m_player2.get_in_play())
 		{
-			initSuccess = initSuccess && m_player2.init(2);
+			initSuccess = initSuccess && m_player2.init(2, "Spud");
+			m_fighters.emplace_back(m_player2);
 		}
 
 		for (int i = 0; i < MAX_AI; i++)
@@ -510,17 +512,26 @@ bool World::set_mode(GameMode mode) {
 	case PVP: // 2 player
 		m_player1.set_in_play(true);
 		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen);
+		m_fighters.emplace_back(m_player1);
+		m_fighters.emplace_back(m_player2);
 		break;
 	case PVC: // single player
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen);
+		m_fighters.emplace_back(m_player1);
 		break;
 	case TUTORIAL:
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen);
+		m_fighters.emplace_back(m_player1);
 		break;
 	}
+
+	if (mode != MENU)
+		for (Fighter &f : m_fighters)
+			m_bg.addNameplate(f.get_nameplate(), f.get_name());
+
 	return initSuccess;
 }
 
