@@ -3,8 +3,10 @@
 
 Texture Background::bg_texture;
 
-bool Background::init(vec2 screen)
+bool Background::init(vec2 screen, GameMode mode)
 {
+	m_mode = mode;
+
 	// Load shared texture
 	if (!bg_texture.is_valid())
 	{
@@ -79,6 +81,19 @@ bool Background::init(vec2 screen)
 	lives1->setPosition({ 50.f, 180.f });
 	lives2->setPosition({ screen.x-(width*1.05f), 180.f });
 
+	jump = new TextRenderer(mainFont, 44);
+	jump ->setPosition({50.f, 230.f});
+	left = new TextRenderer(mainFont, 44);
+	left ->setPosition({50.f, 280.f});
+	right = new TextRenderer(mainFont, 44);
+	right ->setPosition({50.f, 330.f});
+	crouch = new TextRenderer(mainFont, 44);
+	crouch ->setPosition({50.f, 380.f});
+	reset = new TextRenderer(mainFont, 44);
+	reset ->setPosition({50.f, 430.f});
+	pause = new TextRenderer(mainFont, 44);
+	pause ->setPosition({50.f, 480.f});
+
 	fprintf(stderr, "Loaded text\n");
 
 	return true;
@@ -150,6 +165,10 @@ void Background::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	//if (p1Lives != -1 && p2Lives != -1) { drawPlayerInfo(projection); }
 	drawPlayerInfo(projection);
+
+	if (m_mode == TUTORIAL) {
+		drawTutorialText(projection);
+	}
 }
 
 vec2 Background::get_position()const
@@ -200,4 +219,13 @@ void Background::drawPlayerInfo(const mat3& projection) {
 		lives2->renderString(projection, "X");
 		break;
 	}
+}
+
+void Background::drawTutorialText(const mat3& projection) {
+	jump->renderString(projection, "Q/I: Jump");
+	left->renderString(projection, "A/J: Move left");
+	right->renderString(projection, "D/L: Move right");
+	crouch->renderString(projection, "S/K: Crouch");
+	pause->renderString(projection, "Esc: Pause");
+	reset->renderString(projection, "B: Reset");
 }

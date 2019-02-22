@@ -14,10 +14,16 @@ class Background : public Renderable
 	TextRenderer* health2;
 	TextRenderer* lives1;
 	TextRenderer* lives2;
+	TextRenderer* jump;
+	TextRenderer* left;
+	TextRenderer* right;
+	TextRenderer* crouch;
+	TextRenderer* pause;
+	TextRenderer* reset;
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen);
+	bool init(vec2 screen, GameMode mode);
 
 	// Releases all the associated resources
 	void destroy();
@@ -33,13 +39,14 @@ public:
 
 	void setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP); // set to -1 if player is not initialized
 	void drawPlayerInfo(const mat3& projection);
-
+	void drawTutorialText(const mat3& projection);
 
 private:
 	vec2 screen;
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
+	GameMode m_mode;
 
 	int p1Lives = -1;
 	int p1HP = -1;

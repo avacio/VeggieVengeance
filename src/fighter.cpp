@@ -157,7 +157,9 @@ void Fighter::update(float ms)
 				m_scale.x = -m_scale.x;
 				m_facing_front = true;
 			}
-			move({MOVING_SPEED, 0.0});
+			if (m_position.x < 1150.f) {
+				move({MOVING_SPEED, 0.0});
+			}
 		}
 		if (m_moving_backward)
 		{
@@ -166,7 +168,9 @@ void Fighter::update(float ms)
 				m_scale.x = -m_scale.x;
 				m_facing_front = false;
 			}
-			move({-MOVING_SPEED, 0.0});
+			if (m_position.x > 50.f) {
+				move({-MOVING_SPEED, 0.0});
+			}
 		}
 
 		if (m_crouch_state == CROUCH_PRESSED)
