@@ -8,6 +8,7 @@
 #include "ai.hpp"
 #include "background.hpp"
 #include "textRenderer.hpp"
+#include "mainMenu.hpp"
 
 // stlib
 #include <vector>
@@ -40,6 +41,8 @@ class World
 	// Should the game be over ?
 	bool is_over() const;
 
+	bool set_mode(GameMode mode);
+
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
@@ -54,6 +57,8 @@ class World
 	// Window handle
 	GLFWwindow *m_window;
 
+	vec2 m_screen; // screen vector
+
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -66,6 +71,7 @@ class World
 	TextRenderer *text;
 
 	// Game entities
+	MainMenu m_menu;
 	Background m_bg;
 	Player m_player1;
 	Player m_player2;

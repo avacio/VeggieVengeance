@@ -3,17 +3,13 @@
 #include "common.hpp"
 #include "textRenderer.hpp"
 
-// Background
-class Background : public Renderable
+class MainMenu : public Renderable
 {
 	// Background texture
-	static Texture bg_texture;
+	static Texture m_texture;
 
 	// GUI text renderer
-	TextRenderer* health1;
-	TextRenderer* health2;
-	TextRenderer* lives1;
-	TextRenderer* lives2;
+	TextRenderer* title;
 
 public:
 	// Creates all the associated render resources and default transform
@@ -31,9 +27,10 @@ public:
 	// Sets the new bubble position
 	void set_position(vec2 position);
 
-	void setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP); // set to -1 if player is not initialized
-	void drawPlayerInfo(const mat3& projection);
-
+	void init_buttons();
+	//void change_selection(int direction); // -1 for down, 1 for up
+	void change_selection();
+	GameMode get_selected();
 
 private:
 	vec2 screen;
@@ -41,8 +38,8 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 
-	int p1Lives = -1;
-	int p1HP = -1;
-	int p2Lives = -1;
-	int p2HP = -1;
+	int selectedButtonIndex = -1;
+	std::vector<TextRenderer*> buttons;
+	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
+	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
 };

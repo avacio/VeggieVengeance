@@ -110,67 +110,10 @@ bool World::init(vec2 screen, GameMode mode)
 
 	fprintf(stderr, "Loaded music\n");
 
-	////// TEXT
-	//text = new TextRenderer(mainFont, 40);
+	m_screen = screen; // to pass on screen size to renderables
+	bool initSuccess = set_mode(mode);
 
-	//int text_width = text->get_width_of_string("HEALTH: 100"); // TODO
-	////text->setPosition({ screen.x / 33.3f, screen.y - 10.f });
-	//text->setPosition({ 50.f, 100.f});
-	////text->setPosition({ screen.x / 2.f, screen.y/2.f });
-	////text->setColor({ 255.0f,0.0f,0.0f });
-
-	//fprintf(stderr, "Loaded text\n");
-
-	//spawn fighters below
-	//indicates success of initialization operations, if even one failure occurs it should be false
-	bool initSuccess = true;
-
-	m_mode = mode;
-	if (mode == DEV)
-	{
-		if (MAX_PLAYERS >= 1)
-		{
-			m_player1.set_in_play(true);
-		}
-		if (MAX_PLAYERS >= 2)
-		{
-			m_player2.set_in_play(true);
-		}
-
-		if (m_player1.get_in_play())
-		{
-			initSuccess = initSuccess && m_player1.init(1);
-		}
-
-		if (m_player2.get_in_play())
-		{
-			initSuccess = initSuccess && m_player2.init(2);
-		}
-
-		for (int i = 0; i < MAX_AI; i++)
-		{
-			AIType type = AVOID;
-			if (i % 2 == 0)
-			{
-				type = CHASE;
-			}
-			initSuccess = initSuccess && spawn_ai(type);
-		}
-	}
-	else if (mode == PVP)
-	{
-		m_player1.set_in_play(true);
-		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2);
-	}
-	else if (mode == TUTORIAL)
-	{
-		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID);
-	}
-	m_paused = false;
-
-	return m_water.init() && m_bg.init() && initSuccess;
+	return m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -241,30 +184,12 @@ void World::draw()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 
-	// Updating window title with points
-	/*std::stringstream title_ss;
-	int stock_display1 = 0;
-	int stock_display2 = 0;
-	int health_display1 = 0;
-	int health_display2 = 0;
-	if (m_player1.get_in_play())
-	{
-		health_display1 = m_player1.get_health();
-		stock_display1 = m_player1.get_lives();
-	}
-	if (m_player2.get_in_play())
-	{
-		health_display2 = m_player2.get_health();
-		stock_display2 = m_player2.get_lives();
-	}
-	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " << health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
-	glfwSetWindowTitle(m_window, title_ss.str().c_str());
-*/
+	
 	if (m_mode == DEV || m_mode == PVP)
 	{
 		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
 	}
-	else if (m_mode == TUTORIAL)
+	else if (m_mode == TUTORIAL || m_mode == PVC)
 	{
 		AI ai = m_ais.front();
 		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), ai.get_lives(), ai.get_health());
@@ -296,7 +221,9 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	m_bg.draw(projection_2D);
+	if (m_mode == MENU) { m_menu.draw(projection_2D); }
+	else { m_bg.draw(projection_2D); }
+	
 	if (m_player1.get_in_play())
 	{
 		m_player1.draw(projection_2D);
@@ -325,7 +252,6 @@ void World::draw()
 
 	////////////////////////////
 
-	//text->renderString(projection_2D, "Health: 100");
 
 	m_water.draw(projection_2D);
 	//text->renderString(mat3{}, "Health: 100");
@@ -358,85 +284,127 @@ bool World::spawn_ai(AIType type)
 // On key callback
 void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
-	// Handle player movement here
-	if (m_player1.get_in_play() && !m_paused)
+	////////////// TEST MODES
+	if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
 	{
-		if (action == GLFW_PRESS && key == GLFW_KEY_D)
-			m_player1.set_movement(MOVING_FORWARD);
-		if (action == GLFW_PRESS && key == GLFW_KEY_A)
-			m_player1.set_movement(MOVING_BACKWARD);
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
-			m_player1.set_movement(START_JUMPING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_S)
-			m_player1.set_movement(CROUCHING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_E)
-			m_player1.set_movement(PUNCHING);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+		m_player1.set_in_play(false);
+		m_player2.set_in_play(false);
+		m_ais.clear();
+		set_mode(DEV);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_2) // TEST
+	{
+		m_player1.set_in_play(false);
+		m_player2.set_in_play(false);
+		m_ais.clear();
+		set_mode(PVC);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_3) // TEST
+	{
+		m_player1.set_in_play(false);
+		m_player2.set_in_play(false);
+		m_ais.clear();
+		set_mode(PVP);
+	}
+	//////////////////////
+
+	// MAIN MENU CONTROLS
+	if (m_mode == MENU)
+	{
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_S
+			|| key == GLFW_KEY_UP || key == GLFW_KEY_DOWN))
+		{
+			m_menu.change_selection();
+		}
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+		{
+			reset();
+			//m_ais.clear();
+			set_mode(m_menu.get_selected());
+		}
+
+	}
+	else {
+		// Handle player movement here
+		if (m_player1.get_in_play() && !m_paused)
+		{
+			if (action == GLFW_PRESS && key == GLFW_KEY_D)
+				m_player1.set_movement(MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_A)
+				m_player1.set_movement(MOVING_BACKWARD);
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
+				m_player1.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_S)
+				m_player1.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_E)
+				m_player1.set_movement(PUNCHING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+				m_player1.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
+				m_player1.set_movement(STOP_MOVING_BACKWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+				m_player1.set_movement(RELEASE_CROUCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+				m_player1.set_movement(STOP_PUNCHING);
+		}
+
+		if (m_player2.get_in_play() && !m_paused)
+		{
+			if (action == GLFW_PRESS && key == GLFW_KEY_L)
+				m_player2.set_movement(MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_J)
+				m_player2.set_movement(MOVING_BACKWARD);
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
+				m_player2.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_K)
+				m_player2.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_O)
+				m_player2.set_movement(PUNCHING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
+				m_player2.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
+				m_player2.set_movement(STOP_MOVING_BACKWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+				m_player2.set_movement(RELEASE_CROUCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O)
+				m_player2.set_movement(STOP_PUNCHING);
+		}
+
+		if (m_paused) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 			m_player1.set_movement(STOP_MOVING_BACKWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
-			m_player1.set_movement(RELEASE_CROUCH);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_E)
 			m_player1.set_movement(STOP_PUNCHING);
-	}
-
-	if (m_player2.get_in_play() && !m_paused)
-	{
-		if (action == GLFW_PRESS && key == GLFW_KEY_L)
-			m_player2.set_movement(MOVING_FORWARD);
-		if (action == GLFW_PRESS && key == GLFW_KEY_J)
-			m_player2.set_movement(MOVING_BACKWARD);
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
-			m_player2.set_movement(START_JUMPING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_K)
-			m_player2.set_movement(CROUCHING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_O)
-			m_player2.set_movement(PUNCHING);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 			m_player2.set_movement(STOP_MOVING_FORWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_K)
-			m_player2.set_movement(RELEASE_CROUCH);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_O)
 			m_player2.set_movement(STOP_PUNCHING);
-	}
-
-	if (m_paused) {
-		m_player1.set_movement(STOP_MOVING_FORWARD);
-		m_player1.set_movement(STOP_MOVING_BACKWARD);
-		m_player1.set_movement(STOP_PUNCHING);
-		m_player2.set_movement(STOP_MOVING_FORWARD);
-		m_player2.set_movement(STOP_MOVING_BACKWARD);
-		m_player2.set_movement(STOP_PUNCHING);
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
-	{
-		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !m_paused)
-	{
-		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
-	}
-
-	// Pausing and resuming game
-	if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
-		if (m_player1.get_in_play() && m_player1.get_crouch_state() == IS_CROUCHING) {
-			m_player1.set_crouch_state(CROUCH_RELEASED);
 		}
-			
-		if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
-			m_player2.set_crouch_state(CROUCH_RELEASED);
-		}
-		m_paused = !m_paused;
-	}
 
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_B)
-	{
-		reset();
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
+		{
+			m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
+		}
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !m_paused)
+		{
+			m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
+		}
+
+		// Pausing and resuming game
+		if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
+			if (m_player1.get_in_play() && m_player1.get_crouch_state() == IS_CROUCHING) {
+				m_player1.set_crouch_state(CROUCH_RELEASED);
+			}
+
+			if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
+				m_player2.set_crouch_state(CROUCH_RELEASED);
+			}
+			m_paused = !m_paused;
+		}
+
+		// Resetting game
+		if (action == GLFW_RELEASE && key == GLFW_KEY_B)
+		{
+			reset();
+		}
 	}
 
 	// Music control
@@ -452,8 +420,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
-	if (m_mode == DEV)
-	{
+	switch (m_mode) {
+	case DEV:
 		m_player1.reset(1);
 		m_player2.reset(2);
 
@@ -461,21 +429,94 @@ void World::reset()
 		{
 			ai.reset(3);
 		}
-	}
-	else if (m_mode == PVP)
-	{
+		break;
+	case PVP:
 		m_player1.reset(1);
 		m_player2.reset(2);
-	}
-	else if (m_mode == TUTORIAL)
-	{
+		break;
+	case PVC:
 		m_player1.reset(1);
 
 		for (AI ai : m_ais)
 		{
 			ai.reset(3);
 		}
+		break;
+	case TUTORIAL:
+		m_player1.reset(1);
+
+		for (AI ai : m_ais)
+		{
+			ai.reset(3);
+		}
+		break;
+	case MENU:	// TESTING TRANSITIONS, REDUNDANT NOW
+		m_player1.set_in_play(false);
+		m_ais.clear();
+		//set_mode(DEV);
+		//set_mode(PVC);
+		break;
 	}
+}
+
+bool World::set_mode(GameMode mode) {
+	m_mode = mode;
+	bool initSuccess = true;
+	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
+
+	switch (mode) {
+	case MENU:
+		m_player1.set_in_play(true); // needed to make AI respond
+		spawn_ai(AVOID);
+		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
+		initSuccess = initSuccess && m_menu.init(m_screen);
+		break;
+	case DEV:
+		if (MAX_PLAYERS >= 1)
+		{
+			m_player1.set_in_play(true);
+		}
+		if (MAX_PLAYERS >= 2)
+		{
+			m_player2.set_in_play(true);
+		}
+
+		if (m_player1.get_in_play())
+		{
+			initSuccess = initSuccess && m_player1.init(1);
+		}
+
+		if (m_player2.get_in_play())
+		{
+			initSuccess = initSuccess && m_player2.init(2);
+		}
+
+		for (int i = 0; i < MAX_AI; i++)
+		{
+			AIType type = AVOID;
+			if (i % 2 == 0)
+			{
+				type = CHASE;
+			}
+			initSuccess = initSuccess && spawn_ai(type);
+		}
+		initSuccess = initSuccess && m_bg.init(m_screen);
+		break;
+	case PVP: // 2 player
+		m_player1.set_in_play(true);
+		m_player2.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2) && m_bg.init(m_screen);
+		break;
+	case PVC: // single player
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		break;
+	case TUTORIAL:
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		break;
+	}
+	return initSuccess;
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
