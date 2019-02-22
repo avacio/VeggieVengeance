@@ -3,8 +3,10 @@
 
 Texture Background::bg_texture;
 
-bool Background::init()
+bool Background::init(vec2 screen, GameMode mode)
 {
+	m_mode = mode;
+
 	// Load shared texture
 	if (!bg_texture.is_valid())
 	{
@@ -14,6 +16,7 @@ bool Background::init()
 			return false;
 		}
 	}
+	this->screen = screen;
 
 	// The position corresponds to the center of the texture
 	float wr = bg_texture.width * 3.5f;
@@ -62,6 +65,62 @@ bool Background::init()
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
+	////////////////
+	//// TEXT
+	health1 = new TextRenderer(mainFont, 44);
+	health2 = new TextRenderer(mainFont, 44);
+	int width = health1->get_width_of_string("HP: 100"); // TODO
+	health1->setPosition({ 50.f, 100.f });
+	health2->setPosition({ screen.x-(width*1.15f), 100.f });
+
+	lives1 = new TextRenderer(mainFont, 70);
+	lives2 = new TextRenderer(mainFont, 70);
+	width = lives2->get_width_of_string("XXX");
+	lives1->setPosition({ 50.f, 180.f });
+	lives2->setPosition({ screen.x-(width*1.05f), 180.f });
+
+	isPausedText = new TextRenderer(mainFontBold, 60);
+	width = isPausedText->get_width_of_string("PAUSED");
+	isPausedText->setPosition({ screen.x/2.f - width*0.32f, 150.f });
+	isPausedText->setColor({ 0.f,0.f,0.f });
+
+	jump = new TextRenderer(mainFont, 44);
+	jump->setPosition({50.f, 230.f});
+	left = new TextRenderer(mainFont, 44);
+	left->setPosition({50.f, 280.f});
+	right = new TextRenderer(mainFont, 44);
+	right->setPosition({50.f, 330.f});
+	crouch = new TextRenderer(mainFont, 44);
+	crouch->setPosition({50.f, 380.f});
+	reset = new TextRenderer(mainFont, 44);
+	reset->setPosition({50.f, 430.f});
+	pause = new TextRenderer(mainFont, 44);
+	pause->setPosition({50.f, 480.f});
+	ability1 = new TextRenderer(mainFont, 44);
+	width = ability1->get_width_of_string("Q/U:SpecialAbility");
+	ability1->setPosition({screen.x-(width*1.15f), 230.f});
+	ability2 = new TextRenderer(mainFont, 44);
+	width = ability2->get_width_of_string("R/P:SpecialAbility");
+	ability2->setPosition({screen.x-(width*1.15f), 280.f});
+	punch = new TextRenderer(mainFont, 44);
+	width = punch->get_width_of_string("E/O: Punch");
+	punch->setPosition({screen.x-(width*1.15f), 330.f});
+	pauseMusic = new TextRenderer(mainFont, 44);
+	width = pauseMusic->get_width_of_string("End: Pausemusic");
+	pauseMusic->setPosition({screen.x-(width*1.15f), 380.f});
+	resumeMusic = new TextRenderer(mainFont, 44);
+	width = resumeMusic->get_width_of_string("Home:Resumemusic");
+	resumeMusic->setPosition({screen.x-(width*1.15f), 430.f});
+	increaseVolume = new TextRenderer(mainFont, 44);
+	width = increaseVolume->get_width_of_string("PageUp: Inc.Volume");
+	increaseVolume->setPosition({screen.x-(width*1.15f), 480.f});
+	decreaseVolume = new TextRenderer(mainFont, 44);
+	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
+	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
+
+
+	fprintf(stderr, "Loaded text\n");
+
 	return true;
 }
 
@@ -76,6 +135,7 @@ void Background::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	nameplates.clear();
 }
 
 void Background::draw(const mat3& projection)
@@ -84,7 +144,7 @@ void Background::draw(const mat3& projection)
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
 	transform_begin();
 	transform_translate(get_position());
-	transform_rotate(m_rotation);
+	//transform_rotate(m_rotation);
 	transform_scale(m_scale);
 	transform_end();
 
@@ -125,9 +185,16 @@ void Background::draw(const mat3& projection)
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
+	/////////////////////////
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	drawPlayerInfo(projection);
+
+	if (m_mode == TUTORIAL || m_paused) {
+		drawTutorialText(projection);
+	}
+	drawNameplates(projection);
 }
 
 vec2 Background::get_position()const
@@ -139,4 +206,84 @@ vec2 Background::get_position()const
 void Background::set_position(vec2 position)
 {
 	m_position = position;
+}
+
+void Background::setPaused(bool isPaused) {
+	m_paused = isPaused;
+}
+
+
+void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
+	this->p1Lives = p1Lives;
+	this->p1HP = p1HP;
+	this->p2Lives = p2Lives;
+	this->p2HP = p2HP;
+}
+
+void Background::drawPlayerInfo(const mat3& projection) {
+	std::stringstream ss1, ss2;
+	ss1 << "HP: " << p1HP;
+	ss2 << "HP: " << p2HP;
+
+	health1->renderString(projection, ss1.str());
+	health2->renderString(projection, ss2.str());
+
+	switch (p1Lives) {
+	case 3:
+		lives1->renderString(projection, "XXX");
+		break;
+	case 2:
+		lives1->renderString(projection, "XX");
+		break;
+	case 1:
+		lives1->renderString(projection, "X");
+		break;
+	}
+	switch (p2Lives) {
+	case 3:
+		lives2->renderString(projection, "XXX");
+		break;
+	case 2:
+		lives2->renderString(projection, "XX");
+		break;
+	case 1:
+		lives2->renderString(projection, "X");
+		break;
+	}
+}
+
+void Background::drawTutorialText(const mat3& projection) {
+	jump->renderString(projection, "W/I: Jump");
+	left->renderString(projection, "A/J: Move left");
+	right->renderString(projection, "D/L: Move right");
+	crouch->renderString(projection, "S/K: Crouch");
+	pause->renderString(projection, "Esc: Pause");
+	reset->renderString(projection, "B: Reset");
+	ability1->renderString(projection, "Q/U: Special Ability");
+	ability2->renderString(projection, "R/P: Special Ability");
+	punch->renderString(projection, "E/O: Punch");
+	pauseMusic->renderString(projection, "End: Pause music");
+	resumeMusic->renderString(projection, "Home: Resume music");
+	increaseVolume->renderString(projection, "Page Up: Inc. volume");
+	decreaseVolume->renderString(projection, "Page Down: Dec. volume");
+
+	if (m_paused) {
+		isPausedText->renderString(projection, "PAUSED");
+	}
+}
+void Background::addNameplate(TextRenderer* td, std::string name) {
+	nameplates.insert(std::make_pair(td, name));
+}
+void Background::drawNameplates(const mat3& projection) {
+	std::map<TextRenderer*, std::string>::iterator it = nameplates.begin();
+	while (it != nameplates.end())
+	{
+		//std::cout << it->first << " :: " << it->second << std::endl;
+		it->first->renderString(projection, it->second);
+		it++;
+	}
+}
+
+void Background::clearNameplates() {
+	nameplates.clear();
 }

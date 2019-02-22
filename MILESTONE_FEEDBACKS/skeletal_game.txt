@@ -1,0 +1,13 @@
+Team 9
+Grade: 75
+Creative:
++10 Player sprite distorts and changes color when getting hit (implemented via shader).
++10 Multiplayer.
+
+Issue/Missing:
+-5 The background is the default blank one, while the milestone requirement asks for a working background.
+-15 No collision detection.
+
+Feedback:
+It’s exciting to see a fighting game out of all the platformers. To make the game minimally playable, prioritize the collision handling and UI for visualizing the health states. Though the AI can be an interesting topic, it may be safer to save it for the future and first make a playable prototype.
+

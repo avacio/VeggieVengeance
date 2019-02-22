@@ -7,11 +7,13 @@
 
 Texture Fighter::fighter_texture;
 
+
 Fighter::Fighter(unsigned int id) : m_id(id) {
 
 }
 
-bool Fighter::init(int init_position)
+bool Fighter::init(int init_position, std::string name)
+
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -82,18 +84,23 @@ bool Fighter::init(int init_position)
 	m_speed = 5;
 	m_strength = 5;
 	m_lives = STARTING_LIVES;
-	if (init_position == 1)
-	{
-		m_position = {250.f, 525.f};
+	m_vertical_velocity = 0.0;
+	m_name = name;
+	
+	switch (init_position) {
+	case 1:
+		m_position = { 250.f, 525.f };
+		break;
+	case 2:
+		m_position = { 950.f, 525.f };
+		break;
+	default:
+		m_position = { 550.f, 525.f };
+		break;
 	}
-	else if (init_position == 2)
-	{
-		m_position = {950.f, 525.f};
-	}
-	else
-	{
-		m_position = {550.f, 525.f};
-	}
+
+	m_nameplate = new TextRenderer(mainFont, 25);
+	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
 
 	return true;
 }
@@ -113,23 +120,14 @@ void Fighter::destroy()
 
 void Fighter::update(float ms)
 {
-	float MOVING_SPEED = 5.0;
-	//!!! cant use ms for jumping until we have collision since ms
-	//is inconsistent per update and will result in Fighter ending u
-	//at a different ypos than at initially
-	float JUMP_SPEED = 5.0;
+	const float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
 	{
 		m_is_alive = false;
 		m_lives--;
-		//fall to ground if still in the air
-		if (m_jump_counter > 0)
-		{
-			m_jump_state = FALLING;
-		}
-		//if stock remaining, set the respawn timer
+
 		if (m_lives > 0)
 		{
 			m_respawn_timer = RESPAWN_TIME;
@@ -158,14 +156,7 @@ void Fighter::update(float ms)
 		}
 	}
 
-	//Fall regardless whether alive or not
-	if (m_jump_state == FALLING)
-	{
-		m_jump_counter--;
-		move({0.0, JUMP_SPEED});
-		if (m_jump_counter <= 0)
-			m_jump_state = GROUNDED;
-	}
+	jump_update();
 
 	if (m_is_alive)
 	{
@@ -176,7 +167,9 @@ void Fighter::update(float ms)
 				m_scale.x = -m_scale.x;
 				m_facing_front = true;
 			}
-			move({MOVING_SPEED, 0.0});
+			if (m_position.x < 1150.f) {
+				move({MOVING_SPEED, 0.0});
+			}
 		}
 		if (m_moving_backward)
 		{
@@ -185,14 +178,9 @@ void Fighter::update(float ms)
 				m_scale.x = -m_scale.x;
 				m_facing_front = false;
 			}
-			move({-MOVING_SPEED, 0.0});
-		}
-		if (m_jump_state == JUMPING)
-		{
-			m_jump_counter++;
-			move({0.0, -JUMP_SPEED});
-			if (m_jump_counter >= MAX_JUMP)
-				m_jump_state = FALLING;
+			if (m_position.x > 50.f) {
+				move({-MOVING_SPEED, 0.0});
+			}
 		}
 
 		if (m_crouch_state == CROUCH_PRESSED)
@@ -269,6 +257,9 @@ void Fighter::draw(const mat3 &projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	
+	int sWidth = m_nameplate->get_width_of_string(m_name);
+	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
 vec2 Fighter::get_position() const
@@ -308,8 +299,7 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case START_JUMPING:
-		m_jump_state = JUMPING;
-		m_is_idle = false;
+		start_jumping();
 		break;
 	case CROUCHING:
 		m_crouch_state = CROUCH_PRESSED;
@@ -360,6 +350,50 @@ int Fighter::get_lives() const
 {
 	return m_lives;
 }
+TextRenderer* Fighter::get_nameplate() const {
+	return m_nameplate;
+}
+std::string Fighter::get_name() const {
+	return m_name;
+}
+
+void Fighter::start_jumping()
+{
+	if (!m_is_jumping && m_is_alive)
+	{
+		m_is_jumping = true;
+		m_is_idle = false;
+		m_vertical_velocity = INITIAL_VELOCITY;
+	}
+}
+
+void Fighter::jump_update()
+{
+	if (m_is_jumping)
+	{
+		move({0.0, -m_vertical_velocity});
+		m_vertical_velocity += ACCELERATION;
+	}
+
+	if (m_vertical_velocity < -INITIAL_VELOCITY)
+	{
+		m_is_jumping = false;
+		m_vertical_velocity = 0.0;
+	}
+}
+
+bool Fighter::is_jumping() const
+{
+	return m_is_jumping;
+}
+
+int Fighter::get_crouch_state() {
+	return m_crouch_state;
+}
+
+void Fighter::set_crouch_state(CrouchState cs) {
+	m_crouch_state = cs;
+}
 
 int Fighter::get_alive() const
 {
@@ -371,12 +405,30 @@ bool Fighter::get_facing_front() const
 	return m_facing_front;
 }
 
-JumpState Fighter::get_jumpstate() const
-{
-	return m_jump_state;
-}
-
 unsigned int Fighter::get_id() const
 {
 	return m_id;
+}
+
+void Fighter::reset(int init_position)
+{
+	m_health = MAX_HEALTH;
+	m_lives = STARTING_LIVES;
+	m_is_alive = true;
+	m_rotation = 0;
+	m_is_jumping = false;
+	m_vertical_velocity = 0;
+
+	if (init_position == 1)
+	{
+		m_position = {250.f, 525.f};
+	}
+	else if (init_position == 2)
+	{
+		m_position = {950.f, 525.f};
+	}
+	else
+	{
+		m_position = {550.f, 525.f};
+	}
 }

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "textRenderer.hpp"
 #include <random>
 
-// Salmon enemy
 class Fighter : public Renderable
 {
 	// Shared between all bubbles, no need to load one for each instance
@@ -12,7 +12,7 @@ class Fighter : public Renderable
   public:
 	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
-	bool init(int init_position);
+	bool init(int init_position, std::string name);
 
 	// Releases all the associated resources
 	void destroy();
@@ -21,7 +21,6 @@ class Fighter : public Renderable
 	// ms represents the number of milliseconds elapsed from the previous update() call
 	void update(float ms);
 
-	// Renders the salmon
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
@@ -42,8 +41,9 @@ class Fighter : public Renderable
 
 	// Returns the current health
 	int get_health() const;
-
 	int get_lives() const;
+	TextRenderer* get_nameplate() const;
+	std::string get_name() const;
 
 	int get_alive() const;
 
@@ -52,17 +52,38 @@ class Fighter : public Renderable
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
 
-	JumpState get_jumpstate() const;
+	void start_jumping();
 
 	unsigned int get_id() const;
 
-  private:
+	void jump_update();
+
+	bool is_jumping() const;
+
+	int get_crouch_state();
+
+	void set_crouch_state(CrouchState cs);
+
+	void reset(int init_position);
+
+  protected:
+  	const int MAX_HEALTH = 100;
+	const int STARTING_LIVES = 3;
+
+	int m_health;
+	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
+
+	std::string m_name;
+	TextRenderer* m_nameplate;
+
+  private:
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
-	int m_health;
+	
 	int m_speed; // each fighter has different speed and strength stats
 	int m_strength;
+	float m_vertical_velocity;
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
@@ -71,22 +92,19 @@ class Fighter : public Renderable
 	bool m_moving_backward = false;
 	bool m_is_punching = false;
 	bool m_is_hurt = false;
-
-	//lives system
-	int m_lives; //counter for lives/stock remaining
+	bool m_is_jumping = false;
+	
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
-	JumpState m_jump_state = GROUNDED;
-	int m_jump_counter = 0;
 	CrouchState m_crouch_state = NOT_CROUCHING;
-	//float angle;
 
 	//CONST VALUES
 	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
-	const int STARTING_LIVES = 3;
-	const int MAX_HEALTH = 100;
+	
+	const float INITIAL_VELOCITY = 10.0;
+	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
 
 	const unsigned int m_id; //unique identifier given when created
 

@@ -2,10 +2,9 @@
 
 #include "common.hpp"
 
-
 class Water : public Renderable
 {
-public:
+  public:
 	// Creates all the associated render resources and default transform
 	bool init();
 
@@ -13,10 +12,10 @@ public:
 	void destroy();
 
 	// Renders the water
-	void draw(const mat3& projection)override;
+	void draw(const mat3 &projection) override;
 
 	void set_is_wavy(bool is_wavy);
 
-private:
+  private:
 	bool m_is_wavy;
 };

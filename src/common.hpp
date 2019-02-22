@@ -2,6 +2,7 @@
 
 // stlib
 #include <fstream> // stdout, stderr..
+#include <sstream>
 
 // glfw
 #define NOMINMAX
@@ -19,6 +20,11 @@
 #define textures_path(name) data_path "/textures/" name
 #define audio_path(name) data_path "/audio/" name
 #define mesh_path(name) data_path "/meshes/" name
+
+std::string fonts_path(std::string name);
+static const std::string mainFont = "HABESHAPIXELS.ttf";
+static const std::string mainFontBold = "HABESHAPIXELS-Bold.ttf";
+
 
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..
@@ -73,6 +79,7 @@ struct Texture
 
 	// Loads texture from file specified by path
 	bool load_from_file(const char *path);
+
 	// Screen texture
 	bool create_from_screen(GLFWwindow const *const window);
 	bool is_valid() const; // True if texture is valid
@@ -127,12 +134,6 @@ enum AIType
 	AVOID
 };
 
-enum JumpState
-{
-	JUMPING,
-	FALLING,
-	GROUNDED
-};
 enum CrouchState
 {
 	NOT_CROUCHING,
@@ -154,9 +155,23 @@ enum FighterMovementState
 	STOP_PUNCHING = 8
 };
 
+
 enum DeletionTime
 {
 	AFTER_UPDATE,
 	AFTER_HIT,
 	AFTER_OUT_OF_BOUNDS
 };
+
+enum GameMode
+{
+	MENU = 0,
+	PVC, // single player
+	PVP, // 2 player
+	TUTORIAL,
+	DEV
+};
+
+// For console log printing
+static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+

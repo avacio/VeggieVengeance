@@ -9,6 +9,8 @@
 #include "background.hpp"
 #include "damageEffect.hpp"
 #include "boundingbox.hpp"
+#include "textRenderer.hpp"
+#include "mainMenu.hpp"
 
 
 // stlib
@@ -28,7 +30,7 @@ class World
 	~World();
 
 	// Creates a window, sets up events and begins the game
-	bool init(vec2 screen);
+	bool init(vec2 screen, GameMode mode);
 
 	// Releases all associated resources
 	void destroy();
@@ -42,9 +44,14 @@ class World
 	// Should the game be over ?
 	bool is_over() const;
 
+	bool set_mode(GameMode mode);
+	void set_paused(bool isPaused);
+
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
+
+	void reset();
 
 	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
@@ -58,6 +65,8 @@ class World
 	// Window handle
 	GLFWwindow *m_window;
 
+	vec2 m_screen; // screen vector
+
 	// Screen texture
 	// The draw loop first renders to this texture, then it is used for the water shader
 	GLuint m_frame_buffer;
@@ -66,20 +75,20 @@ class World
 	// Water effect
 	Water m_water;
 
-	// GUI text renderer
-
 	// Game entities
+	MainMenu m_menu;
 	Background m_bg;
 	Player m_player1;
 	Player m_player2;
 	std::vector<AI> m_ais;
 	std::vector<DamageEffect> m_damageEffects;
-
-	float m_current_speed;
+	//float m_current_speed;
+	std::vector<Fighter> m_fighters; // all fighters including AIs
 
 	Mix_Music *m_background_music;
-	Mix_Chunk *m_salmon_dead_sound;
-	Mix_Chunk *m_salmon_eat_sound;
+
+	GameMode m_mode;
+	bool m_paused;
 
 	// C++ rng
 	std::default_random_engine m_rng;

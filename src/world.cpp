@@ -30,14 +30,6 @@ World::World() : m_player1(1), m_player2(2)
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
-	if (MAX_PLAYERS >= 1)
-	{	
-		m_player1.set_in_play(true);
-	}
-	if (MAX_PLAYERS >= 2)
-	{
-		m_player2.set_in_play(true);
-	}
 }
 
 World::~World()
@@ -45,7 +37,7 @@ World::~World()
 }
 
 // World initialization
-bool World::init(vec2 screen)
+bool World::init(vec2 screen, GameMode mode)
 {
 	//-------------------------------------------------------------------------
 	// GLFW / OGL Initialization
@@ -65,7 +57,7 @@ bool World::init(vec2 screen)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
-	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "A1 Assignment", nullptr, nullptr);
+	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "VEGGIE VENGEANCE", nullptr, nullptr);
 	if (m_window == nullptr)
 		return false;
 
@@ -107,15 +99,11 @@ bool World::init(vec2 screen)
 	}
 
 	m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
-	m_salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav"));
-	m_salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav"));
 
-	if (m_background_music == nullptr || m_salmon_dead_sound == nullptr || m_salmon_eat_sound == nullptr)
+	if (m_background_music == nullptr)
 	{
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-				audio_path("Abandoned Hopes.wav"),
-				audio_path("salmon_dead.wav"),
-				audio_path("salmon_eat.wav"));
+		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
+				audio_path("Abandoned Hopes.wav"));
 		return false;
 	}
 
@@ -124,33 +112,10 @@ bool World::init(vec2 screen)
 
 	fprintf(stderr, "Loaded music\n");
 
-	m_current_speed = 1.f;
+	m_screen = screen; // to pass on screen size to renderables
+	bool initSuccess = set_mode(mode);
 
-	//spawn fighters below
-	//indicates success of initialization operations, if even one failure occurs it should be false
-	bool initSuccess = true;
-
-	if (m_player1.get_in_play())
-	{
-		initSuccess = initSuccess && m_player1.init(1);
-	}
-
-	if (m_player2.get_in_play())
-	{
-		initSuccess = initSuccess && m_player2.init(2);
-	}
-
-	for (int i = 0; i < MAX_AI; i++)
-	{
-		AIType type = AVOID;
-		if (i % 2 == 0)
-		{
-			type = CHASE;
-		}
-		initSuccess = initSuccess && spawn_ai(type);
-	}
-
-	return m_water.init() && m_bg.init() && initSuccess;
+	return m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -160,10 +125,6 @@ void World::destroy()
 
 	if (m_background_music != nullptr)
 		Mix_FreeMusic(m_background_music);
-	if (m_salmon_dead_sound != nullptr)
-		Mix_FreeChunk(m_salmon_dead_sound);
-	if (m_salmon_eat_sound != nullptr)
-		Mix_FreeChunk(m_salmon_eat_sound);
 
 	Mix_CloseAudio();
 
@@ -178,6 +139,8 @@ void World::destroy()
 	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
+	m_fighters.clear();
+	m_bg.destroy();
 	glfwDestroyWindow(m_window);
 }
 
@@ -191,73 +154,81 @@ bool World::update(float elapsed_ms)
 	// Updating all entities, making the entities
 	// faster based on current
 
-	if (m_player1.get_in_play() && m_player1.get_alive()) {
-		m_player1.set_hurt(false);
+	if (m_paused) {
+		return true;
 	}
-	if (m_player2.get_in_play() && m_player2.get_alive()) {
-		m_player2.set_hurt(false);
-	}
-	for (int i = 0; i < m_ais.size(); i++) {
-		if (m_ais[i].get_alive()) {
-			m_ais[i].set_hurt(false);
+	if (!m_paused) {
+		//mark alive players + ai as not having a collision applied before collision check
+		if (m_player1.get_in_play() && m_player1.get_alive()) {
+			m_player1.set_hurt(false);
 		}
-	}
-
-	//damage effect collision loop
-	for (int i = 0; i < m_damageEffects.size(); i++) {
-		if (m_player1.get_in_play()) {
-			BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-			if (m_damageEffects[i].id != m_player1.get_id() && check_collision(m_damageEffects[i].bounding_box, *b1)) {
-				//incur damage
-				m_player1.decrease_health(m_damageEffects[i].damage);
-				m_player1.set_hurt(true);
+		if (m_player2.get_in_play() && m_player2.get_alive()) {
+			m_player2.set_hurt(false);
+		}
+		for (int i = 0; i < m_ais.size(); i++) {
+			if (m_ais[i].get_alive()) {
+				m_ais[i].set_hurt(false);
 			}
-			delete b1;
 		}
-		if (m_player2.get_in_play()) {
-			BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-			if (m_damageEffects[i].id != m_player2.get_id() && check_collision(m_damageEffects[i].bounding_box, *b2)) {
-				//incur damage
-				m_player2.decrease_health(m_damageEffects[i].damage);
-				m_player2.set_hurt(true);
+
+		//damage effect collision loop
+		for (int i = 0; i < m_damageEffects.size(); i++) {
+			if (m_player1.get_in_play()) {
+				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
+				if (m_damageEffects[i].id != m_player1.get_id() && check_collision(m_damageEffects[i].bounding_box, *b1)) {
+					//incur damage
+					m_player1.decrease_health(m_damageEffects[i].damage);
+					m_player1.set_hurt(true);
+				}
+				delete b1;
 			}
-			delete b2;
-		}
-		for (int j = 0; j < m_ais.size(); j++) {
-			BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
-			if (m_damageEffects[i].id != m_ais[j].get_id() && check_collision(m_damageEffects[i].bounding_box, *b3)) {
-				//incur damage
-				m_ais[j].decrease_health(m_damageEffects[i].damage);
-				m_ais[j].set_hurt(true);
+			if (m_player2.get_in_play()) {
+				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
+				if (m_damageEffects[i].id != m_player2.get_id() && check_collision(m_damageEffects[i].bounding_box, *b2)) {
+					//incur damage
+					m_player2.decrease_health(m_damageEffects[i].damage);
+					m_player2.set_hurt(true);
+				}
+				delete b2;
 			}
-			delete b3;
+			for (int j = 0; j < m_ais.size(); j++) {
+				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
+				if (m_damageEffects[i].id != m_ais[j].get_id() && check_collision(m_damageEffects[i].bounding_box, *b3)) {
+					//incur damage
+					m_ais[j].decrease_health(m_damageEffects[i].damage);
+					m_ais[j].set_hurt(true);
+				}
+				delete b3;
+			}
+		}
+
+		//damage effect removal loop
+		for (int i = 0; i < m_damageEffects.size(); i++) {
+			if (m_damageEffects[i].delete_when == AFTER_UPDATE ||
+				(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter)) {
+				//remove from list
+				m_damageEffects.erase(m_damageEffects.begin() + i);
+				i--;
+			}
+		}
+
+		//update players + ai
+		if (m_player1.get_in_play())
+		{
+			m_player1.update(elapsed_ms);
+		}
+		if (m_player2.get_in_play())
+		{
+			m_player2.update(elapsed_ms);
+		}
+
+		if (m_player1.get_in_play())
+		{
+			for (auto &ai : m_ais)
+				ai.update(elapsed_ms * 0.5, m_player1.get_position());
 		}
 	}
-
-	//damage effect removal loop
-	for (int i = 0; i < m_damageEffects.size(); i++) {
-		if (m_damageEffects[i].delete_when == AFTER_UPDATE ||
-			(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter)) {
-			//remove from list
-			m_damageEffects.erase(m_damageEffects.begin() + i);
-			i--;
-		}
-	}
-
-	if (m_player1.get_in_play())
-	{
-		m_player1.update(elapsed_ms);
-	}
-	if (m_player2.get_in_play())
-	{
-		m_player2.update(elapsed_ms);
-	}
-
-	if (m_player1.get_in_play())
-	{
-		for (auto &ai : m_ais)
-			ai.update(elapsed_ms * m_current_speed, m_player1.get_position());
-	}
+	
 
 	return true;
 }
@@ -273,24 +244,16 @@ void World::draw()
 	int w, h;
 	glfwGetFramebufferSize(m_window, &w, &h);
 
-	// Updating window title with points
-	std::stringstream title_ss;
-	int stock_display1 = 0;
-	int stock_display2 = 0;
-	int health_display1 = 0;
-	int health_display2 = 0;
-	if (m_player1.get_in_play())
+	
+	if (m_mode == DEV || m_mode == PVP)
 	{
-		health_display1 = m_player1.get_health();
-		stock_display1 = m_player1.get_lives();
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
 	}
-	if (m_player2.get_in_play())
+	else if (m_mode == TUTORIAL || m_mode == PVC)
 	{
-		health_display2 = m_player2.get_health();
-		stock_display2 = m_player2.get_lives();
+		AI ai = m_ais.front();
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), ai.get_lives(), ai.get_health());
 	}
-	title_ss << "Veggie Vengeance  -  Player 1's Stock: " << stock_display1 << " Health: " << health_display1 << " || Player 2's Stock: " << stock_display2 << " Health: " << health_display2;
-	glfwSetWindowTitle(m_window, title_ss.str().c_str());
 
 	/////////////////////////////////////
 	// First render to the custom framebuffer
@@ -318,18 +281,24 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	m_bg.draw(projection_2D);
-	if (m_player1.get_in_play())
-	{
-		m_player1.draw(projection_2D);
-	}
-	if (m_player2.get_in_play())
-	{
-		m_player2.draw(projection_2D);
-	}
-	for (auto &fighter : m_ais)
-		fighter.draw(projection_2D);
+	if (m_mode == MENU) { 
+		m_menu.draw(projection_2D); 
+		for (auto &fighter : m_ais)
+			fighter.draw(projection_2D);
+	} else {
+		m_bg.draw(projection_2D);
 
+		if (m_player1.get_in_play())
+		{
+			m_player1.draw(projection_2D);
+		}
+		if (m_player2.get_in_play())
+		{
+			m_player2.draw(projection_2D);
+		}
+		for (auto &fighter : m_ais)
+			fighter.draw(projection_2D);
+	}
 	/////////////////////
 	// Truly render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -345,7 +314,12 @@ void World::draw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
+	////////////////////////////
+
+
 	m_water.draw(projection_2D);
+	//text->renderString(mat3{}, "Health: 100");
+	//text->renderString(projection_2D, "Health: 100");
 
 	//////////////////
 	// Presenting
@@ -363,11 +337,12 @@ bool World::spawn_ai(AIType type)
 {
 	//intialize ai with next ID and provided type
 	AI ai(idCounter, type);
-	if (ai.init(3))
+	if (ai.init(3, "AI"))
 	{
 		//assure the next ID given is unique
 		idCounter++;
 		m_ais.emplace_back(ai);
+		m_fighters.emplace_back(ai);
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
@@ -377,93 +352,260 @@ bool World::spawn_ai(AIType type)
 // On key callback
 void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
-	// Handle player movement here
-	if (m_player1.get_in_play())
+	////////////// TEST MODES
+	if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
 	{
-		if (action == GLFW_PRESS && key == GLFW_KEY_D)
-			m_player1.set_movement(0);
-		if (action == GLFW_PRESS && key == GLFW_KEY_A)
-			m_player1.set_movement(1);
-		if (action == GLFW_PRESS && key == GLFW_KEY_W && m_player1.get_jumpstate() == GROUNDED)
-			m_player1.set_movement(2);
-		if (action == GLFW_PRESS && key == GLFW_KEY_S)
-			m_player1.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_E) {
-			DamageEffect* p = punch(m_player1);
-			m_damageEffects.push_back(*p);
+		set_mode(DEV);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_2) // TEST
+	{
+		set_mode(PVC);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_3) // TEST
+	{
+		set_mode(PVP);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_4) // TEST
+	{
+		m_player1.set_in_play(false);
+		m_player2.set_in_play(false);
+		m_ais.clear();
+		set_mode(TUTORIAL);
+	}
+	//////////////////////
+
+	// MAIN MENU CONTROLS
+	if (m_mode == MENU)
+	{
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+		{
+			m_menu.change_selection(false);
 		}
-		if (action == GLFW_RELEASE && key == GLFW_KEY_D)
-			m_player1.set_movement(5);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_A)
-			m_player1.set_movement(6);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_S)
-			m_player1.set_movement(7);
-		//if (action == GLFW_RELEASE && key == GLFW_KEY_E)
-			//m_player1.set_movement(8);
-	}
-
-	if (m_player2.get_in_play())
-	{
-		if (action == GLFW_PRESS && key == GLFW_KEY_L)
-			m_player2.set_movement(0);
-		if (action == GLFW_PRESS && key == GLFW_KEY_J)
-			m_player2.set_movement(1);
-		if (action == GLFW_PRESS && key == GLFW_KEY_I && m_player2.get_jumpstate() == GROUNDED)
-			m_player2.set_movement(2);
-		if (action == GLFW_PRESS && key == GLFW_KEY_K)
-			m_player2.set_movement(3);
-		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
-			DamageEffect* p = punch(m_player2);
-			m_damageEffects.push_back(*p);
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+		{
+			m_menu.change_selection(true);
 		}
-		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
-			m_player2.set_movement(5);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
-			m_player2.set_movement(6);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_K)
-			m_player2.set_movement(7);
-		//if (action == GLFW_RELEASE && key == GLFW_KEY_O)
-			//m_player2.set_movement(8);
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+		{
+			reset();
+			//m_ais.clear();
+			set_mode(m_menu.get_selected());
+		}
+
+	}
+	else {
+		// Handle player movement here
+		if (m_player1.get_in_play() && !m_paused)
+		{
+			if (action == GLFW_PRESS && key == GLFW_KEY_D)
+				m_player1.set_movement(MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_A)
+				m_player1.set_movement(MOVING_BACKWARD);
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
+				m_player1.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_S)
+				m_player1.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+				DamageEffect* p = punch(m_player1);
+				m_damageEffects.push_back(*p);
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
+				m_player1.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
+				m_player1.set_movement(STOP_MOVING_BACKWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+				m_player1.set_movement(RELEASE_CROUCH);
+		}
+
+		if (m_player2.get_in_play() && !m_paused)
+		{
+			if (action == GLFW_PRESS && key == GLFW_KEY_L)
+				m_player2.set_movement(MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_J)
+				m_player2.set_movement(MOVING_BACKWARD);
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
+				m_player2.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_K)
+				m_player2.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+				DamageEffect* p = punch(m_player2);
+				m_damageEffects.push_back(*p);
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
+				m_player2.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
+				m_player2.set_movement(STOP_MOVING_BACKWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+				m_player2.set_movement(RELEASE_CROUCH);
+		}
+
+		if (m_paused) {
+			m_player1.set_movement(STOP_MOVING_FORWARD);
+			m_player1.set_movement(STOP_MOVING_BACKWARD);
+			m_player1.set_movement(STOP_PUNCHING);
+			m_player2.set_movement(STOP_MOVING_FORWARD);
+			m_player2.set_movement(STOP_MOVING_BACKWARD);
+			m_player2.set_movement(STOP_PUNCHING);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
+		{
+			m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
+		}
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !m_paused)
+		{
+			m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
+		}
+
+		// Pausing and resuming game
+		if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
+			if (m_player1.get_in_play() && m_player1.get_crouch_state() == IS_CROUCHING) {
+				m_player1.set_crouch_state(CROUCH_RELEASED);
+			}
+
+			if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
+				m_player2.set_crouch_state(CROUCH_RELEASED);
+			}
+			//m_paused = !m_paused;
+			set_paused(!m_paused);
+
+		}
+
+		// Resetting game
+		if (action == GLFW_RELEASE && key == GLFW_KEY_B)
+		{
+			reset();
+		}
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER)
-	{
-		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER)
-	{
-		m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
-	}
+	// Music control
+	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_UP)
+		Mix_VolumeMusic(Mix_VolumeMusic(-1) + 20);
+	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_DOWN)
+		Mix_VolumeMusic(Mix_VolumeMusic(-1) - 20);
+	if (action == GLFW_PRESS && key == GLFW_KEY_END && !Mix_PausedMusic())
+		Mix_PauseMusic();
+	if (action == GLFW_PRESS && key == GLFW_KEY_HOME && Mix_PausedMusic())
+		Mix_ResumeMusic();
+}
 
-	// Resetting game
-	/*if (action == GLFW_RELEASE && key == GLFW_KEY_R)
-	{
-		//!!! DESPITE MY EFFORTS THIS IS STILL BUGGY, ERROR
-		//LIKELY TO DO WITH DESTROYING FIGHTERS
-		int w, h;
-		glfwGetWindowSize(m_window, &w, &h);
+void World::reset()
+{
+	m_damageEffects.clear();
+	switch (m_mode) {
+	case DEV:
+		m_player1.reset(1);
+		m_player2.reset(2);
+
+		for (AI ai : m_ais)
+		{
+			ai.reset(3);
+		}
+		break;
+	case PVP:
+		m_player1.reset(1);
+		m_player2.reset(2);
+		break;
+	case PVC:
+		m_player1.reset(1);
+
+		for (AI ai : m_ais)
+		{
+			ai.reset(3);
+		}
+		break;
+	case TUTORIAL:
+		m_player1.reset(1);
+
+		for (AI ai : m_ais)
+		{
+			ai.reset(3);
+		}
+		break;
+	case MENU:	// TESTING TRANSITIONS, REDUNDANT NOW
+		m_player1.set_in_play(false);
+		m_ais.clear();
+		//set_mode(DEV);
+		//set_mode(PVC);
+		break;
+	}
+}
+
+bool World::set_mode(GameMode mode) {
+	m_player1.set_in_play(false);
+	m_player2.set_in_play(false);
+	m_ais.clear();
+	m_fighters.clear();
+	m_bg.clearNameplates();
+	
+	m_mode = mode;
+	bool initSuccess = true;
+	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
+
+	switch (mode) {
+	case MENU:
+		m_player1.set_in_play(true); // needed to make AI respond
+		spawn_ai(AVOID);
+		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
+		initSuccess = initSuccess && m_menu.init(m_screen);
+		break;
+	case DEV:
+		if (MAX_PLAYERS >= 1)
+		{
+			m_player1.set_in_play(true);
+		}
+		if (MAX_PLAYERS >= 2)
+		{
+			m_player2.set_in_play(true);
+		}
+
 		if (m_player1.get_in_play())
 		{
-			m_player1.destroy();
-			m_player1.set_in_play(true);
-			m_player1.init(1);
+			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
+			m_fighters.emplace_back(m_player1);
 		}
+
 		if (m_player2.get_in_play())
 		{
-			m_player2.destroy();
-			m_player2.set_in_play(true);
-			m_player2.init(2);
+			initSuccess = initSuccess && m_player2.init(2, "Spud");
+			m_fighters.emplace_back(m_player2);
 		}
-		//m_fighters.clear();
-		for (auto &ai : m_ais)
+
+		for (int i = 0; i < MAX_AI; i++)
 		{
-			ai.destroy();
-			ai.init(3);
+			AIType type = AVOID;
+			if (i % 2 == 0)
+			{
+				type = CHASE;
+			}
+			initSuccess = initSuccess && spawn_ai(type);
 		}
-		//m_ais.clear();
-		//m_water.reset_salmon_dead_time();
-		m_current_speed = 1.f;
-	}*/
+		initSuccess = initSuccess && m_bg.init(m_screen, mode);
+		break;
+	case PVP: // 2 player
+		m_player1.set_in_play(true);
+		m_player2.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		m_fighters.emplace_back(m_player2);
+		break;
+	case PVC: // single player
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		break;
+	case TUTORIAL:
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		break;
+	}
+
+	if (mode != MENU)
+		for (Fighter &f : m_fighters)
+			m_bg.addNameplate(f.get_nameplate(), f.get_name());
+
+	return initSuccess;
 }
 
 DamageEffect * World::punch(Fighter f) {
@@ -483,6 +625,7 @@ void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
 
+
 bool World::check_collision(BoundingBox b1, BoundingBox b2) {
 	if (b1.xpos < b2.xpos + b2.width &&
 		b1.xpos + b1.width > b2.xpos &&
@@ -494,3 +637,9 @@ bool World::check_collision(BoundingBox b1, BoundingBox b2) {
 		return false;
 	}
 }
+
+void World::set_paused(bool isPaused) {
+	m_paused = isPaused;
+	m_bg.setPaused(isPaused);
+}
+
