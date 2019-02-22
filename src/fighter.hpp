@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "textRenderer.hpp"
 #include <random>
 
 class Fighter : public Renderable
@@ -10,7 +11,7 @@ class Fighter : public Renderable
 
   public:
 	// Creates all the associated render resources and default transform
-	bool init(int init_position);
+	bool init(int init_position, std::string name);
 
 	// Releases all the associated resources
 	void destroy();
@@ -35,8 +36,9 @@ class Fighter : public Renderable
 
 	// Returns the current health
 	int get_health() const;
-
 	int get_lives() const;
+	TextRenderer* get_nameplate() const;
+	std::string get_name() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
@@ -60,6 +62,9 @@ class Fighter : public Renderable
 	int m_health;
 	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
+
+	std::string m_name;
+	TextRenderer* m_nameplate;
 
   private:
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture

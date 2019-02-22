@@ -110,6 +110,7 @@ void Background::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	nameplates.clear();
 }
 
 void Background::draw(const mat3& projection)
@@ -169,6 +170,7 @@ void Background::draw(const mat3& projection)
 	if (m_mode == TUTORIAL) {
 		drawTutorialText(projection);
 	}
+	drawNameplates(projection);
 }
 
 vec2 Background::get_position()const
@@ -228,4 +230,20 @@ void Background::drawTutorialText(const mat3& projection) {
 	crouch->renderString(projection, "S/K: Crouch");
 	pause->renderString(projection, "Esc: Pause");
 	reset->renderString(projection, "B: Reset");
+}
+void Background::addNameplate(TextRenderer* td, std::string name) {
+	nameplates.insert(std::make_pair(td, name));
+}
+void Background::drawNameplates(const mat3& projection) {
+	std::map<TextRenderer*, std::string>::iterator it = nameplates.begin();
+	while (it != nameplates.end())
+	{
+		//std::cout << it->first << " :: " << it->second << std::endl;
+		it->first->renderString(projection, it->second);
+		it++;
+	}
+}
+
+void Background::clearNameplates() {
+	nameplates.clear();
 }

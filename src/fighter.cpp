@@ -7,7 +7,7 @@
 
 Texture Fighter::fighter_texture;
 
-bool Fighter::init(int init_position)
+bool Fighter::init(int init_position, std::string name)
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -79,6 +79,7 @@ bool Fighter::init(int init_position)
 	m_strength = 5;
 	m_lives = STARTING_LIVES;
 	m_vertical_velocity = 0.0;
+	m_name = name;
 	
 	switch (init_position) {
 	case 1:
@@ -91,6 +92,9 @@ bool Fighter::init(int init_position)
 		m_position = { 550.f, 525.f };
 		break;
 	}
+
+	m_nameplate = new TextRenderer(mainFont, 25);
+	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
 
 	return true;
 }
@@ -258,6 +262,9 @@ void Fighter::draw(const mat3 &projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+	
+	int sWidth = m_nameplate->get_width_of_string(m_name);
+	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
 vec2 Fighter::get_position() const
@@ -334,6 +341,12 @@ int Fighter::get_health() const
 int Fighter::get_lives() const
 {
 	return m_lives;
+}
+TextRenderer* Fighter::get_nameplate() const {
+	return m_nameplate;
+}
+std::string Fighter::get_name() const {
+	return m_name;
 }
 
 void Fighter::start_jumping()
