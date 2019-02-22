@@ -149,6 +149,7 @@ void MainMenu::draw(const mat3& projection)
 	title->renderString(projection, "VEGGIE VENGEANCE");
 	buttons[0]->renderString(projection, "ONE-PLAYER");
 	buttons[1]->renderString(projection, "TWO-PLAYER");
+	buttons[2]->renderString(projection, "TUTORIAL");
 }
 
 vec2 MainMenu::get_position()const
@@ -166,31 +167,64 @@ void MainMenu::init_buttons()
 	selectedButtonIndex = 0; // default: first button selected
 	TextRenderer* play1 = new TextRenderer(mainFont, 60);
 	TextRenderer* play2 = new TextRenderer(mainFont, 60);
+	TextRenderer* playTut = new TextRenderer(mainFont, 60);
 
 	play1->setColor(selectedColor);
 	play2->setColor(defaultColor);
+	playTut->setColor(defaultColor);
 
 	int width = play1->get_width_of_string("ONE-PLAYER");
-	play1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-50.f });
+	play1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
 	width = play2->get_width_of_string("TWO-PLAYER");
-	play2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) +50.f });
+	play2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	width = playTut->get_width_of_string("TUTORIAL");
+	playTut->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
 	buttons.emplace_back(play1);
 	buttons.emplace_back(play2);
+	buttons.emplace_back(playTut);
 }
 
 // TODO: may want to change design so that selection does not loop
-//void MainMenu::change_selection(int direction) // -1 for down, 1 for up
-void MainMenu::change_selection()
+void MainMenu::change_selection(int direction) // -1 for down, 1 for up
+//void MainMenu::change_selection()
 {
-	if (selectedButtonIndex == 0) {
-		selectedButtonIndex = 1;
-		buttons[0]->setColor(defaultColor);
-		buttons[1]->setColor(selectedColor);
-	}
-	else {
-		selectedButtonIndex = 0;
-		buttons[1]->setColor(defaultColor);
-		buttons[0]->setColor(selectedColor);
+	switch (selectedButtonIndex) {
+	case 0:
+		if (direction == -1) {
+			selectedButtonIndex = 1;
+			buttons[0]->setColor(defaultColor);
+			buttons[1]->setColor(selectedColor);
+		}
+		else {
+			selectedButtonIndex = 2;
+			buttons[0]->setColor(defaultColor);
+			buttons[2]->setColor(selectedColor);
+		}
+		break;
+	case 1:
+		if (direction == -1) {
+			selectedButtonIndex = 2;
+			buttons[1]->setColor(defaultColor);
+			buttons[2]->setColor(selectedColor);
+		}
+		else {
+			selectedButtonIndex = 0;
+			buttons[1]->setColor(defaultColor);
+			buttons[0]->setColor(selectedColor);
+		}
+		break;
+	case 2:
+		if (direction == -1) {
+			selectedButtonIndex = 0;
+			buttons[2]->setColor(defaultColor);
+			buttons[0]->setColor(selectedColor);
+		}
+		else {
+			selectedButtonIndex = 1;
+			buttons[2]->setColor(defaultColor);
+			buttons[1]->setColor(selectedColor);
+		}
+		break;
 	}
 }
 
@@ -202,6 +236,9 @@ GameMode MainMenu::get_selected()
 		break;
 	case 1:
 		return PVP;
+		break;
+	case 2:
+		return TUTORIAL;
 		break;
 	}
 }

@@ -316,10 +316,13 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	// MAIN MENU CONTROLS
 	if (m_mode == MENU)
 	{
-		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_S
-			|| key == GLFW_KEY_UP || key == GLFW_KEY_DOWN))
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 		{
-			m_menu.change_selection();
+			m_menu.change_selection(1);
+		}
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+		{
+			m_menu.change_selection(-1);
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
