@@ -225,8 +225,7 @@ void World::draw()
 		m_menu.draw(projection_2D); 
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
-	}
-	else {
+	} else {
 		m_bg.draw(projection_2D);
 
 		if (m_player1.get_in_play())
@@ -310,6 +309,13 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		m_player2.set_in_play(false);
 		m_ais.clear();
 		set_mode(PVP);
+	}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_4) // TEST
+	{
+		m_player1.set_in_play(false);
+		m_player2.set_in_play(false);
+		m_ais.clear();
+		set_mode(TUTORIAL);
 	}
 	//////////////////////
 
@@ -505,20 +511,20 @@ bool World::set_mode(GameMode mode) {
 			}
 			initSuccess = initSuccess && spawn_ai(type);
 		}
-		initSuccess = initSuccess && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_bg.init(m_screen, mode);
 		break;
 	case PVP: // 2 player
 		m_player1.set_in_play(true);
 		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1) && m_player2.init(2) && m_bg.init(m_screen, mode);
 		break;
 	case PVC: // single player
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 		break;
 	case TUTORIAL:
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen);
+		initSuccess = initSuccess && m_player1.init(1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 		break;
 	}
 	return initSuccess;
