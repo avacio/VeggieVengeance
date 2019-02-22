@@ -403,6 +403,15 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_PUNCHING);
 	}
 
+	if (m_paused) {
+		m_player1.set_movement(STOP_MOVING_FORWARD);
+		m_player1.set_movement(STOP_MOVING_BACKWARD);
+		m_player1.set_movement(STOP_PUNCHING);
+		m_player2.set_movement(STOP_MOVING_FORWARD);
+		m_player2.set_movement(STOP_MOVING_BACKWARD);
+		m_player2.set_movement(STOP_PUNCHING);
+	}
+
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
 	{
 		m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
