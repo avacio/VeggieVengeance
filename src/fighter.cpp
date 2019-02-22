@@ -408,4 +408,9 @@ void Fighter::reset(int init_position)
 	{
 		m_position = {550.f, 525.f};
 	}
+
+	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
+		m_crouch_state = CROUCH_RELEASED;
+		m_position.y += 25.f;
+	}
 }

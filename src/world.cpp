@@ -350,7 +350,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_S)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_E)
 				m_player1.set_movement(STOP_PUNCHING);
@@ -372,7 +372,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_K)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O)
 				m_player2.set_movement(STOP_PUNCHING);
