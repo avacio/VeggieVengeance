@@ -222,7 +222,7 @@ void Background::drawPlayerInfo(const mat3& projection) {
 }
 
 void Background::drawTutorialText(const mat3& projection) {
-	jump->renderString(projection, "Q/I: Jump");
+	jump->renderString(projection, "W/I: Jump");
 	left->renderString(projection, "A/J: Move left");
 	right->renderString(projection, "D/L: Move right");
 	crouch->renderString(projection, "S/K: Crouch");
