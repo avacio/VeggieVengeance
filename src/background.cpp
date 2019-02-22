@@ -85,17 +85,39 @@ bool Background::init(vec2 screen, GameMode mode)
 	isPausedText->setColor({ 0.f,0.f,0.f });
 
 	jump = new TextRenderer(mainFont, 44);
-	jump ->setPosition({50.f, 230.f});
+	jump->setPosition({50.f, 230.f});
 	left = new TextRenderer(mainFont, 44);
-	left ->setPosition({50.f, 280.f});
+	left->setPosition({50.f, 280.f});
 	right = new TextRenderer(mainFont, 44);
-	right ->setPosition({50.f, 330.f});
+	right->setPosition({50.f, 330.f});
 	crouch = new TextRenderer(mainFont, 44);
-	crouch ->setPosition({50.f, 380.f});
+	crouch->setPosition({50.f, 380.f});
 	reset = new TextRenderer(mainFont, 44);
-	reset ->setPosition({50.f, 430.f});
+	reset->setPosition({50.f, 430.f});
 	pause = new TextRenderer(mainFont, 44);
-	pause ->setPosition({50.f, 480.f});
+	pause->setPosition({50.f, 480.f});
+	ability1 = new TextRenderer(mainFont, 44);
+	width = ability1->get_width_of_string("Q/U:SpecialAbility");
+	ability1->setPosition({screen.x-(width*1.15f), 230.f});
+	ability2 = new TextRenderer(mainFont, 44);
+	width = ability2->get_width_of_string("R/P:SpecialAbility");
+	ability2->setPosition({screen.x-(width*1.15f), 280.f});
+	punch = new TextRenderer(mainFont, 44);
+	width = punch->get_width_of_string("E/O: Punch");
+	punch->setPosition({screen.x-(width*1.15f), 330.f});
+	pauseMusic = new TextRenderer(mainFont, 44);
+	width = pauseMusic->get_width_of_string("End: Pausemusic");
+	pauseMusic->setPosition({screen.x-(width*1.15f), 380.f});
+	resumeMusic = new TextRenderer(mainFont, 44);
+	width = resumeMusic->get_width_of_string("Home:Resumemusic");
+	resumeMusic->setPosition({screen.x-(width*1.15f), 430.f});
+	increaseVolume = new TextRenderer(mainFont, 44);
+	width = increaseVolume->get_width_of_string("PageUp: Inc.Volume");
+	increaseVolume->setPosition({screen.x-(width*1.15f), 480.f});
+	decreaseVolume = new TextRenderer(mainFont, 44);
+	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
+	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
+
 
 	fprintf(stderr, "Loaded text\n");
 
@@ -237,6 +259,13 @@ void Background::drawTutorialText(const mat3& projection) {
 	crouch->renderString(projection, "S/K: Crouch");
 	pause->renderString(projection, "Esc: Pause");
 	reset->renderString(projection, "B: Reset");
+	ability1->renderString(projection, "Q/U: Special Ability");
+	ability2->renderString(projection, "R/P: Special Ability");
+	punch->renderString(projection, "E/O: Punch");
+	pauseMusic->renderString(projection, "End: Pause music");
+	resumeMusic->renderString(projection, "Home: Resume music");
+	increaseVolume->renderString(projection, "Page Up: Inc. volume");
+	decreaseVolume->renderString(projection, "Page Down: Dec. volume");
 
 	if (m_paused) {
 		isPausedText->renderString(projection, "PAUSED");

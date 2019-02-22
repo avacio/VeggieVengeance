@@ -21,6 +21,13 @@ class Background : public Renderable
 	TextRenderer* crouch;
 	TextRenderer* pause;
 	TextRenderer* reset;
+	TextRenderer* ability1;
+	TextRenderer* ability2;
+	TextRenderer* punch;
+	TextRenderer* pauseMusic;
+	TextRenderer* resumeMusic;
+	TextRenderer* increaseVolume;
+	TextRenderer* decreaseVolume;
 
 public:
 	// Creates all the associated render resources and default transform
