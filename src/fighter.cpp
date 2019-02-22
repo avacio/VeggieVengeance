@@ -12,7 +12,7 @@ bool Fighter::init(int init_position, std::string name)
 	// Load shared texture
 	if (!fighter_texture.is_valid())
 	{
-		if (!fighter_texture.load_from_file(textures_path("potato.png")))
+		if (!fighter_texture.load_from_file(textures_path("broccoli.png")))
 		{
 			fprintf(stderr, "Failed to load bubble texture!");
 			return false;
@@ -327,11 +327,13 @@ void Fighter::set_movement(int mov)
 		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		m_is_idle = true;
+		if (m_moving_backward == false)
+			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		m_is_idle = true;
+		if (m_moving_forward == false)
+			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
 		m_crouch_state = CROUCH_RELEASED;

@@ -20,6 +20,7 @@ public:
 private:
 	bool m_in_play = false; // denotes if a player object is currently in play, false by default
 
+	int m_idle_counter = 0;
 
 	int m_jump_counter = 0;
 	CrouchState m_crouch_state = NOT_CROUCHING;

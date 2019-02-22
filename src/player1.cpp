@@ -53,9 +53,24 @@ void Player1::draw(const mat3 &projection)
 		}
 	}
 	if (!is_punching()) {
-		if (!player1_texture.load_from_file(textures_path("potato.png")))
-		{
-			fprintf(stderr, "Failed to load fighter texture!");
+		if (is_idle()) {
+			m_idle_counter++;
+			if (m_idle_counter < 25) {
+				if (!player1_texture.load_from_file(textures_path("potato_idle.png")))
+				{
+					fprintf(stderr, "Failed to load fighter texture!");
+				}
+			}
+
+			else if (m_idle_counter > 25 && m_idle_counter < 50) {
+				if (!player1_texture.load_from_file(textures_path("potato.png")))
+				{
+					fprintf(stderr, "Failed to load fighter texture!");
+				}
+			}
+
+			else if (m_idle_counter >= 50)
+				m_idle_counter = 0;
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, player1_texture.id);
@@ -70,6 +85,9 @@ void Player1::draw(const mat3 &projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+	int sWidth = m_nameplate->get_width_of_string(m_name);
+	m_nameplate->setPosition({ m_position.x - sWidth * .45f, m_position.y - 70.0f });
 }
 
 bool Player1::get_in_play() const
