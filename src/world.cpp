@@ -318,11 +318,11 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	{
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 		{
-			m_menu.change_selection(1);
+			m_menu.change_selection(false);
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
 		{
-			m_menu.change_selection(-1);
+			m_menu.change_selection(true);
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
@@ -405,7 +405,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
 				m_player2.set_crouch_state(CROUCH_RELEASED);
 			}
-			m_paused = !m_paused;
+			//m_paused = !m_paused;
+			set_paused(!m_paused);
+
 		}
 
 		// Resetting game
@@ -546,4 +548,9 @@ bool World::set_mode(GameMode mode) {
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
+}
+
+void World::set_paused(bool isPaused) {
+	m_paused = isPaused;
+	m_bg.setPaused(isPaused);
 }

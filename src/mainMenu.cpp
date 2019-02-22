@@ -185,12 +185,12 @@ void MainMenu::init_buttons()
 }
 
 // TODO: may want to change design so that selection does not loop
-void MainMenu::change_selection(int direction) // -1 for down, 1 for up
+void MainMenu::change_selection(bool goDown)
 //void MainMenu::change_selection()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		if (direction == -1) {
+		if (goDown) {
 			selectedButtonIndex = 1;
 			buttons[0]->setColor(defaultColor);
 			buttons[1]->setColor(selectedColor);
@@ -202,7 +202,7 @@ void MainMenu::change_selection(int direction) // -1 for down, 1 for up
 		}
 		break;
 	case 1:
-		if (direction == -1) {
+		if (goDown) {
 			selectedButtonIndex = 2;
 			buttons[1]->setColor(defaultColor);
 			buttons[2]->setColor(selectedColor);
@@ -214,7 +214,7 @@ void MainMenu::change_selection(int direction) // -1 for down, 1 for up
 		}
 		break;
 	case 2:
-		if (direction == -1) {
+		if (goDown) {
 			selectedButtonIndex = 0;
 			buttons[2]->setColor(defaultColor);
 			buttons[0]->setColor(selectedColor);

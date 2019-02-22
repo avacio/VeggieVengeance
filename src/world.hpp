@@ -42,6 +42,7 @@ class World
 	bool is_over() const;
 
 	bool set_mode(GameMode mode);
+	void set_paused(bool isPaused);
 
   private:
 	// Generates a new fighter
