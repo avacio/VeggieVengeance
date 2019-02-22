@@ -5,6 +5,8 @@
 #include "water.hpp"
 #include "fighter.hpp"
 #include "player.hpp"
+#include "player1.hpp"
+#include "player2.hpp"
 #include "ai.hpp"
 #include "background.hpp"
 #include "textRenderer.hpp"
@@ -71,8 +73,8 @@ class World
 	// Game entities
 	MainMenu m_menu;
 	Background m_bg;
-	Player m_player1;
-	Player m_player2;
+	Player1 m_player1;
+	Player2 m_player2;
 	std::vector<AI> m_ais;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 

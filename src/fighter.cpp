@@ -267,6 +267,17 @@ void Fighter::draw(const mat3 &projection)
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
+float Fighter::get_rotation() const
+{
+	return m_rotation;
+}
+
+
+vec2 Fighter::get_scale() const
+{
+	return m_scale;
+}
+
 vec2 Fighter::get_position() const
 {
 	return m_position;
@@ -374,9 +385,29 @@ void Fighter::jump_update()
 	}
 }
 
+bool Fighter::is_hurt() const
+{
+	return m_is_hurt;
+}
+
 bool Fighter::is_jumping() const
 {
 	return m_is_jumping;
+}
+
+bool Fighter::is_punching() const
+{
+	return m_is_punching;
+}
+
+bool Fighter::is_crouching() const
+{
+	return (m_crouch_state == IS_CROUCHING);
+}
+
+bool Fighter::is_idle() const
+{
+	return m_is_idle;
 }
 
 int Fighter::get_crouch_state() {
