@@ -221,20 +221,25 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	if (m_mode == MENU) { m_menu.draw(projection_2D); }
-	else { m_bg.draw(projection_2D); }
-	
-	if (m_player1.get_in_play())
-	{
-		m_player1.draw(projection_2D);
+	if (m_mode == MENU) { 
+		m_menu.draw(projection_2D); 
+		for (auto &fighter : m_ais)
+			fighter.draw(projection_2D);
 	}
-	if (m_player2.get_in_play())
-	{
-		m_player2.draw(projection_2D);
-	}
-	for (auto &fighter : m_ais)
-		fighter.draw(projection_2D);
+	else {
+		m_bg.draw(projection_2D);
 
+		if (m_player1.get_in_play())
+		{
+			m_player1.draw(projection_2D);
+		}
+		if (m_player2.get_in_play())
+		{
+			m_player2.draw(projection_2D);
+		}
+		for (auto &fighter : m_ais)
+			fighter.draw(projection_2D);
+	}
 	/////////////////////
 	// Truly render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
