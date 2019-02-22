@@ -43,11 +43,25 @@ class Fighter : public Renderable
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
 
+	// Returns the current fighter scale
+	vec2 get_scale() const;
+
+	// Returns the current fighter rotation
+	float get_rotation() const;
+
 	void start_jumping();
 
 	void jump_update();
 
+	bool is_hurt() const;
+
 	bool is_jumping() const;
+
+	bool is_punching() const;
+
+	bool is_crouching() const;
+
+	bool is_idle() const;
 
 	int get_crouch_state();
 

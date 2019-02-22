@@ -12,7 +12,7 @@ bool Fighter::init(int init_position, std::string name)
 	// Load shared texture
 	if (!fighter_texture.is_valid())
 	{
-		if (!fighter_texture.load_from_file(textures_path("potato.png")))
+		if (!fighter_texture.load_from_file(textures_path("broccoli.png")))
 		{
 			fprintf(stderr, "Failed to load bubble texture!");
 			return false;
@@ -267,6 +267,17 @@ void Fighter::draw(const mat3 &projection)
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
+float Fighter::get_rotation() const
+{
+	return m_rotation;
+}
+
+
+vec2 Fighter::get_scale() const
+{
+	return m_scale;
+}
+
 vec2 Fighter::get_position() const
 {
 	return m_position;
@@ -316,11 +327,13 @@ void Fighter::set_movement(int mov)
 		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		m_is_idle = true;
+		if (m_moving_backward == false)
+			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		m_is_idle = true;
+		if (m_moving_forward == false)
+			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
 		m_crouch_state = CROUCH_RELEASED;
@@ -374,9 +387,29 @@ void Fighter::jump_update()
 	}
 }
 
+bool Fighter::is_hurt() const
+{
+	return m_is_hurt;
+}
+
 bool Fighter::is_jumping() const
 {
 	return m_is_jumping;
+}
+
+bool Fighter::is_punching() const
+{
+	return m_is_punching;
+}
+
+bool Fighter::is_crouching() const
+{
+	return (m_crouch_state == IS_CROUCHING);
+}
+
+bool Fighter::is_idle() const
+{
+	return m_is_idle;
 }
 
 int Fighter::get_crouch_state() {
