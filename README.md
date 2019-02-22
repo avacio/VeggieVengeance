@@ -60,7 +60,7 @@ Creative: You should implement one or more additional creative elements. These c
 
 
 
-Overview: For this milestone, we focused on Collision System and UI (health display, menu), also fixing and adding new assets and features
+Overview: For this milestone, we focused on the Collision System and UI (health display, menu) as suggested by the TA feedback from the last milestone, also fixing and adding many new assets and features
 
 
 
@@ -68,17 +68,22 @@ Overview: For this milestone, we focused on Collision System and UI (health disp
 
 
 - Sustain progressive, non-repetitive gameplay using all required features for 2 min or more (assume that you can provide users with oral instruction).
-	- Collision System: allow for damaging opponents
+	- Collision System: allow for hitting and damaging opponents
+	- Mode System: one-player/two-player/tutorial modes (and switching between)
     
 - You should implement state and decision tree driven (possibly randomized) response to user input and game state (create a decision tree data structure and reuse it for multiple entities)
-	- 
+	- Smarter state and decision tree driven AI
     
 - Provide extended sprite and background assets set as well as corresponding actions.
-	- stage background (kitchen)
-	- new Broccoli sprite (currently used for AI)
+	- Extended Sprite assets
+    	- new Idle and punching animation (for Potato)
+    	- new Broccoli sprite (currently used for AI)
+	- Background for "Kitchen" stage 
+	
     
 - Provide basic user tutorial/help.
-	- basic tutorial Mode: display controls for player 1/2 as text (FreeType)
+	- Basic tutorial Mode: display controls for player and UI as text (FreeType)
+ 		- also display controls when game is paused
 
 - Stable game code supporting continuing execution and graceful termination
 	- Fixed reset button: allow for continuous replay without closing the game
@@ -88,8 +93,12 @@ Overview: For this milestone, we focused on Collision System and UI (health disp
 Creative: You should implement one or more additional creative elements. These can include additional integrated assets or rendering effects or pre-emptive implementation of one or more features from subsequent milestones.
 	
 - Planned Work
-	- Improved Health display: FreeType text rendering in layers
-	- Title menu: allow players to choose between one-player/two-player/tutorial modes
+	- Improved Health display: FreeType text rendering in layers (Health Points and Stock)
+	- Main title menu: allow players to choose between modes (one-player/two-player/tutorial) wth temporary background image
  		- random AI in menu to display basic art and gameplay
+
+- Unplanned Work
+	- Pausing and resuming gameplay(ESC)
+    - Music Controls (PageDown/PageUp for Volume, End/Home for pause/play)
 
 
