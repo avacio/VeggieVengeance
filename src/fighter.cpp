@@ -82,7 +82,7 @@ bool Fighter::init(int init_position, std::string name)
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5;
-	m_strength = 5;
+	m_strength = 1;
 	m_lives = STARTING_LIVES;
 	m_vertical_velocity = 0.0;
 	m_name = name;
@@ -118,8 +118,9 @@ void Fighter::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Fighter::update(float ms)
+DamageEffect * Fighter::update(float ms)
 {
+	DamageEffect * d = NULL;
 	const float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
@@ -195,6 +196,13 @@ void Fighter::update(float ms)
 			m_position.y -= 25.f;
 			m_crouch_state = NOT_CROUCHING;
 		}
+
+		if (m_is_punching)
+		{
+			//save collision object from punch
+			d = punch();
+		}
+		
 	}
 	else
 	{
@@ -203,6 +211,9 @@ void Fighter::update(float ms)
 		else
 			m_rotation = M_PI / 2;
 	}
+
+	//return null if not attacking, or the collision object if attacking
+	return d;
 }
 
 void Fighter::draw(const mat3 &projection)
@@ -430,5 +441,19 @@ void Fighter::reset(int init_position)
 	else
 	{
 		m_position = {550.f, 525.f};
+	}
+}
+
+DamageEffect * Fighter::punch() {
+	//create the bounding box based on fighter position
+	int sizeMultiplier = 4;
+	if (get_facing_front()) {
+		//right facing
+		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
+			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
 	}
 }

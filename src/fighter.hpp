@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "damageEffect.hpp"
 #include "textRenderer.hpp"
 #include <random>
 
@@ -19,10 +20,13 @@ class Fighter : public Renderable
 
 	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	void update(float ms);
+	DamageEffect * update(float ms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
+
+	//get collision object for punch
+	DamageEffect * punch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;

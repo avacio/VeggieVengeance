@@ -212,20 +212,32 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
+		
 		//update players + ai
+		DamageEffect * d = NULL;
 		if (m_player1.get_in_play())
 		{
-			m_player1.update(elapsed_ms);
+			d = m_player1.update(elapsed_ms);
+			if (d != NULL) {
+				m_damageEffects.push_back(*d);
+			}
 		}
 		if (m_player2.get_in_play())
 		{
-			m_player2.update(elapsed_ms);
+			d = m_player2.update(elapsed_ms);
+			if (d != NULL) {
+				m_damageEffects.push_back(*d);
+			}
 		}
 
 		if (m_player1.get_in_play())
 		{
-			for (auto &ai : m_ais)
-				ai.update(elapsed_ms * 0.5, m_player1.get_position());
+			for (auto &ai : m_ais) {
+				d = ai.update(elapsed_ms * 0.5, m_player1.get_position());
+				if (d != NULL) {
+					m_damageEffects.push_back(*d);
+				}
+			}
 		}
 	}
 	
@@ -406,8 +418,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
-				DamageEffect* p = punch(m_player1);
-				m_damageEffects.push_back(*p);
+				//DamageEffect* p = punch(m_player1);
+				//m_damageEffects.push_back(*p);
+				m_player1.set_movement(PUNCHING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
@@ -415,6 +428,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S)
 				m_player1.set_movement(RELEASE_CROUCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+				m_player1.set_movement(STOP_PUNCHING);
 		}
 
 		if (m_player2.get_in_play() && !m_paused)
@@ -428,8 +443,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (action == GLFW_PRESS && key == GLFW_KEY_K)
 				m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
-				DamageEffect* p = punch(m_player2);
-				m_damageEffects.push_back(*p);
+				//DamageEffect* p = punch(m_player2);
+				//m_damageEffects.push_back(*p);
+				m_player2.set_movement(PUNCHING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -437,6 +453,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_K)
 				m_player2.set_movement(RELEASE_CROUCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O)
+				m_player2.set_movement(STOP_PUNCHING);
 		}
 
 		if (m_paused) {
@@ -606,19 +624,6 @@ bool World::set_mode(GameMode mode) {
 			m_bg.addNameplate(f.get_nameplate(), f.get_name());
 
 	return initSuccess;
-}
-
-DamageEffect * World::punch(Fighter f) {
-	//create the bounding box based on fighter position
-	int sizeMultiplier = 4;
-	if (f.get_facing_front()) {
-		//right facing
-		return new DamageEffect(f.get_position().x, f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
-	}
-	else {
-		//left facing
-		return new DamageEffect(f.get_position().x - ((sizeMultiplier - 1) * f.get_bounding_box().x), f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
-	}
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
