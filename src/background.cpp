@@ -72,14 +72,17 @@ bool Background::init(vec2 screen, GameMode mode)
 	int width = health1->get_width_of_string("HP: 100"); // TODO
 	health1->setPosition({ 50.f, 100.f });
 	health2->setPosition({ screen.x-(width*1.15f), 100.f });
-	//health2->setPosition({ screen.x - width, 100.f });
-
 
 	lives1 = new TextRenderer(mainFont, 70);
 	lives2 = new TextRenderer(mainFont, 70);
 	width = lives2->get_width_of_string("XXX");
 	lives1->setPosition({ 50.f, 180.f });
 	lives2->setPosition({ screen.x-(width*1.05f), 180.f });
+
+	isPausedText = new TextRenderer(mainFontBold, 60);
+	width = isPausedText->get_width_of_string("PAUSED");
+	isPausedText->setPosition({ screen.x/2.f - width*0.32f, 150.f });
+	isPausedText->setColor({ 0.f,0.f,0.f });
 
 	jump = new TextRenderer(mainFont, 44);
 	jump ->setPosition({50.f, 230.f});
@@ -164,10 +167,9 @@ void Background::draw(const mat3& projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	//if (p1Lives != -1 && p2Lives != -1) { drawPlayerInfo(projection); }
 	drawPlayerInfo(projection);
 
-	if (m_mode == TUTORIAL) {
+	if (m_mode == TUTORIAL || m_paused) {
 		drawTutorialText(projection);
 	}
 	drawNameplates(projection);
@@ -183,6 +185,11 @@ void Background::set_position(vec2 position)
 {
 	m_position = position;
 }
+
+void Background::setPaused(bool isPaused) {
+	m_paused = isPaused;
+}
+
 
 void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
 	this->p1Lives = p1Lives;
@@ -230,6 +237,10 @@ void Background::drawTutorialText(const mat3& projection) {
 	crouch->renderString(projection, "S/K: Crouch");
 	pause->renderString(projection, "Esc: Pause");
 	reset->renderString(projection, "B: Reset");
+
+	if (m_paused) {
+		isPausedText->renderString(projection, "PAUSED");
+	}
 }
 void Background::addNameplate(TextRenderer* td, std::string name) {
 	nameplates.insert(std::make_pair(td, name));

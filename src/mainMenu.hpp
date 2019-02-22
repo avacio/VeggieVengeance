@@ -28,8 +28,8 @@ public:
 	void set_position(vec2 position);
 
 	void init_buttons();
-	//void change_selection(int direction); // -1 for down, 1 for up
-	void change_selection();
+	void change_selection(bool goDown); // goDown is true when down direction
+	//void change_selection();
 	GameMode get_selected();
 
 private:
