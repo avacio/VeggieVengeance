@@ -9,7 +9,7 @@
 #include "ai.hpp"
 #include "background.hpp"
 #include "damageEffect.hpp"
-#include "boundingbox.hpp"
+#include "boundingBox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
 

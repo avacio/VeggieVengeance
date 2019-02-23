@@ -1,4 +1,4 @@
-#include "boundingbox.hpp"
+#include "boundingBox.hpp"
 
 BoundingBox::BoundingBox(int xpos, int ypos, int width, int height) {
 	this->xpos = xpos;

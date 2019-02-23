@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.hpp"
-#include "boundingbox.hpp"
+#include "boundingBox.hpp"
 class DamageEffect
 {
 public:

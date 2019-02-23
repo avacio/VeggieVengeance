@@ -81,7 +81,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	isPausedText = new TextRenderer(mainFontBold, 60);
 	width = isPausedText->get_width_of_string("PAUSED");
-	isPausedText->setPosition({ screen.x/2.f - width*0.32f, 150.f });
+	isPausedText->setPosition({ screen.x/2.f - width*0.4f, 150.f });
 	isPausedText->setColor({ 0.f,0.f,0.f });
 
 	jump = new TextRenderer(mainFont, 44);

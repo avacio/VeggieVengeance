@@ -131,7 +131,8 @@ struct Renderable
 enum AIType
 {
 	CHASE,
-	AVOID
+	AVOID,
+	RANDOM
 };
 
 enum CrouchState

@@ -563,7 +563,7 @@ bool World::set_mode(GameMode mode) {
 	switch (mode) {
 	case MENU:
 		m_player1.set_in_play(true); // needed to make AI respond
-		spawn_ai(AVOID);
+		spawn_ai(RANDOM);
 		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 		initSuccess = initSuccess && m_menu.init(m_screen);
 		break;
