@@ -155,6 +155,14 @@ enum FighterMovementState
 	STOP_PUNCHING = 8
 };
 
+
+enum DeletionTime
+{
+	AFTER_UPDATE,
+	AFTER_HIT,
+	AFTER_OUT_OF_BOUNDS
+};
+
 enum GameMode
 {
 	MENU = 0,
@@ -166,3 +174,4 @@ enum GameMode
 
 // For console log printing
 static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+

@@ -40,6 +40,8 @@ set(SOURCE_FILES
 	src/world.cpp
 	src/water.cpp
 	src/background.cpp
+	src/damageEffect.cpp
+	src/boundingbox.cpp
 	src/textRenderer.cpp
 	src/mainMenu.cpp
 
@@ -52,6 +54,8 @@ set(SOURCE_FILES
 	src/world.hpp
 	src/water.hpp
 	src/background.hpp
+	src/damageEffect.hpp
+	src/boundingbox.hpp
 	src/textRenderer.hpp
 	src/mainMenu.hpp
 	)

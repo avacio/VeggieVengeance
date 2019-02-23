@@ -10,6 +10,7 @@ class Fighter : public Renderable
 	static Texture fighter_texture;
 
   public:
+	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
 	bool init(int init_position, std::string name);
 
@@ -34,11 +35,19 @@ class Fighter : public Renderable
 	// Set fighter's movements
 	void set_movement(int mov);
 
+	void set_hurt(bool hurt);
+
+	void decrease_health(unsigned int damage);
+
 	// Returns the current health
 	int get_health() const;
 	int get_lives() const;
 	TextRenderer* get_nameplate() const;
 	std::string get_name() const;
+
+	int get_alive() const;
+
+	bool get_facing_front() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
@@ -50,6 +59,8 @@ class Fighter : public Renderable
 	float get_rotation() const;
 
 	void start_jumping();
+
+	unsigned int get_id() const;
 
 	void jump_update();
 
@@ -108,6 +119,8 @@ class Fighter : public Renderable
 	
 	const float INITIAL_VELOCITY = 10.0;
 	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
+
+	const unsigned int m_id; //unique identifier given when created
 
 	// C++ rng
 	std::default_random_engine m_rng;

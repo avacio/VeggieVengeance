@@ -7,7 +7,13 @@
 
 Texture Fighter::fighter_texture;
 
+
+Fighter::Fighter(unsigned int id) : m_id(id) {
+
+}
+
 bool Fighter::init(int init_position, std::string name)
+
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -189,17 +195,6 @@ void Fighter::update(float ms)
 			m_position.y -= 25.f;
 			m_crouch_state = NOT_CROUCHING;
 		}
-
-		if (m_is_punching)
-		{
-			m_is_hurt = true;
-
-			m_health -= 1;
-		}
-		else
-		{
-			m_is_hurt = false;
-		}
 	}
 	else
 	{
@@ -346,6 +341,19 @@ void Fighter::set_movement(int mov)
 	}
 }
 
+void Fighter::set_hurt(bool hurt) {
+	m_is_hurt = hurt;
+}
+
+void Fighter::decrease_health(unsigned int damage) {
+	if (damage <= m_health) {
+		m_health -= damage;
+	}
+	else {
+		m_health = 0;
+	}
+}
+
 int Fighter::get_health() const
 {
 	return m_health;
@@ -418,6 +426,21 @@ int Fighter::get_crouch_state() {
 
 void Fighter::set_crouch_state(CrouchState cs) {
 	m_crouch_state = cs;
+}
+
+int Fighter::get_alive() const
+{
+	return m_is_alive;
+}
+
+bool Fighter::get_facing_front() const
+{
+	return m_facing_front;
+}
+
+unsigned int Fighter::get_id() const
+{
+	return m_id;
 }
 
 void Fighter::reset(int init_position)

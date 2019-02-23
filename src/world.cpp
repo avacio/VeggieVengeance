@@ -24,7 +24,9 @@ void glfw_err_cb(int error, const char *desc)
 } // namespace
 } // namespace
 
-World::World()
+//set up player values
+//give p1 id =1, p2 id =2 
+World::World() : m_player1(1), m_player2(2)
 {
 	// Seeding rng with random device
 	m_rng = std::default_random_engine(std::random_device()());
@@ -151,10 +153,66 @@ bool World::update(float elapsed_ms)
 
 	// Updating all entities, making the entities
 	// faster based on current
+
 	if (m_paused) {
 		return true;
 	}
 	if (!m_paused) {
+		//mark alive players + ai as not having a collision applied before collision check
+		if (m_player1.get_in_play() && m_player1.get_alive()) {
+			m_player1.set_hurt(false);
+		}
+		if (m_player2.get_in_play() && m_player2.get_alive()) {
+			m_player2.set_hurt(false);
+		}
+		for (int i = 0; i < m_ais.size(); i++) {
+			if (m_ais[i].get_alive()) {
+				m_ais[i].set_hurt(false);
+			}
+		}
+
+		//damage effect collision loop
+		for (int i = 0; i < m_damageEffects.size(); i++) {
+			if (m_player1.get_in_play()) {
+				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
+				if (m_damageEffects[i].id != m_player1.get_id() && check_collision(m_damageEffects[i].bounding_box, *b1)) {
+					//incur damage
+					m_player1.decrease_health(m_damageEffects[i].damage);
+					m_player1.set_hurt(true);
+				}
+				delete b1;
+			}
+			if (m_player2.get_in_play()) {
+				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
+				if (m_damageEffects[i].id != m_player2.get_id() && check_collision(m_damageEffects[i].bounding_box, *b2)) {
+					//incur damage
+					m_player2.decrease_health(m_damageEffects[i].damage);
+					m_player2.set_hurt(true);
+				}
+				delete b2;
+			}
+			for (int j = 0; j < m_ais.size(); j++) {
+				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
+				if (m_damageEffects[i].id != m_ais[j].get_id() && check_collision(m_damageEffects[i].bounding_box, *b3)) {
+					//incur damage
+					m_ais[j].decrease_health(m_damageEffects[i].damage);
+					m_ais[j].set_hurt(true);
+				}
+				delete b3;
+			}
+		}
+
+		//damage effect removal loop
+		for (int i = 0; i < m_damageEffects.size(); i++) {
+			if (m_damageEffects[i].delete_when == AFTER_UPDATE ||
+				(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter)) {
+				//remove from list
+				m_damageEffects.erase(m_damageEffects.begin() + i);
+				i--;
+			}
+		}
+
+		//update players + ai
 		if (m_player1.get_in_play())
 		{
 			m_player1.update(elapsed_ms);
@@ -277,9 +335,12 @@ bool World::is_over() const
 // Creates a ai and if successful, adds it to the list of ai
 bool World::spawn_ai(AIType type)
 {
-	AI ai(type);
+	//intialize ai with next ID and provided type
+	AI ai(idCounter, type);
 	if (ai.init(3, "AI"))
 	{
+		//assure the next ID given is unique
+		idCounter++;
 		m_ais.emplace_back(ai);
 		m_fighters.emplace_back(ai);
 		return true;
@@ -344,16 +405,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(START_JUMPING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_E)
-				m_player1.set_movement(PUNCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+				DamageEffect* p = punch(m_player1);
+				m_damageEffects.push_back(*p);
+			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E)
-				m_player1.set_movement(STOP_PUNCHING);
 		}
 
 		if (m_player2.get_in_play() && !m_paused)
@@ -366,16 +427,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(START_JUMPING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_K)
 				m_player2.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_O)
-				m_player2.set_movement(PUNCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+				DamageEffect* p = punch(m_player2);
+				m_damageEffects.push_back(*p);
+			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O)
-				m_player2.set_movement(STOP_PUNCHING);
 		}
 
 		if (m_paused) {
@@ -430,6 +491,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
+	m_damageEffects.clear();
 	switch (m_mode) {
 	case DEV:
 		m_player1.reset(1);
@@ -546,11 +608,38 @@ bool World::set_mode(GameMode mode) {
 	return initSuccess;
 }
 
+DamageEffect * World::punch(Fighter f) {
+	//create the bounding box based on fighter position
+	int sizeMultiplier = 4;
+	if (f.get_facing_front()) {
+		//right facing
+		return new DamageEffect(f.get_position().x, f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(f.get_position().x - ((sizeMultiplier - 1) * f.get_bounding_box().x), f.get_position().y, sizeMultiplier * f.get_bounding_box().x, f.get_bounding_box().y, 10, f.get_id(), AFTER_UPDATE);
+	}
+}
+
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
+}
+
+
+bool World::check_collision(BoundingBox b1, BoundingBox b2) {
+	if (b1.xpos < b2.xpos + b2.width &&
+		b1.xpos + b1.width > b2.xpos &&
+		b1.ypos < b2.ypos + b2.height &&
+		b1.ypos + b1.height > b2.ypos) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void World::set_paused(bool isPaused) {
 	m_paused = isPaused;
 	m_bg.setPaused(isPaused);
 }
+

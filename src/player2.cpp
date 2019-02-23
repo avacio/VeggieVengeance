@@ -6,6 +6,9 @@
 
 Texture Player2::player2_texture;
 
+Player2::Player2(unsigned int id) : Fighter(id) {
+}
+
 void Player2::draw(const mat3 &projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info

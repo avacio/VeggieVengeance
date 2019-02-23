@@ -6,7 +6,7 @@
 class AI : public Fighter
 {
   public:
-    AI(AIType type);
+    AI(unsigned int id, AIType type);
 
     bool get_in_play() const;
     void set_in_play(bool value);

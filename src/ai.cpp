@@ -8,7 +8,7 @@
 int randNum;
 long t = time(0); //initialize time
 
-AI::AI(AIType type)
+AI::AI(unsigned int id, AIType type) : Fighter(id)
 {
     this->aitype = type;
 }

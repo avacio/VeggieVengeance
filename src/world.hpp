@@ -8,8 +8,11 @@
 #include "player2.hpp"
 #include "ai.hpp"
 #include "background.hpp"
+#include "damageEffect.hpp"
+#include "boundingbox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
+
 
 // stlib
 #include <vector>
@@ -55,6 +58,10 @@ class World
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
+	DamageEffect * punch(Fighter f);
+	bool check_collision(BoundingBox b1, BoundingBox b2);
+
+
   private:
 	// Window handle
 	GLFWwindow *m_window;
@@ -75,6 +82,8 @@ class World
 	Player1 m_player1;
 	Player2 m_player2;
 	std::vector<AI> m_ais;
+	std::vector<DamageEffect> m_damageEffects;
+	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
 	Mix_Music *m_background_music;
@@ -85,4 +94,8 @@ class World
 	// C++ rng
 	std::default_random_engine m_rng;
 	std::uniform_real_distribution<float> m_dist; // default 0..1
+
+	//determines next ID for fighter, incremented every time a fighter is added
+	//id 1 and 2 are reserved for players 1 and 2
+	unsigned int idCounter = 3;
 };

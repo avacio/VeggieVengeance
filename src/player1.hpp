@@ -9,6 +9,7 @@ class Player1 : public Fighter
 	static Texture player1_texture;
 
   public:
+	Player1(unsigned int id);
 	bool get_in_play() const;
 	void set_in_play(bool value);
 
