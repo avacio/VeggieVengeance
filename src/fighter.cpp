@@ -131,6 +131,7 @@ DamageEffect * Fighter::update(float ms)
 	{
 		m_is_alive = false;
 		m_lives--;
+		m_is_punching = false;
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {

@@ -412,7 +412,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 	else {
 		// Handle player movement here
-		if (m_player1.get_in_play() && !m_paused)
+		if (m_player1.get_in_play() && !m_paused && m_player1.get_alive())
 		{
 			if (action == GLFW_PRESS && key == GLFW_KEY_D)
 				m_player1.set_movement(MOVING_FORWARD);
@@ -420,7 +420,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_S && m_player1.get_alive())
+			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
@@ -438,7 +438,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			}
 		}
 
-		if (m_player2.get_in_play() && !m_paused)
+		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
 		{
 			if (action == GLFW_PRESS && key == GLFW_KEY_L)
 				m_player2.set_movement(MOVING_FORWARD);
@@ -446,7 +446,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
 				m_player2.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_K && m_player2.get_alive())
+			if (action == GLFW_PRESS && key == GLFW_KEY_K)
 				m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 				m_player2.set_movement(PUNCHING);
