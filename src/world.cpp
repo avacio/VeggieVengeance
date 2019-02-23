@@ -420,11 +420,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_S)
+			if (action == GLFW_PRESS && key == GLFW_KEY_S && m_player1.get_alive())
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
-				//DamageEffect* p = punch(m_player1);
-				//m_damageEffects.push_back(*p);
 				m_player1.set_movement(PUNCHING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
@@ -448,11 +446,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
 				m_player2.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			if (action == GLFW_PRESS && key == GLFW_KEY_K && m_player2.get_alive())
 				m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
-				//DamageEffect* p = punch(m_player2);
-				//m_damageEffects.push_back(*p);
 				m_player2.set_movement(PUNCHING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)

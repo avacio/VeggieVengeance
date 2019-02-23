@@ -132,6 +132,16 @@ DamageEffect * Fighter::update(float ms)
 		m_is_alive = false;
 		m_lives--;
 
+		//uncrouch in death
+		if (m_crouch_state == IS_CROUCHING) {
+			m_scale.y = 0.2f;
+			m_position.y -= 25.f;
+			m_crouch_state = NOT_CROUCHING;
+		}
+		else if (m_crouch_state == CROUCH_PRESSED) {
+			m_crouch_state == NOT_CROUCHING;
+		}
+
 		if (m_lives > 0)
 		{
 			m_respawn_timer = RESPAWN_TIME;
