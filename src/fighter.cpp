@@ -74,7 +74,7 @@ bool Fighter::init(int init_position, std::string name)
 
 	m_is_alive = true;
 	m_is_idle = true;
-	m_facing_front = true;
+	//m_facing_front = true;
 	m_is_hurt = false;
 
 	m_scale.x = 0.2f;
@@ -90,9 +90,12 @@ bool Fighter::init(int init_position, std::string name)
 	switch (init_position) {
 	case 1:
 		m_position = { 250.f, 525.f };
+		m_facing_front = true;
 		break;
 	case 2:
 		m_position = { 950.f, 525.f };
+		m_facing_front = false;
+		m_scale.x = -m_scale.x;
 		break;
 	default:
 		m_position = { 550.f, 525.f };
@@ -463,23 +466,33 @@ void Fighter::reset(int init_position)
 	m_is_jumping = false;
 	m_vertical_velocity = 0;
 
-	if (init_position == 1)
-	{
+	switch (init_position) {
+	case 1:
 		m_position = { 250.f, 525.f };
-	}
-	else if (init_position == 2)
-	{
+		if (!m_facing_front) {
+			m_facing_front = true;
+			m_scale.x = -m_scale.x;
+		}
+		break;
+	case 2:
 		m_position = { 950.f, 525.f };
-	}
-	else
-	{
+		if (m_facing_front) {
+			m_facing_front = false;
+			m_scale.x = -m_scale.x;
+		}
+		break;
+	default:
 		m_position = { 550.f, 525.f };
+		break;
 	}
 
+	
 	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
+	
+	
 }
 
 DamageEffect * Fighter::punch() {
