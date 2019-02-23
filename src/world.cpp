@@ -99,6 +99,11 @@ bool World::init(vec2 screen, GameMode mode)
 	}
 
 	m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
+	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt0.wav")));
+	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt1.wav")));
+	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt2.wav")));
+	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt3.wav")));
+
 
 	if (m_background_music == nullptr)
 	{
@@ -428,8 +433,11 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
 				m_player1.set_movement(STOP_PUNCHING);
+
+				play_grunt_audio();
+			}
 		}
 
 		if (m_player2.get_in_play() && !m_paused)
@@ -453,8 +461,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
+				play_grunt_audio();
+			}
 		}
 
 		if (m_paused) {
@@ -563,7 +573,7 @@ bool World::set_mode(GameMode mode) {
 	switch (mode) {
 	case MENU:
 		m_player1.set_in_play(true); // needed to make AI respond
-		spawn_ai(AVOID);
+		spawn_ai(RANDOM);
 		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 		initSuccess = initSuccess && m_menu.init(m_screen);
 		break;
@@ -648,3 +658,10 @@ void World::set_paused(bool isPaused) {
 	m_bg.setPaused(isPaused);
 }
 
+void World::play_grunt_audio() {
+	std::random_device rd; // non-deterministic generator
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(0, 3); //ADD FOR MORE ACTIONS
+	int	randNum = dist(gen);
+	Mix_PlayChannel(-1, m_grunt_audio[randNum], 0);
+}

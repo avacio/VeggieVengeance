@@ -9,7 +9,7 @@
 #include "ai.hpp"
 #include "background.hpp"
 #include "damageEffect.hpp"
-#include "boundingbox.hpp"
+#include "boundingBox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
 
@@ -47,6 +47,8 @@ class World
 
 	bool set_mode(GameMode mode);
 	void set_paused(bool isPaused);
+
+	void play_grunt_audio();
 
   private:
 	// Generates a new fighter
@@ -86,6 +88,7 @@ class World
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
 	Mix_Music *m_background_music;
+	std::vector<Mix_Chunk*> m_grunt_audio;
 
 	GameMode m_mode;
 	bool m_paused;
