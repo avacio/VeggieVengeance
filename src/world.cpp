@@ -98,7 +98,7 @@ bool World::init(vec2 screen, GameMode mode)
 		return false;
 	}
 
-	m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
+	m_background_music = Mix_LoadMUS(audio_path("/bgm/Sunstrider.wav"));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt0.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt1.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt2.wav")));
@@ -108,7 +108,7 @@ bool World::init(vec2 screen, GameMode mode)
 	if (m_background_music == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
-				audio_path("Abandoned Hopes.wav"));
+				audio_path("/bgm/Sunstrider.wav"));
 		return false;
 	}
 
