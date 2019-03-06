@@ -210,7 +210,8 @@ bool World::update(float elapsed_ms)
 		//damage effect removal loop
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_damageEffects[i].delete_when == AFTER_UPDATE ||
-				(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter)) {
+				(m_damageEffects[i].delete_when == AFTER_HIT && m_damageEffects[i].hit_fighter) ||
+				!check_collision_world(m_damageEffects[i].bounding_box)) {
 				//remove from list
 				m_damageEffects.erase(m_damageEffects.begin() + i);
 				i--;
@@ -647,6 +648,14 @@ bool World::check_collision(BoundingBox b1, BoundingBox b2) {
 	else {
 		return false;
 	}
+}
+
+bool World::check_collision_world(BoundingBox b1) {
+	// !!! refactor so that this doesn't use magic numbers
+	BoundingBox* b3 = new BoundingBox(0, 0, 1200, 800);
+	bool collision = check_collision(b1, *b3);
+	delete b3;
+	return collision;
 }
 
 void World::set_paused(bool isPaused) {

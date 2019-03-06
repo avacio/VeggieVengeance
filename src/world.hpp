@@ -61,6 +61,7 @@ class World
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
 	bool check_collision(BoundingBox b1, BoundingBox b2);
+	bool check_collision_world(BoundingBox b1);
 
 
   private:
