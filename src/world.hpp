@@ -12,6 +12,7 @@
 #include "boundingBox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
+#include "platform.hpp"
 
 
 // stlib
@@ -60,7 +61,7 @@ class World
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
-	bool check_collision(BoundingBox b1, BoundingBox b2);
+	//bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
 
 
@@ -85,6 +86,7 @@ class World
 	Player2 m_player2;
 	std::vector<AI> m_ais;
 	std::vector<DamageEffect> m_damageEffects;
+	std::vector<Platform> m_platforms;
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 

@@ -180,7 +180,7 @@ bool World::update(float elapsed_ms)
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_player1.get_in_play()) {
 				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1)) {
+				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
 					//incur damage
 					m_player1.decrease_health(m_damageEffects[i].m_damage);
 					m_player1.set_hurt(true);
@@ -189,7 +189,7 @@ bool World::update(float elapsed_ms)
 			}
 			if (m_player2.get_in_play()) {
 				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2)) {
+				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
 					//incur damage
 					m_player2.decrease_health(m_damageEffects[i].m_damage);
 					m_player2.set_hurt(true);
@@ -198,7 +198,7 @@ bool World::update(float elapsed_ms)
 			}
 			for (int j = 0; j < m_ais.size(); j++) {
 				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b3)) {
+				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
 					//incur damage
 					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
 					m_ais[j].set_hurt(true);
@@ -223,14 +223,14 @@ bool World::update(float elapsed_ms)
 		DamageEffect * d = NULL;
 		if (m_player1.get_in_play())
 		{
-			d = m_player1.update(elapsed_ms);
+			d = m_player1.update(elapsed_ms, m_platforms);
 			if (d != NULL) {
 				m_damageEffects.push_back(*d);
 			}
 		}
 		if (m_player2.get_in_play())
 		{
-			d = m_player2.update(elapsed_ms);
+			d = m_player2.update(elapsed_ms, m_platforms);
 			if (d != NULL) {
 				m_damageEffects.push_back(*d);
 			}
@@ -239,7 +239,7 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				d = ai.update(elapsed_ms * 0.5, m_player1.get_position());
+				d = ai.update(elapsed_ms * 0.5, m_platforms, m_player1.get_position());
 				if (d != NULL) {
 					m_damageEffects.push_back(*d);
 				}
@@ -638,17 +638,17 @@ void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 }
 
 
-bool World::check_collision(BoundingBox b1, BoundingBox b2) {
+/*bool World::check_collision(BoundingBox b1, BoundingBox b2) {
 	return (b1.xpos < b2.xpos + b2.width &&
 		b1.xpos + b1.width > b2.xpos &&
 		b1.ypos < b2.ypos + b2.height &&
 		b1.ypos + b1.height > b2.ypos);
-}
+}*/
 
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers
 	BoundingBox* b3 = new BoundingBox(0, 0, 1200, 800);
-	bool collision = check_collision(b1, *b3);
+	bool collision = b1.check_collision(*b3);
 	delete b3;
 	return collision;
 }

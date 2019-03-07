@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "damageEffect.hpp"
+#include "platform.hpp"
 #include "textRenderer.hpp"
 #include <random>
 
@@ -20,7 +21,7 @@ class Fighter : public Renderable
 
 	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	DamageEffect * update(float ms);
+	DamageEffect * update(float ms, std::vector<Platform> platforms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;

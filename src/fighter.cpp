@@ -121,7 +121,7 @@ void Fighter::destroy()
 	glDeleteShader(effect.program);
 }
 
-DamageEffect * Fighter::update(float ms)
+DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 {
 	DamageEffect * d = NULL;
 	const float MOVING_SPEED = 5.0;
