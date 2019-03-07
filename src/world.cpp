@@ -119,12 +119,11 @@ bool World::init(vec2 screen, GameMode mode)
 	fprintf(stderr, "Loaded music\n");
 
 	m_screen = screen; // to pass on screen size to renderables
-	bool initSuccess = set_mode(mode);
-	initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
-				  POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
-				  POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
-				  BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
-				  BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && initSuccess;
+	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
+				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
+				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
+				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
+				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && set_mode(mode);
 
 	return m_water.init() && initSuccess;
 }
