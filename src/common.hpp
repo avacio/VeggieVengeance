@@ -25,7 +25,6 @@ std::string fonts_path(std::string name);
 static const std::string mainFont = "HABESHAPIXELS.ttf";
 static const std::string mainFontBold = "HABESHAPIXELS-Bold.ttf";
 
-
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..
 struct vec2
@@ -84,6 +83,13 @@ struct Texture
 	bool create_from_screen(GLFWwindow const *const window);
 	bool is_valid() const; // True if texture is valid
 };
+
+extern Texture POTATO_TEXTURE;
+extern Texture POTATO_IDLE_TEXTURE;
+extern Texture POTATO_PUNCH_TEXTURE;
+extern Texture BROCCOLI_TEXTURE;
+extern Texture MAIN_MENU_TEXTURE;
+extern Texture BACKGROUND_TEXTURE;
 
 // A Mesh is a collection of a VertexBuffer and an IndexBuffer. A VAO
 // represents a Vertex Array Object and is the container for 1 or more Vertex Buffers and

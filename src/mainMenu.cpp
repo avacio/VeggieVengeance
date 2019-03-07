@@ -10,14 +10,9 @@ Texture MainMenu::m_texture;
 bool MainMenu::init(vec2 screen)
 {
 	// Load shared texture
-	if (!m_texture.is_valid())
-	{
-		if (!m_texture.load_from_file(textures_path("mainMenu.jpg")))
-		{
-			fprintf(stderr, "Failed to load background texture!");
-			return false;
-		}
-	}
+	MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg"));
+	m_texture = MAIN_MENU_TEXTURE;
+
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture

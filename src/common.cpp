@@ -49,6 +49,14 @@ bool gl_has_errors()
 	return true;
 }
 
+Texture POTATO_TEXTURE;
+Texture POTATO_IDLE_TEXTURE;
+Texture POTATO_PUNCH_TEXTURE;
+Texture BROCCOLI_TEXTURE;
+Texture MAIN_MENU_TEXTURE;
+Texture BACKGROUND_TEXTURE;
+
+
 float dot(vec2 l, vec2 r)
 {
 	return l.x * r.x + l.y * r.y;

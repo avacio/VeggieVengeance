@@ -1,4 +1,5 @@
 // Header
+#include "common.hpp"
 #include "world.hpp"
 
 // stlib
@@ -119,6 +120,11 @@ bool World::init(vec2 screen, GameMode mode)
 
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = set_mode(mode);
+	initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
+				  POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
+				  POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
+				  BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
+				  BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && initSuccess;
 
 	return m_water.init() && initSuccess;
 }

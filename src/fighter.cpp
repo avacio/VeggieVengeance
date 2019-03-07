@@ -16,14 +16,7 @@ bool Fighter::init(int init_position, std::string name)
 
 {
 	// Load shared texture
-	if (!fighter_texture.is_valid())
-	{
-		if (!fighter_texture.load_from_file(textures_path("broccoli.png")))
-		{
-			fprintf(stderr, "Failed to load bubble texture!");
-			return false;
-		}
-	}
+	fighter_texture = BROCCOLI_TEXTURE;
 
 	// The position corresponds to the center of the texture
 	float wr = fighter_texture.width * 3.5f;

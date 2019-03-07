@@ -50,26 +50,17 @@ void Player1::draw(const mat3 &projection)
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
 	if (get_alive() && is_punching()) {
-		if (!player1_texture.load_from_file(textures_path("potato_punch.png")))
-		{
-			fprintf(stderr, "Failed to load fighter texture!");
-		}
+		player1_texture = POTATO_PUNCH_TEXTURE;
 	}
 	if (!is_punching()) {
 		if (get_alive() && is_idle()) {
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
-				if (!player1_texture.load_from_file(textures_path("potato_idle.png")))
-				{
-					fprintf(stderr, "Failed to load fighter texture!");
-				}
+				player1_texture = POTATO_IDLE_TEXTURE;
 			}
 
 			else if (m_idle_counter > 25 && m_idle_counter < 50) {
-				if (!player1_texture.load_from_file(textures_path("potato.png")))
-				{
-					fprintf(stderr, "Failed to load fighter texture!");
-				}
+				player1_texture = POTATO_TEXTURE;
 			}
 
 			else if (m_idle_counter >= 50)

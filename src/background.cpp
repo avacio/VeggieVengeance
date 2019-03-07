@@ -8,14 +8,7 @@ bool Background::init(vec2 screen, GameMode mode)
 	m_mode = mode;
 
 	// Load shared texture
-	if (!bg_texture.is_valid())
-	{
-		if (!bg_texture.load_from_file(textures_path("background.png")))
-		{
-			fprintf(stderr, "Failed to load background texture!");
-			return false;
-		}
-	}
+	bg_texture = BACKGROUND_TEXTURE;
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
