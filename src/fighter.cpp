@@ -315,10 +315,12 @@ void Fighter::move(vec2 off)
 }
 
 //// Returns the local bounding coordinates scaled by the current size of the bubble
-vec2 Fighter::get_bounding_box() const
+BoundingBox * Fighter::get_bounding_box() const
 {
 	// fabs is to avoid negative scale due to the facing direction
-	return {std::fabs(m_scale.x) * fighter_texture.width, std::fabs(m_scale.y) * fighter_texture.height};
+	float width = std::fabs(m_scale.x) * fighter_texture.width;
+	float height = std::fabs(m_scale.y) * fighter_texture.height;
+	return new BoundingBox(get_position().x, get_position().y, width, height);	
 }
 
 // set fighter's movements
@@ -509,13 +511,28 @@ void Fighter::reset(int init_position)
 DamageEffect * Fighter::punch() {
 	//create the bounding box based on fighter position
 	int sizeMultiplier = 4;
+	BoundingBox* b = get_bounding_box();
+	DamageEffect* d;
 	if (get_facing_front()) {
 		//right facing
-		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		d = new DamageEffect(b->xpos, b->ypos, sizeMultiplier * b->width, b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
 	else {
 		//left facing
-		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
-			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * b->width), b->ypos, sizeMultiplier * b->width,
+			b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
+
+	delete b;
+	return d;
+}
+
+void Fighter::platform_collision(std::vector<Platform> platforms) {
+	//go through loop checking if there is a collision with the platform
+	//for (int i = 0; i < platforms.size(); i++) {
+	//	platforms[i].check_collision()
+	//}
+
+	//if there is a collision, you need to determine whether to reset the platform's x or y
+	// i guess we can start by resetting both and see what it looks like
 }

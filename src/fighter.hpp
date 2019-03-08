@@ -55,7 +55,7 @@ class Fighter : public Renderable
 	bool get_facing_front() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
-	vec2 get_bounding_box() const;
+	BoundingBox * get_bounding_box() const;
 
 	// Returns the current fighter scale
 	vec2 get_scale() const;
@@ -84,6 +84,8 @@ class Fighter : public Renderable
 	void set_crouch_state(CrouchState cs);
 
 	void reset(int init_position);
+
+	void platform_collision(std::vector<Platform> platforms);
 
   protected:
   	const int MAX_HEALTH = 100;

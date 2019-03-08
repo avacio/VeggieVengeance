@@ -179,7 +179,7 @@ bool World::update(float elapsed_ms)
 		//damage effect collision loop
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_player1.get_in_play()) {
-				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
+				BoundingBox* b1 = m_player1.get_bounding_box();
 				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
 					//incur damage
 					m_player1.decrease_health(m_damageEffects[i].m_damage);
@@ -188,7 +188,7 @@ bool World::update(float elapsed_ms)
 				delete b1;
 			}
 			if (m_player2.get_in_play()) {
-				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
+				BoundingBox* b2 = m_player2.get_bounding_box();
 				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
 					//incur damage
 					m_player2.decrease_health(m_damageEffects[i].m_damage);
@@ -197,7 +197,7 @@ bool World::update(float elapsed_ms)
 				delete b2;
 			}
 			for (int j = 0; j < m_ais.size(); j++) {
-				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
+				BoundingBox* b3 = m_ais[j].get_bounding_box();
 				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
 					//incur damage
 					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
@@ -636,14 +636,6 @@ bool World::set_mode(GameMode mode) {
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
-
-
-/*bool World::check_collision(BoundingBox b1, BoundingBox b2) {
-	return (b1.xpos < b2.xpos + b2.width &&
-		b1.xpos + b1.width > b2.xpos &&
-		b1.ypos < b2.ypos + b2.height &&
-		b1.ypos + b1.height > b2.ypos);
-}*/
 
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers
