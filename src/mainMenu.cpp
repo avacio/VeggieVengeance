@@ -72,8 +72,6 @@ bool MainMenu::init(vec2 screen)
 	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 	init_buttons();
 
-	//fprintf(stderr, "Loaded text\n");
-
 	return true;
 }
 
@@ -83,11 +81,14 @@ void MainMenu::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	delete title;
+	buttons.clear();
+	effect.release();
 }
 
 void MainMenu::draw(const mat3& projection)
@@ -181,7 +182,6 @@ void MainMenu::init_buttons()
 
 // TODO: may want to change design so that selection does not loop
 void MainMenu::change_selection(bool goDown)
-//void MainMenu::change_selection()
 {
 	switch (selectedButtonIndex) {
 	case 0:

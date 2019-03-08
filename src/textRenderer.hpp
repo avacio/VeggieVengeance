@@ -22,7 +22,7 @@ struct Character {
 class TextRenderer : public Renderable {
 public:
 	TextRenderer(std::string font_name, int size);
-
+	~TextRenderer();
 	void setColor(vec3 color);
 	void setPosition(vec2 position);
 	void setScale(vec2 scale);

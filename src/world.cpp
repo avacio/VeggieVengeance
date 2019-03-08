@@ -563,9 +563,17 @@ void World::reset()
 bool World::set_mode(GameMode mode) {
 	m_player1.set_in_play(false);
 	m_player2.set_in_play(false);
+
+	for (AI& ai : m_ais) {
+		ai.destroy();
+	}
 	m_ais.clear();
+
+	for (Fighter& fighter : m_fighters) {
+		fighter.destroy();
+	}
 	m_fighters.clear();
-	m_bg.clearNameplates();
+	m_bg.destroy();
 	
 	m_mode = mode;
 	bool initSuccess = true;

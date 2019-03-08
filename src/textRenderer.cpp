@@ -74,6 +74,18 @@ TextRenderer::TextRenderer(std::string font_name, int size) {
 		printf("textRenderer text shaders failed!");
 }
 
+TextRenderer::~TextRenderer() {
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
+	effect.release();
+
+	characters.clear();
+}
+
 void TextRenderer::setColor(vec3 color) {
 	m_color = color;
 }

@@ -107,11 +107,13 @@ void Fighter::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	// delete m_nameplate;
+	effect.release();
 }
 
 DamageEffect * Fighter::update(float ms)
@@ -133,7 +135,7 @@ DamageEffect * Fighter::update(float ms)
 			m_crouch_state = NOT_CROUCHING;
 		}
 		else if (m_crouch_state == CROUCH_PRESSED) {
-			m_crouch_state == NOT_CROUCHING;
+			m_crouch_state = NOT_CROUCHING;
 		}
 
 		if (m_lives > 0)

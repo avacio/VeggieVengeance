@@ -257,9 +257,13 @@ bool Effect::load_from_file(const char* vs_path, const char* fs_path)
 
 void Effect::release()
 {
-	glDeleteProgram(program);
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
+  glDetachShader(program, vertex);
+  glDeleteShader(vertex);
+  //
+  glDetachShader(program, fragment);
+  glDeleteShader(fragment);
+  //
+  glDeleteProgram(program);
 }
 
 std::string fonts_path(std::string name) {
