@@ -67,7 +67,7 @@ class Fighter : public Renderable
 
 	unsigned int get_id() const;
 
-	void jump_update();
+	void jump_update(float ms);
 
 	bool is_hurt() const;
 
@@ -87,6 +87,8 @@ class Fighter : public Renderable
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
+	void updatePosition(float ms);
+
   protected:
   	const int MAX_HEALTH = 100;
 	const int STARTING_LIVES = 3;
@@ -105,6 +107,7 @@ class Fighter : public Renderable
 	int m_speed; // each fighter has different speed and strength stats
 	int m_strength;
 	float m_vertical_velocity;
+	vec2 m_velocity;
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
@@ -125,7 +128,9 @@ class Fighter : public Renderable
 	const int RESPAWN_TIME = 1000; //in ms
 	
 	const float INITIAL_VELOCITY = 10.0;
+	const float MOVEMENT_SPEED = 5.0;
 	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
+	const vec2 GRAVITY = {0.0, 0.0};
 
 	const unsigned int m_id; //unique identifier given when created
 

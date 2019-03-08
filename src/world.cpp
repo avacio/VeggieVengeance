@@ -240,7 +240,7 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				d = ai.update(elapsed_ms * 0.5, m_platforms, m_player1.get_position());
+				d = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
 				if (d != NULL) {
 					m_damageEffects.push_back(*d);
 				}
@@ -422,8 +422,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_S)
-				m_player1.set_movement(CROUCHING);
+			//if (action == GLFW_PRESS && key == GLFW_KEY_S)
+			//	m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
 			}
@@ -431,8 +431,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
-				m_player1.set_movement(RELEASE_CROUCH);
+			//if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
+			//	m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
 				m_player1.set_movement(STOP_PUNCHING);
 
@@ -448,8 +448,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
 				m_player2.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_K)
-				m_player2.set_movement(CROUCHING);
+			//if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			//	m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 				m_player2.set_movement(PUNCHING);
 			}
@@ -457,8 +457,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
-				m_player2.set_movement(RELEASE_CROUCH);
+			//if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
+			//	m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
 				play_grunt_audio();

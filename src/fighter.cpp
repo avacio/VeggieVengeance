@@ -85,6 +85,7 @@ bool Fighter::init(int init_position, std::string name)
 	m_strength = 1;
 	m_lives = STARTING_LIVES;
 	m_vertical_velocity = 0.0;
+	m_velocity = { 0.0, 0.0 };
 	m_name = name;
 	
 	switch (init_position) {
@@ -124,7 +125,6 @@ void Fighter::destroy()
 DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 {
 	DamageEffect * d = NULL;
-	const float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
@@ -171,7 +171,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 	}
 
-	jump_update();
+	//jump_update();
 
 	if (m_is_alive)
 	{
@@ -183,7 +183,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_facing_front = true;
 			}
 			if (m_position.x < 1150.f) {
-				move({MOVING_SPEED, 0.0});
+				move({ MOVEMENT_SPEED, 0.0});
 			}
 		}
 		if (m_moving_backward)
@@ -194,7 +194,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_facing_front = false;
 			}
 			if (m_position.x > 50.f) {
-				move({-MOVING_SPEED, 0.0});
+				move({-MOVEMENT_SPEED, 0.0});
 			}
 		}
 
@@ -225,6 +225,8 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		else
 			m_rotation = M_PI / 2;
 	}
+
+	updatePosition(ms);
 
 	//return null if not attacking, or the collision object if attacking
 	return d;
@@ -403,23 +405,24 @@ void Fighter::start_jumping()
 	{
 		m_is_jumping = true;
 		m_is_idle = false;
-		m_vertical_velocity = INITIAL_VELOCITY;
+		//m_vertical_velocity = INITIAL_VELOCITY;
+		m_velocity.y = -INITIAL_VELOCITY;
 	}
 }
 
-void Fighter::jump_update()
+void Fighter::jump_update(float ms)
 {
-	if (m_is_jumping)
+	/*if (m_is_jumping)
 	{
-		move({0.0, -m_vertical_velocity});
-		m_vertical_velocity += ACCELERATION;
-	}
+		move({0.0, -m_vertical_velocity*ms});
+		m_vertical_velocity += ms*ACCELERATION;
+	}*/
 
-	if (m_vertical_velocity < -INITIAL_VELOCITY)
+	/*if (m_vertical_velocity < -INITIAL_VELOCITY)
 	{
 		m_is_jumping = false;
 		m_vertical_velocity = 0.0;
-	}
+	}*/
 }
 
 bool Fighter::is_hurt() const
@@ -478,6 +481,7 @@ void Fighter::reset(int init_position)
 	m_rotation = 0;
 	m_is_jumping = false;
 	m_vertical_velocity = 0;
+	m_velocity = { 0.0, 0.0 };
 
 	switch (init_position) {
 	case 1:
@@ -538,4 +542,10 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 		}
 		delete b;
 	}
+}
+
+void Fighter::updatePosition(float ms) {
+	float s = ms / 1000;
+	m_position.y += m_velocity.y * s;
+	m_velocity.y += GRAVITY.y * s;
 }
