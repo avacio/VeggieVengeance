@@ -16,14 +16,7 @@ bool Fighter::init(int init_position, std::string name)
 
 {
 	// Load shared texture
-	if (!fighter_texture.is_valid())
-	{
-		if (!fighter_texture.load_from_file(textures_path("broccoli.png")))
-		{
-			fprintf(stderr, "Failed to load bubble texture!");
-			return false;
-		}
-	}
+	fighter_texture = BROCCOLI_TEXTURE;
 
 	// The position corresponds to the center of the texture
 	float wr = fighter_texture.width * 3.5f;
@@ -114,11 +107,13 @@ void Fighter::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	// delete m_nameplate;
+	effect.release();
 }
 
 DamageEffect * Fighter::update(float ms)
@@ -140,7 +135,7 @@ DamageEffect * Fighter::update(float ms)
 			m_crouch_state = NOT_CROUCHING;
 		}
 		else if (m_crouch_state == CROUCH_PRESSED) {
-			m_crouch_state == NOT_CROUCHING;
+			m_crouch_state = NOT_CROUCHING;
 		}
 
 		if (m_lives > 0)

@@ -1,4 +1,5 @@
 // Header
+#include "common.hpp"
 #include "world.hpp"
 
 // stlib
@@ -118,7 +119,11 @@ bool World::init(vec2 screen, GameMode mode)
 	fprintf(stderr, "Loaded music\n");
 
 	m_screen = screen; // to pass on screen size to renderables
-	bool initSuccess = set_mode(mode);
+	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
+				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
+				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
+				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
+				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && set_mode(mode);
 
 	return m_water.init() && initSuccess;
 }
@@ -425,6 +430,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
+				play_grunt_audio();
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
@@ -434,8 +440,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
 				m_player1.set_movement(STOP_PUNCHING);
-
-				play_grunt_audio();
 			}
 		}
 
@@ -451,6 +455,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 				m_player2.set_movement(PUNCHING);
+				play_grunt_audio();
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -460,7 +465,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
-				play_grunt_audio();
 			}
 		}
 
@@ -559,9 +563,17 @@ void World::reset()
 bool World::set_mode(GameMode mode) {
 	m_player1.set_in_play(false);
 	m_player2.set_in_play(false);
+
+	for (AI& ai : m_ais) {
+		ai.destroy();
+	}
 	m_ais.clear();
+
+	for (Fighter& fighter : m_fighters) {
+		fighter.destroy();
+	}
 	m_fighters.clear();
-	m_bg.clearNameplates();
+	m_bg.destroy();
 	
 	m_mode = mode;
 	bool initSuccess = true;

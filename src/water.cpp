@@ -42,6 +42,7 @@ void Water::destroy() {
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	effect.release();
 }
 
 void Water::set_is_wavy(bool is_wavy) {

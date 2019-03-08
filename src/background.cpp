@@ -8,14 +8,7 @@ bool Background::init(vec2 screen, GameMode mode)
 	m_mode = mode;
 
 	// Load shared texture
-	if (!bg_texture.is_valid())
-	{
-		if (!bg_texture.load_from_file(textures_path("background.png")))
-		{
-			fprintf(stderr, "Failed to load background texture!");
-			return false;
-		}
-	}
+	bg_texture = BACKGROUND_TEXTURE;
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
@@ -65,8 +58,8 @@ bool Background::init(vec2 screen, GameMode mode)
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
-	////////////////
-	//// TEXT
+	//////////////
+	// TEXT
 	health1 = new TextRenderer(mainFont, 44);
 	health2 = new TextRenderer(mainFont, 44);
 	int width = health1->get_width_of_string("HP: 100"); // TODO
@@ -118,9 +111,6 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
 	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
 
-
-	fprintf(stderr, "Loaded text\n");
-
 	return true;
 }
 
@@ -130,12 +120,32 @@ void Background::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	nameplates.clear();
+
+	delete health1;
+	delete health2;
+	delete lives1;
+	delete lives2;
+	delete isPausedText;
+	delete jump;
+	delete left;
+	delete right;
+	delete crouch;
+	delete pause;
+	delete reset;
+	delete ability1;
+	delete ability2;
+	delete punch;
+	delete pauseMusic;
+	delete resumeMusic;
+	delete increaseVolume;
+	delete decreaseVolume;
+	effect.release();
 }
 
 void Background::draw(const mat3& projection)

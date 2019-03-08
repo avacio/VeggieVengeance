@@ -10,14 +10,9 @@ Texture MainMenu::m_texture;
 bool MainMenu::init(vec2 screen)
 {
 	// Load shared texture
-	if (!m_texture.is_valid())
-	{
-		if (!m_texture.load_from_file(textures_path("mainMenu.jpg")))
-		{
-			fprintf(stderr, "Failed to load background texture!");
-			return false;
-		}
-	}
+	MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg"));
+	m_texture = MAIN_MENU_TEXTURE;
+
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
@@ -77,8 +72,6 @@ bool MainMenu::init(vec2 screen)
 	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 	init_buttons();
 
-	//fprintf(stderr, "Loaded text\n");
-
 	return true;
 }
 
@@ -88,11 +81,14 @@ void MainMenu::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
-	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	delete title;
+	buttons.clear();
+	effect.release();
 }
 
 void MainMenu::draw(const mat3& projection)
@@ -186,7 +182,6 @@ void MainMenu::init_buttons()
 
 // TODO: may want to change design so that selection does not loop
 void MainMenu::change_selection(bool goDown)
-//void MainMenu::change_selection()
 {
 	switch (selectedButtonIndex) {
 	case 0:
