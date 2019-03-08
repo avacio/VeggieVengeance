@@ -1,0 +1,16 @@
+TEAM 9 -- Vegetable Fight  
+
+===================================================================
+OVERALL GRADING (75)
+
+* Core part:
+  - Decision based enemy but hardcoded with if and else (-5)
+  - Gameplay is still basic (-5).
+  - Instructions is included.
+  - Game executes and terminates smoothly
+  - Sprites match the input behaviour
+* Creative Part (10/25):
+  - Game can be paused, but some actions still happen in the background (+5)
+  - Music (+5)
+
+Creative from last time: Distortion and multiplayer. Physics was included from last time. Player could crouch last time.
