@@ -145,6 +145,7 @@ void World::destroy()
 		ai.destroy();
 	m_ais.clear();
 	m_fighters.clear();
+	m_damageEffects.clear();
 	m_bg.destroy();
 	glfwDestroyWindow(m_window);
 }

@@ -85,7 +85,7 @@ class Fighter : public Renderable
 
 	void reset(int init_position);
 
-	void platform_collision(std::vector<Platform> platforms);
+	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
   protected:
   	const int MAX_HEALTH = 100;

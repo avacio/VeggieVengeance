@@ -527,12 +527,15 @@ DamageEffect * Fighter::punch() {
 	return d;
 }
 
-void Fighter::platform_collision(std::vector<Platform> platforms) {
-	//go through loop checking if there is a collision with the platform
-	//for (int i = 0; i < platforms.size(); i++) {
-	//	platforms[i].check_collision()
-	//}
-
-	//if there is a collision, you need to determine whether to reset the platform's x or y
-	// i guess we can start by resetting both and see what it looks like
+//revert to old position if new position causes a collision with platforms
+void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPosition) {
+	for (int i = 0; i < platforms.size(); i++) {
+		BoundingBox* b = get_bounding_box();
+		if (platforms[i].check_collision(*b)) {
+			m_position = oldPosition;
+			//delete b;  //do we really need to keep going if we reset it...
+			//break;
+		}
+		delete b;
+	}
 }
