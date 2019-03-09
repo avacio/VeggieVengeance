@@ -32,7 +32,7 @@ public:
 
 
 private:
-	std::map<GLchar, Character> characters;
+	std::map<GLchar, Character*> characters;
 	vec3 m_color;
 
 	GLuint VAO;

@@ -56,7 +56,6 @@ Texture BROCCOLI_TEXTURE;
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
 
-
 float dot(vec2 l, vec2 r)
 {
 	return l.x * r.x + l.y * r.y;
