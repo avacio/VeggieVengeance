@@ -4,8 +4,7 @@
 #include "common.hpp"
 #include "water.hpp"
 #include "fighter.hpp"
-#include "player1.hpp"
-#include "player2.hpp"
+#include "player.hpp"
 #include "ai.hpp"
 #include "background.hpp"
 #include "damageEffect.hpp"
@@ -81,8 +80,8 @@ class World
 	// Game entities
 	MainMenu m_menu;
 	Background m_bg;
-	Player1 m_player1;
-	Player2 m_player2;
+	Player m_player1;
+	Player m_player2;
 	std::vector<AI> m_ais;
 	std::vector<DamageEffect> m_damageEffects;
 	//float m_current_speed;

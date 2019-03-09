@@ -182,3 +182,8 @@ enum GameMode
 // For console log printing
 static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
 
+enum FighterCharacter
+{
+	POTATO = 0,
+	BROCCOLI
+};

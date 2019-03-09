@@ -34,8 +34,7 @@ set(SOURCE_FILES
 	src/main.cpp
 	src/common.cpp
 	src/fighter.cpp
-	src/player1.cpp
-	src/player2.cpp
+	src/player.cpp
 	src/ai.cpp
 	src/world.cpp
 	src/water.cpp
@@ -48,8 +47,7 @@ set(SOURCE_FILES
     src/project_path.hpp
 	src/common.hpp
 	src/fighter.hpp
-	src/player1.hpp
-	src/player2.hpp
+	src/player.hpp
 	src/ai.hpp
 	src/world.hpp
 	src/water.hpp

@@ -1,15 +1,15 @@
 // Header
-#include "player1.hpp"
+#include "player.hpp"
 #include "fighter.hpp"
 
 //implement player specific functions here
 
-Texture Player1::player1_texture;
+Texture Player::player_texture;
 
-Player1::Player1(unsigned int id) : Fighter(id) {
+Player::Player(unsigned int id) : Fighter(id) {
 }
 
-void Player1::draw(const mat3 &projection)
+void Player::draw(const mat3 &projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -50,24 +50,24 @@ void Player1::draw(const mat3 &projection)
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
 	if (get_alive() && is_punching()) {
-		player1_texture = POTATO_PUNCH_TEXTURE;
+		player_texture = POTATO_PUNCH_TEXTURE;
 	}
 	if (!is_punching()) {
 		if (get_alive() && is_idle()) {
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
-				player1_texture = POTATO_IDLE_TEXTURE;
+				player_texture = POTATO_IDLE_TEXTURE;
 			}
 
 			else if (m_idle_counter > 25 && m_idle_counter < 50) {
-				player1_texture = POTATO_TEXTURE;
+				player_texture = POTATO_TEXTURE;
 			}
 
 			else if (m_idle_counter >= 50)
 				m_idle_counter = 0;
 		}
 	}
-	glBindTexture(GL_TEXTURE_2D, player1_texture.id);
+	glBindTexture(GL_TEXTURE_2D, player_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -84,12 +84,12 @@ void Player1::draw(const mat3 &projection)
 	m_nameplate->setPosition({ m_position.x - sWidth * .45f, m_position.y - 70.0f });
 }
 
-bool Player1::get_in_play() const
+bool Player::get_in_play() const
 {
 	return m_in_play;
 }
 
-void Player1::set_in_play(bool value)
+void Player::set_in_play(bool value)
 {
 	m_in_play = value;
 }

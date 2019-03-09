@@ -3,13 +3,13 @@
 #include "common.hpp"
 #include "fighter.hpp"
 
-class Player2 : public Fighter
+class Player : public Fighter
 {
 	// Shared between all fighters, no need to load one for each instance
-	static Texture player2_texture;
+	static Texture player_texture;
 
-public:
-	Player2(unsigned int id);
+  public:
+	Player(unsigned int id);
 	bool get_in_play() const;
 	void set_in_play(bool value);
 
@@ -18,7 +18,7 @@ public:
 	void draw(const mat3 &projection) override;
 
 
-private:
+  private:
 	bool m_in_play = false; // denotes if a player object is currently in play, false by default
 
 	int m_idle_counter = 0;
