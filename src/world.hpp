@@ -11,7 +11,7 @@
 #include "boundingBox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
-
+#include "characterSelect.hpp"
 
 // stlib
 #include <vector>
@@ -79,6 +79,7 @@ class World
 
 	// Game entities
 	MainMenu m_menu;
+	CharacterSelect m_charSelect;
 	Background m_bg;
 	Player m_player1;
 	Player m_player2;
@@ -92,6 +93,12 @@ class World
 
 	GameMode m_mode;
 	bool m_paused;
+
+	/////// selected
+	GameMode m_selected_mode;
+	FighterCharacter m_selected_p1;
+	FighterCharacter m_selected_p2;
+	///////
 
 	// C++ rng
 	std::default_random_engine m_rng;

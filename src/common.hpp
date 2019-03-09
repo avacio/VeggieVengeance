@@ -3,6 +3,7 @@
 // stlib
 #include <fstream> // stdout, stderr..
 #include <sstream>
+#include <random>
 
 // glfw
 #define NOMINMAX
@@ -45,6 +46,7 @@ float dot(vec2 l, vec2 r);
 float dot(vec3 l, vec3 r);
 mat3 mul(const mat3 &l, const mat3 &r);
 vec2 normalize(vec2 v);
+int get_random_number(int maxRange);
 
 // OpenGL utilities
 // cleans error buffer
@@ -89,6 +91,7 @@ extern Texture POTATO_IDLE_TEXTURE;
 extern Texture POTATO_PUNCH_TEXTURE;
 extern Texture BROCCOLI_TEXTURE;
 extern Texture MAIN_MENU_TEXTURE;
+extern Texture CHAR_SELECT_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
 
 // A Mesh is a collection of a VertexBuffer and an IndexBuffer. A VAO
@@ -173,6 +176,7 @@ enum DeletionTime
 enum GameMode
 {
 	MENU = 0,
+	CHARSELECT,
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
@@ -180,7 +184,7 @@ enum GameMode
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "CHARSELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
 
 enum FighterCharacter
 {

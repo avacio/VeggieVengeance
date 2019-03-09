@@ -2,19 +2,9 @@
 
 #include "common.hpp"
 #include "textRenderer.hpp"
+#include "mainMenu.hpp"
 
-class Screen {
-public:
-	void change_selection(bool goDown); // goDown is true when down direction
-
-protected:
-	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
-	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
-	int selectedButtonIndex = -1;
-	std::vector<TextRenderer*> buttons;
-};
-
-class MainMenu : public Renderable, public Screen
+class CharacterSelect : public Renderable, public Screen
 {
 	// Background texture
 	static Texture m_texture;
@@ -39,7 +29,7 @@ public:
 	void set_position(vec2 position);
 
 	void init_buttons();
-	GameMode get_selected();
+	FighterCharacter get_selected_char();
 
 private:
 	vec2 screen;

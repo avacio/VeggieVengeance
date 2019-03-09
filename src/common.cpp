@@ -54,6 +54,7 @@ Texture POTATO_IDLE_TEXTURE;
 Texture POTATO_PUNCH_TEXTURE;
 Texture BROCCOLI_TEXTURE;
 Texture MAIN_MENU_TEXTURE;
+Texture CHAR_SELECT_TEXTURE; // TODO
 Texture BACKGROUND_TEXTURE;
 
 
@@ -92,6 +93,15 @@ vec2 normalize(vec2 v)
 {
 	float m = sqrtf(dot(v, v));
 	return { v.x / m, v.y / m };
+}
+
+int get_random_number(int maxRange) {
+	std::random_device rd; // non-deterministic generator
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(0, maxRange);
+	//return dist(gen);
+	int randNum = dist(gen);
+	return randNum;
 }
 
 Texture::Texture()

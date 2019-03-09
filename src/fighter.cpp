@@ -7,16 +7,26 @@
 
 Texture Fighter::fighter_texture;
 
-
 Fighter::Fighter(unsigned int id) : m_id(id) {
 
 }
 
-bool Fighter::init(int init_position, std::string name)
-
+bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 {
+	m_charType = fc;
 	// Load shared texture
-	fighter_texture = BROCCOLI_TEXTURE;
+	switch (fc) {
+	case POTATO:
+		fighter_texture = POTATO_TEXTURE;
+		break;
+	case BROCCOLI:
+		fighter_texture = BROCCOLI_TEXTURE;
+		break;
+	default:
+		fighter_texture = BROCCOLI_TEXTURE;
+		break;
+
+	}
 
 	// The position corresponds to the center of the texture
 	float wr = fighter_texture.width * 3.5f;

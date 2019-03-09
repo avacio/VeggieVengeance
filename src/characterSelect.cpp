@@ -1,17 +1,16 @@
 // Header
-#include "mainMenu.hpp"
+#include "characterSelect.hpp"
 
-Texture MainMenu::m_texture;
+Texture CharacterSelect::m_texture;
 
-///////////////
-// NOTE: REPEAT FROM BACKGROUND.HPP MIGHT NOT BE NECESSARY
-// if we only want a monocolour background (i.e. water) we can copy that format instead
-
-bool MainMenu::init(vec2 screen)
+bool CharacterSelect::init(vec2 screen)
 {
 	// Load shared texture
-	MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg"));
-	m_texture = MAIN_MENU_TEXTURE;
+	//MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")); // TODO
+	//m_texture = MAIN_MENU_TEXTURE;
+
+	CHAR_SELECT_TEXTURE.load_from_file(textures_path("mainMenu.jpg")); // TODO
+	m_texture = CHAR_SELECT_TEXTURE;
 
 	this->screen = screen;
 
@@ -66,7 +65,7 @@ bool MainMenu::init(vec2 screen)
 	//// TEXT
 	title = new TextRenderer(mainFontBold, 90);
 	title->setColor({ 0.f,0.f,0.f });
-	int width = title->get_width_of_string("VEGGIEVENGEANCE");
+	int width = title->get_width_of_string("CharacterSelect");
 	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 	init_buttons();
 
@@ -75,7 +74,7 @@ bool MainMenu::init(vec2 screen)
 
 // Call if init() was successful
 // Releases all graphics resources
-void MainMenu::destroy()
+void CharacterSelect::destroy()
 {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
@@ -89,7 +88,7 @@ void MainMenu::destroy()
 	effect.release();
 }
 
-void MainMenu::draw(const mat3& projection)
+void CharacterSelect::draw(const mat3& projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
 	// Incrementally updates transformation matrix, thus ORDER IS IMPORTANT
@@ -137,80 +136,52 @@ void MainMenu::draw(const mat3& projection)
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	/////////////////////////
-
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	title->renderString(projection, "VEGGIE VENGEANCE");
-	buttons[0]->renderString(projection, "ONE-PLAYER");
-	buttons[1]->renderString(projection, "TWO-PLAYER");
-	buttons[2]->renderString(projection, "TUTORIAL");
+	//title->renderString(projection, "CHARACTER SELECT");
+	//buttons[0]->renderString(projection, "POTATO");
+	//buttons[1]->renderString(projection, "BROCOLLI");
 }
 
-vec2 MainMenu::get_position()const
+vec2 CharacterSelect::get_position()const
 {
 	return m_position;
 }
 
-void MainMenu::set_position(vec2 position)
+void CharacterSelect::set_position(vec2 position)
 {
 	m_position = position;
 }
 
-void MainMenu::init_buttons()
+void CharacterSelect::init_buttons()
 {
 	buttons.clear();
 	selectedButtonIndex = 0; // default: first button selected
-	TextRenderer* play1 = new TextRenderer(mainFont, 60);
-	TextRenderer* play2 = new TextRenderer(mainFont, 60);
-	TextRenderer* playTut = new TextRenderer(mainFont, 60);
+	TextRenderer* c1 = new TextRenderer(mainFont, 60);
+	TextRenderer* c2 = new TextRenderer(mainFont, 60);
 
-	play1->setColor(selectedColor);
-	play2->setColor(defaultColor);
-	playTut->setColor(defaultColor);
+	c1->setColor(selectedColor);
+	c2->setColor(defaultColor);
 
-	int width = play1->get_width_of_string("ONE-PLAYER");
-	play1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
-	width = play2->get_width_of_string("TWO-PLAYER");
-	play2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
-	width = playTut->get_width_of_string("TUTORIAL");
-	playTut->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
-	buttons.emplace_back(play1);
-	buttons.emplace_back(play2);
-	buttons.emplace_back(playTut);
+	int width = c1->get_width_of_string("POTATO"); //Solanum tuberosum
+	c1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
+	width = c2->get_width_of_string("BROCCOLI");
+	c2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	buttons.emplace_back(c1);
+	buttons.emplace_back(c2);
 }
 
-GameMode MainMenu::get_selected()
+FighterCharacter CharacterSelect::get_selected_char()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		return PVC;
+		return POTATO;
 		break;
 	case 1:
-		return PVP;
+		return BROCCOLI;
 		break;
-	case 2:
-		return TUTORIAL;
+	default:
+		return POTATO;
 		break;
-	}
-}
-
-void Screen::change_selection(bool goDown)
-{
-	buttons[selectedButtonIndex]->setColor(defaultColor);
-	if (selectedButtonIndex == buttons.size() - 1 && goDown) {
-		buttons[0]->setColor(selectedColor);
-		selectedButtonIndex = 0;
-	}
-	else if (selectedButtonIndex == 0 && !goDown) {
-		buttons[buttons.size() - 1]->setColor(selectedColor);
-		selectedButtonIndex = buttons.size() - 1;
-	}
-	else if (goDown) {
-		selectedButtonIndex++;
-		buttons[selectedButtonIndex]->setColor(selectedColor);
-	}
-	else {
-		selectedButtonIndex--;
-		buttons[selectedButtonIndex]->setColor(selectedColor);
 	}
 }

@@ -308,6 +308,9 @@ void World::draw()
 		m_menu.draw(projection_2D); 
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
+	}
+	else if (m_mode == CHARSELECT) {
+		m_charSelect.draw(projection_2D);
 	} else {
 		m_bg.draw(projection_2D);
 
@@ -338,11 +341,7 @@ void World::draw()
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
 	////////////////////////////
-
-
 	m_water.draw(projection_2D);
-	//text->renderString(mat3{}, "Health: 100");
-	//text->renderString(projection_2D, "Health: 100");
 
 	//////////////////
 	// Presenting
@@ -360,7 +359,7 @@ bool World::spawn_ai(AIType type)
 {
 	//intialize ai with next ID and provided type
 	AI ai(idCounter, type);
-	if (ai.init(3, "AI"))
+	if (ai.init(3, "AI", (FighterCharacter) get_random_number(2)))
 	{
 		//assure the next ID given is unique
 		idCounter++;
@@ -411,12 +410,28 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
 			reset();
-			//m_ais.clear();
-			set_mode(m_menu.get_selected());
+			m_selected_mode = m_menu.get_selected();
+			set_mode(CHARSELECT);
+			//set_mode(m_menu.get_selected());
 		}
 
 	}
-	else {
+	else if (m_mode == CHARSELECT) {
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+		{
+			m_charSelect.change_selection(false);
+		}
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+		{
+			m_charSelect.change_selection(true);
+		}
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+		{
+			//reset();
+			m_selected_p1 = m_charSelect.get_selected_char();
+			set_mode(m_selected_mode);
+		}
+	} else {
 		// Handle player movement here
 		if (m_player1.get_in_play() && !m_paused && m_player1.get_alive())
 		{
@@ -557,6 +572,8 @@ void World::reset()
 		//set_mode(DEV);
 		//set_mode(PVC);
 		break;
+	default:
+		break;
 	}
 }
 
@@ -586,6 +603,9 @@ bool World::set_mode(GameMode mode) {
 		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 		initSuccess = initSuccess && m_menu.init(m_screen);
 		break;
+	case CHARSELECT:
+		initSuccess = initSuccess && m_charSelect.init(m_screen);
+		break;
 	case DEV:
 		if (MAX_PLAYERS >= 1)
 		{
@@ -598,13 +618,13 @@ bool World::set_mode(GameMode mode) {
 
 		if (m_player1.get_in_play())
 		{
-			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
+			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum", POTATO);
 			m_fighters.emplace_back(m_player1);
 		}
 
 		if (m_player2.get_in_play())
 		{
-			initSuccess = initSuccess && m_player2.init(2, "Spud");
+			initSuccess = initSuccess && m_player2.init(2, "Spud", BROCCOLI);
 			m_fighters.emplace_back(m_player2);
 		}
 
@@ -622,23 +642,23 @@ bool World::set_mode(GameMode mode) {
 	case PVP: // 2 player
 		m_player1.set_in_play(true);
 		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum", BROCCOLI) && m_player2.init(2, "Spud", POTATO) && m_bg.init(m_screen, mode);
 		m_fighters.emplace_back(m_player1);
 		m_fighters.emplace_back(m_player2);
 		break;
 	case PVC: // single player
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		initSuccess = initSuccess && m_player1.init(1, "Spud", BROCCOLI) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 		m_fighters.emplace_back(m_player1);
 		break;
 	case TUTORIAL:
 		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		initSuccess = initSuccess && m_player1.init(1, "Baby Tater", BROCCOLI) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 		m_fighters.emplace_back(m_player1);
 		break;
 	}
 
-	if (mode != MENU)
+	if (mode != MENU && mode != CHARSELECT)
 		for (Fighter &f : m_fighters)
 			m_bg.addNameplate(f.get_nameplate(), f.get_name());
 
@@ -671,9 +691,5 @@ void World::set_paused(bool isPaused) {
 }
 
 void World::play_grunt_audio() {
-	std::random_device rd; // non-deterministic generator
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dist(0, 3); //ADD FOR MORE ACTIONS
-	int	randNum = dist(gen);
-	Mix_PlayChannel(-1, m_grunt_audio[randNum], 0);
+	Mix_PlayChannel(-1, m_grunt_audio[get_random_number(3)], 0);
 }
