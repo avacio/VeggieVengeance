@@ -10,7 +10,6 @@ Texture MainMenu::m_texture;
 bool MainMenu::init(vec2 screen)
 {
 	// Load shared texture
-	MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg"));
 	m_texture = MAIN_MENU_TEXTURE;
 
 	this->screen = screen;
@@ -87,6 +86,12 @@ void MainMenu::destroy()
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	delete title;
+
+	for (int i = 0; i < buttons.size(); i++) {
+		TextRenderer *button = buttons[i];
+		delete button;
+	}
+
 	buttons.clear();
 	effect.release();
 }

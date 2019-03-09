@@ -130,7 +130,8 @@ DamageEffect * Fighter::update(float ms)
 	{
 		m_is_alive = false;
 		m_lives--;
-		m_is_punching = false;
+		set_movement(STOP_MOVING_BACKWARD);
+		set_movement(STOP_MOVING_FORWARD);
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {
@@ -155,6 +156,7 @@ DamageEffect * Fighter::update(float ms)
 		if (m_respawn_timer > 0)
 		{
 			//count down by time passed
+			m_is_punching = false;
 			m_respawn_timer -= ms;
 		}
 		else

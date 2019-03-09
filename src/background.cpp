@@ -125,6 +125,12 @@ void Background::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+
+	for (std::map<TextRenderer*, std::string>::iterator iter = nameplates.begin(); iter != nameplates.end(); ++iter) {
+		TextRenderer* nameplate = iter->first;
+		delete nameplate;
+	}
+
 	nameplates.clear();
 
 	delete health1;
