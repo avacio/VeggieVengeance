@@ -537,6 +537,7 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 		BoundingBox* b = get_bounding_box();
 		if (platforms[i].check_collision(*b)) {
 			m_position = oldPosition;
+			m_velocity.y = 0.0;
 			//delete b;  //do we really need to keep going if we reset it...
 			//break;
 		}

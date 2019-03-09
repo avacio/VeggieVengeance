@@ -117,8 +117,12 @@ bool World::init(vec2 screen, GameMode mode)
 
 	fprintf(stderr, "Loaded music\n");
 
+
+
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = set_mode(mode);
+
+	spawn_platform(400, 400, 400, 50);
 
 	return m_water.init() && initSuccess;
 }
@@ -147,6 +151,10 @@ void World::destroy()
 	m_fighters.clear();
 	m_damageEffects.clear();
 	m_bg.destroy();
+	for (auto &platform : m_platforms) {
+		platform.destroy();
+	}
+	m_platforms.clear();
 	glfwDestroyWindow(m_window);
 }
 
@@ -317,6 +325,8 @@ void World::draw()
 		}
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
+		for (auto &platform : m_platforms)
+			platform.draw(projection_2D);
 	}
 	/////////////////////
 	// Truly render to the screen
@@ -334,6 +344,10 @@ void World::draw()
 	glBindTexture(GL_TEXTURE_2D, m_screen_tex.id);
 
 	////////////////////////////
+
+
+
+
 
 
 	m_water.draw(projection_2D);
@@ -365,6 +379,19 @@ bool World::spawn_ai(AIType type)
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
+	return false;
+}
+
+// Creates a platform and if successful, adds it to the list of platform
+bool World::spawn_platform(float xpos, float ypos, float width, float height)
+{
+	Platform platform(xpos, ypos, width, height);
+	if (platform.init())
+	{
+		m_platforms.emplace_back(platform);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn platform");
 	return false;
 }
 
@@ -657,4 +684,12 @@ void World::play_grunt_audio() {
 	std::uniform_int_distribution<> dist(0, 3); //ADD FOR MORE ACTIONS
 	int	randNum = dist(gen);
 	Mix_PlayChannel(-1, m_grunt_audio[randNum], 0);
+}
+
+void World::draw_rectangle() {
+	float vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
+	};
 }

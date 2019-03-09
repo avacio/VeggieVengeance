@@ -50,10 +50,12 @@ class World
 	void set_paused(bool isPaused);
 
 	void play_grunt_audio();
+	void draw_rectangle();
 
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
+	bool spawn_platform(float xpos, float ypos, float width, float height);
 
 	void reset();
 

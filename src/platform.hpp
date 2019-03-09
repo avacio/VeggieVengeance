@@ -2,11 +2,19 @@
 
 #include "common.hpp"
 #include "boundingBox.hpp"
-class Platform
+class Platform: public Renderable
 {
 public:
-	Platform(int xpos, int ypos, int width, int height);
+	static Texture fighter_texture;
+	Platform(float xpos, float ypos, float width, float height);
 	bool check_collision(BoundingBox b);
+	bool init();
+	void destroy();
+	void draw(const mat3 &projection);
 private:
 	BoundingBox m_bounding_box;
+	
+	vec2 m_position; // Window coordinates
+	vec2 m_size; //width x height
+	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 };
