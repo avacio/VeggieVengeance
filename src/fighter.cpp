@@ -106,6 +106,8 @@ bool Fighter::init(int init_position, std::string name)
 		break;
 	}
 
+	m_intial_pos = m_position;
+
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
 
@@ -172,6 +174,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_health = MAX_HEALTH;
 			//unrotate the potate
 			m_rotation = 0;
+			m_position = m_intial_pos;
 		}
 	}
 
