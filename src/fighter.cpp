@@ -69,16 +69,21 @@ bool Fighter::init(int init_position, std::string name)
 	m_is_idle = true;
 	//m_facing_front = true;
 	m_is_hurt = false;
+	m_is_blocking = false;
 
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
-	m_speed = 5;
+	m_speed = 5.f;
 	m_strength = 1;
 	m_lives = STARTING_LIVES;
 	m_vertical_velocity = 0.0;
 	m_name = name;
+
+	m_mass = 1.f;
+	m_force = { 0.f, 0.f };
+	m_friction = 1.f;
 	
 	switch (init_position) {
 	case 1:
@@ -119,101 +124,23 @@ void Fighter::destroy()
 DamageEffect * Fighter::update(float ms)
 {
 	DamageEffect * d = NULL;
-	const float MOVING_SPEED = 5.0;
 
-	//IF JUST DIED
-	if (m_health <= 0 && m_is_alive)
-	{
-		m_is_alive = false;
-		m_lives--;
-		set_movement(STOP_MOVING_BACKWARD);
-		set_movement(STOP_MOVING_FORWARD);
-
-		//uncrouch in death
-		if (m_crouch_state == IS_CROUCHING) {
-			m_scale.y = 0.2f;
-			m_position.y -= 25.f;
-			m_crouch_state = NOT_CROUCHING;
-		}
-		else if (m_crouch_state == CROUCH_PRESSED) {
-			m_crouch_state = NOT_CROUCHING;
-		}
-
-		if (m_lives > 0)
-		{
-			m_respawn_timer = RESPAWN_TIME;
-			m_respawn_flag = true;
-		}
-	}
-
-	//If respawn pending
-	if (m_respawn_flag)
-	{
-		if (m_respawn_timer > 0)
-		{
-			//count down by time passed
-			m_is_punching = false;
-			m_respawn_timer -= ms;
-		}
-		else
-		{
-			//reset flags and revive
-			m_respawn_flag = false;
-			m_respawn_timer = 0;
-			m_is_alive = true;
-			m_is_hurt = false;
-			m_health = MAX_HEALTH;
-			//unrotate the potate
-			m_rotation = 0;
-		}
-	}
-
+	die();	
+	check_respawn(ms);
 	jump_update();
 
 	if (m_is_alive)
 	{
-		if (m_moving_forward)
-		{
-			if (!m_facing_front)
-			{
-				m_scale.x = -m_scale.x;
-				m_facing_front = true;
-			}
-			if (m_position.x < 1150.f) {
-				move({MOVING_SPEED, 0.0});
-			}
-		}
-		if (m_moving_backward)
-		{
-			if (m_facing_front)
-			{
-				m_scale.x = -m_scale.x;
-				m_facing_front = false;
-			}
-			if (m_position.x > 50.f) {
-				move({-MOVING_SPEED, 0.0});
-			}
-		}
-
-		if (m_crouch_state == CROUCH_PRESSED)
-		{
-			m_scale.y = 0.1f;
-			m_position.y += 25.f;
-			m_crouch_state = IS_CROUCHING;
-		}
-		if (m_crouch_state == CROUCH_RELEASED)
-		{
-			m_scale.y = 0.2f;
-			m_position.y -= 25.f;
-			m_crouch_state = NOT_CROUCHING;
-		}
+		float added_speed = m_force.x / m_mass;
+		apply_friction();
+		x_position_update(added_speed);
+		crouch_update();
 
 		if (m_is_punching)
 		{
 			//save collision object from punch
 			d = punch();
 		}
-		
 	}
 	else
 	{
@@ -250,6 +177,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
+	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -275,6 +203,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, m_is_hurt);
+	glUniform1i(is_blocking_uloc, m_is_blocking);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!
@@ -339,8 +268,10 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case PUNCHING:
-		m_is_punching = true;
-		m_is_idle = false;
+		if (!m_is_blocking) {
+			m_is_punching = true;
+			m_is_idle = false;
+		}
 		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
@@ -360,6 +291,12 @@ void Fighter::set_movement(int mov)
 		m_is_punching = false;
 		m_is_idle = true;
 		break;
+	case BLOCKING:
+		if (!m_is_punching)  m_is_blocking = true;
+		break;
+	case STOP_BLOCKING:
+		m_is_blocking = false;
+		break;
 	}
 }
 
@@ -367,13 +304,24 @@ void Fighter::set_hurt(bool hurt) {
 	m_is_hurt = hurt;
 }
 
-void Fighter::decrease_health(unsigned int damage) {
-	if (damage <= m_health) {
-		m_health -= damage;
+void Fighter::apply_damage(DamageEffect damage_effect) {
+	if (damage_effect.m_damage <= m_health) {
+		m_health -= damage_effect.m_damage;
+
+		if (damage_effect.m_bounding_box.xpos + (damage_effect.m_bounding_box.width/2) > m_position.x) {
+			m_force.x -= 1.f;
+		} else {
+			m_force.x += 1.f;
+		}
+		
 	}
 	else {
 		m_health = 0;
 	}
+}
+
+void Fighter::set_blocking(bool blocking) {
+	m_is_blocking = blocking;
 }
 
 int Fighter::get_health() const
@@ -417,6 +365,105 @@ void Fighter::jump_update()
 	}
 }
 
+void Fighter::apply_friction() {
+	if (m_force.x > 0.f) {
+		m_force.x = std::max(m_force.x - m_friction, 0.f);
+	} else if (m_force.x < 0.f) {
+		m_force.x = std::min(m_force.x + m_friction, 0.f);
+	}
+}
+
+void Fighter::x_position_update(float added_speed) {
+	if (m_moving_forward)
+	{
+		if (!m_facing_front)
+		{
+			m_scale.x = -m_scale.x;
+			m_facing_front = true;
+		}
+		if (m_position.x < 1150.f) {
+			move({m_speed, 0.0});
+		}
+	}
+	if (m_moving_backward)
+	{
+		if (m_facing_front)
+		{
+			m_scale.x = -m_scale.x;
+			m_facing_front = false;
+		}
+		if (m_position.x > 50.f) {
+			move({-m_speed, 0.0});
+		}
+	}
+
+	move({ added_speed, 0.f });
+}
+
+void Fighter::crouch_update() {
+	if (m_crouch_state == CROUCH_PRESSED)
+	{
+		m_scale.y = 0.1f;
+		m_position.y += 25.f;
+		m_crouch_state = IS_CROUCHING;
+	}
+	if (m_crouch_state == CROUCH_RELEASED)
+	{
+		m_scale.y = 0.2f;
+		m_position.y -= 25.f;
+		m_crouch_state = NOT_CROUCHING;
+	}
+}
+
+void Fighter::die() {
+	if (m_health <= 0 && m_is_alive)
+	{
+		m_is_alive = false;
+		m_lives--;
+		set_movement(STOP_MOVING_BACKWARD);
+		set_movement(STOP_MOVING_FORWARD);
+
+		//uncrouch in death
+		if (m_crouch_state == IS_CROUCHING) {
+			m_scale.y = 0.2f;
+			m_position.y -= 25.f;
+			m_crouch_state = NOT_CROUCHING;
+		}
+		else if (m_crouch_state == CROUCH_PRESSED) {
+			m_crouch_state = NOT_CROUCHING;
+		}
+
+		if (m_lives > 0)
+		{
+			m_respawn_timer = RESPAWN_TIME;
+			m_respawn_flag = true;
+		}
+	}
+}
+
+void Fighter::check_respawn(float ms) {
+	if (m_respawn_flag)
+	{
+		if (m_respawn_timer > 0)
+		{
+			//count down by time passed
+			m_is_punching = false;
+			m_respawn_timer -= ms;
+		}
+		else
+		{
+			//reset flags and revive
+			m_respawn_flag = false;
+			m_respawn_timer = 0;
+			m_is_alive = true;
+			m_is_hurt = false;
+			m_health = MAX_HEALTH;
+			//unrotate the potate
+			m_rotation = 0;
+		}
+	}
+}
+
 bool Fighter::is_hurt() const
 {
 	return m_is_hurt;
@@ -440,6 +487,11 @@ bool Fighter::is_crouching() const
 bool Fighter::is_idle() const
 {
 	return m_is_idle;
+}
+
+bool Fighter::is_blocking() const
+{
+	return m_is_blocking;
 }
 
 int Fighter::get_crouch_state() {
