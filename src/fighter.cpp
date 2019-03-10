@@ -133,7 +133,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 	DamageEffect * d = NULL;
 
 	//IF JUST DIED
-	if (m_health <= 0 && m_is_alive)
+	if ((m_health <= 0 && m_is_alive) || (m_position.y > 800 && m_is_alive))
 	{
 		m_is_alive = false;
 		m_lives--;
