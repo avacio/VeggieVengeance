@@ -1,6 +1,6 @@
 #include "boundingBox.hpp"
 
-BoundingBox::BoundingBox(int xpos, int ypos, int width, int height) {
+BoundingBox::BoundingBox(float xpos, float ypos, float width, float height) {
 	this->xpos = xpos;
 	this->ypos = ypos;
 	this->width = width;

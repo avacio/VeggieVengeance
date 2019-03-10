@@ -5,12 +5,12 @@
 class BoundingBox
 {
 public:
-	BoundingBox(int xpos, int ypos, int width, int height);
+	BoundingBox(float xpos, float ypos, float width, float height);
 
 	bool check_collision(BoundingBox b1);
 
-	int xpos;
-	int ypos;
-	int width;
-	int height;
+	float xpos;
+	float ypos;
+	float width;
+	float height;
 };

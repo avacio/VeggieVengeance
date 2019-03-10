@@ -544,10 +544,21 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 	for (int i = 0; i < platforms.size(); i++) {
 		BoundingBox* b = get_bounding_box();
 		if (platforms[i].check_collision(*b)) {
-			m_position = oldPosition;
-			m_velocity.y = 0.0;
-			//delete b;  //do we really need to keep going if we reset it...
-			//break;
+			if (platforms[i].check_collision_outer_x(*b)) {
+				m_position = oldPosition;
+				m_velocity.y = 0.0;
+				m_is_jumping = false;
+			}
+			if (platforms[i].check_collision_outer_y(*b)) {
+				m_position.y = oldPosition.y;
+				m_velocity.y = 0.0;
+				m_is_jumping = false;
+			}
+			if (!platforms[i].check_collision_outer_x(*b) && !platforms[i].check_collision_outer_y(*b)) {
+				m_position = oldPosition;
+				m_velocity.y = 0.0;
+				m_is_jumping = false;
+			}
 		}
 		delete b;
 	}
@@ -557,4 +568,12 @@ void Fighter::updatePosition(float ms) {
 	float s = ms / 1000;
 	m_position.y += m_velocity.y * s;
 	m_velocity.y += GRAVITY.y * s;
+
+	if (m_velocity.y > TERMINAL_VELOCITY) {
+		m_velocity.y = TERMINAL_VELOCITY;
+	}
+	else if (m_velocity.y < -TERMINAL_VELOCITY) {
+		m_velocity.y = -TERMINAL_VELOCITY;
+	}
+
 }

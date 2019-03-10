@@ -128,10 +128,11 @@ class Fighter : public Renderable
 	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
 	
-	const float INITIAL_VELOCITY = 10.0;
+	const float INITIAL_VELOCITY = 400.0;
+	const float TERMINAL_VELOCITY = 400.0;
 	const float MOVEMENT_SPEED = 5.0;
 	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
-	const vec2 GRAVITY = {0.0, 0.0};
+	const vec2 GRAVITY = {0.0, 400.0};
 
 	const unsigned int m_id; //unique identifier given when created
 

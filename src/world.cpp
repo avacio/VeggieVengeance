@@ -122,7 +122,7 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = set_mode(mode);
 
-	spawn_platform(400, 400, 400, 50);
+	spawn_platform(200, 600, 800, 50);
 
 	return m_water.init() && initSuccess;
 }

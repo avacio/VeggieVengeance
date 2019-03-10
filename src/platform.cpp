@@ -13,6 +13,39 @@ bool Platform::check_collision(BoundingBox b) {
 	return m_bounding_box.check_collision(b);
 }
 
+bool Platform::check_collision_outer_y(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * topEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos, m_bounding_box.width, OUTER_DEPTH);
+	BoundingBox * bottomEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos + m_bounding_box.height - OUTER_DEPTH,
+		m_bounding_box.width, OUTER_DEPTH);
+
+	if ((topEdge->check_collision(b) && topEdge->ypos > centerPos.y) || (bottomEdge->check_collision(b)) && bottomEdge->ypos < centerPos.y) {
+		collides = true;
+	}
+	delete topEdge;
+	delete bottomEdge;
+
+	return collides;
+}
+
+bool Platform::check_collision_outer_x(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = {b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * leftEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos, OUTER_DEPTH, m_bounding_box.height);
+	BoundingBox * rightEdge = new BoundingBox(m_bounding_box.xpos + m_bounding_box.width - OUTER_DEPTH, m_bounding_box.ypos,
+		OUTER_DEPTH, m_bounding_box.height);
+
+	if ((leftEdge->check_collision(b) && leftEdge->xpos > centerPos.x) || (rightEdge->check_collision(b)) && rightEdge->xpos < centerPos.x) {
+		collides = true;
+	}
+	delete leftEdge;
+	delete rightEdge;
+
+	return collides;
+}
+
+
 bool Platform::init() {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
