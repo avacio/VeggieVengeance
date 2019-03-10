@@ -32,6 +32,8 @@ public:
 	//void change_selection();
 	GameMode get_selected();
 
+	bool m_initialized = false;
+
 private:
 	vec2 screen;
 	vec2 m_position; // Window coordinates

@@ -481,7 +481,7 @@ bool Fighter::is_punching() const
 
 bool Fighter::is_crouching() const
 {
-	return (m_crouch_state == IS_CROUCHING);
+	return m_crouch_state == IS_CROUCHING;
 }
 
 bool Fighter::is_idle() const
