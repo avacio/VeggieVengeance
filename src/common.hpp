@@ -179,6 +179,13 @@ enum GameMode
 	DEV
 };
 
+enum PauseMenuOption
+{
+	RESUME,
+	MAINMENU,
+	QUIT
+};
+
 // For console log printing
 static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
 

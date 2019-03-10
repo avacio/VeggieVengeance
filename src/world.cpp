@@ -152,8 +152,12 @@ void World::destroy()
 		ai.destroy();
 	m_ais.clear();
 	m_fighters.clear();
-	m_bg.destroy();
-	m_menu.destroy();
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	glfwDestroyWindow(m_window);
 }
 
@@ -355,7 +359,7 @@ void World::draw()
 // Should the game be over ?
 bool World::is_over() const
 {
-	return glfwWindowShouldClose(m_window);
+	return glfwWindowShouldClose(m_window) || m_over;
 }
 
 // Creates a ai and if successful, adds it to the list of ai
@@ -478,6 +482,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
+
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+			{
+				m_bg.change_selection(false);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+			{
+				m_bg.change_selection(true);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+			{
+				PauseMenuOption selectedOption = m_bg.get_selected();
+				if (selectedOption == RESUME) {
+					set_paused(!m_paused);
+				} else if (selectedOption == MAINMENU) {
+					set_mode(MENU);
+				} else if (selectedOption == QUIT) {
+					m_over = true;
+				}
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
@@ -576,7 +600,13 @@ bool World::set_mode(GameMode mode) {
 		fighter.destroy();
 	}
 	m_fighters.clear();
-	m_bg.destroy();
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	
 	m_mode = mode;
 	bool initSuccess = true;
@@ -586,6 +616,7 @@ bool World::set_mode(GameMode mode) {
 		case MENU:
 			m_player1.set_in_play(true); // needed to make AI respond
 			spawn_ai(RANDOM);
+			set_paused(false);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 			initSuccess = initSuccess && m_menu.init(m_screen);
 			break;

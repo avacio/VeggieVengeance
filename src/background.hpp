@@ -53,6 +53,11 @@ public:
 	void addNameplate(TextRenderer* td, std::string name);
 	void drawNameplates(const mat3& projection);
 	void clearNameplates();
+	void init_buttons();
+	void change_selection(bool goDown);
+	PauseMenuOption get_selected();
+
+	bool m_initialized = false;
 
 private:
 	vec2 screen;
@@ -66,6 +71,11 @@ private:
 	int p1HP = -1;
 	int p2Lives = -1;
 	int p2HP = -1;
+
+	int selectedButtonIndex = -1;
+	std::vector<TextRenderer*> buttons;
+	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
+	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
 
 	std::map<TextRenderer*, std::string> nameplates;
 };
