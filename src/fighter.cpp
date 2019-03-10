@@ -133,11 +133,14 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 	DamageEffect * d = NULL;
 
 	//IF JUST DIED
-	if ((m_health <= 0 && m_is_alive) || (m_position.y > 800 && m_is_alive))
+	if ((m_health <= 0 && m_is_alive) || (m_position.y > (800 + 100) && m_is_alive))
 	{
 		m_is_alive = false;
 		m_lives--;
 		m_is_punching = false;
+		m_moving_forward = false;
+		m_moving_backward = false;
+		m_is_jumping = false;
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {
@@ -493,6 +496,8 @@ void Fighter::reset(int init_position)
 	m_is_jumping = false;
 	m_vertical_velocity = 0;
 	m_velocity = { 0.0, 0.0 };
+	m_moving_forward = false;
+	m_moving_backward = false;
 
 	switch (init_position) {
 	case 1:
@@ -525,16 +530,16 @@ void Fighter::reset(int init_position)
 
 DamageEffect * Fighter::punch() {
 	//create the bounding box based on fighter position
-	int sizeMultiplier = 1;
+	float sizeMultiplier = 1.75;
 	BoundingBox* b = get_bounding_box();
 	DamageEffect* d;
 	if (get_facing_front()) {
 		//right facing
-		d = new DamageEffect(b->xpos, b->ypos, sizeMultiplier * b->width, b->height, m_strength, get_id(), AFTER_UPDATE);
+		d = new DamageEffect(b->xpos + (b->width / 2.0), b->ypos, sizeMultiplier * (b->width / 2.0), b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
 	else {
 		//left facing
-		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * b->width), b->ypos, sizeMultiplier * b->width,
+		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
 			b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
 
@@ -547,17 +552,29 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 	for (int i = 0; i < platforms.size(); i++) {
 		BoundingBox* b = get_bounding_box();
 		if (platforms[i].check_collision(*b)) {
-			if (platforms[i].check_collision_outer_x(*b)) {
+			if (platforms[i].check_collision_outer_left(*b)) {
 				m_position = oldPosition;
 				m_velocity.y = 0.0;
 				m_is_jumping = false;
 			}
-			if (platforms[i].check_collision_outer_y(*b)) {
+			else if (platforms[i].check_collision_outer_right(*b)) {
+				m_position = oldPosition;
+				m_velocity.y = 0.0;
+				m_is_jumping = false;
+			}
+
+			if (platforms[i].check_collision_outer_top(*b)) {
 				m_position.y = oldPosition.y;
 				m_velocity.y = 0.0;
 				m_is_jumping = false;
 			}
-			if (!platforms[i].check_collision_outer_x(*b) && !platforms[i].check_collision_outer_y(*b)) {
+			else if (platforms[i].check_collision_outer_bottom(*b)) {
+				m_position.y = oldPosition.y;
+				m_velocity.y = 0.0;
+			}
+
+			if (!platforms[i].check_collision_outer_left(*b) && !platforms[i].check_collision_outer_right(*b) &&
+				!platforms[i].check_collision_outer_top(*b) && !platforms[i].check_collision_outer_bottom(*b)) {
 				m_position = oldPosition;
 				m_velocity.y = 0.0;
 				m_is_jumping = false;

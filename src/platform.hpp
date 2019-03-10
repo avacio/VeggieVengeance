@@ -8,8 +8,10 @@ public:
 	static Texture fighter_texture;
 	Platform(float xpos, float ypos, float width, float height);
 	bool check_collision(BoundingBox b);
-	bool check_collision_outer_y(BoundingBox b);
-	bool check_collision_outer_x(BoundingBox b);
+	bool check_collision_outer_top(BoundingBox b);
+	bool check_collision_outer_bottom(BoundingBox b);
+	bool check_collision_outer_left(BoundingBox b);
+	bool check_collision_outer_right(BoundingBox b);
 	bool init();
 	void destroy();
 	void draw(const mat3 &projection);

@@ -13,7 +13,7 @@ bool Platform::check_collision(BoundingBox b) {
 	return m_bounding_box.check_collision(b);
 }
 
-bool Platform::check_collision_outer_y(BoundingBox b) {
+/*bool Platform::check_collision_outer_y(BoundingBox b) {
 	bool collides = false;
 	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
 	BoundingBox * topEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos, m_bounding_box.width, OUTER_DEPTH);
@@ -40,6 +40,60 @@ bool Platform::check_collision_outer_x(BoundingBox b) {
 		collides = true;
 	}
 	delete leftEdge;
+	delete rightEdge;
+
+	return collides;
+}*/
+
+bool Platform::check_collision_outer_top(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * topEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos, m_bounding_box.width, OUTER_DEPTH);
+
+	if ((topEdge->check_collision(b) && topEdge->ypos > centerPos.y)) {
+		collides = true;
+	}
+	delete topEdge;
+
+	return collides;
+}
+
+bool Platform::check_collision_outer_bottom(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * bottomEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos + m_bounding_box.height - OUTER_DEPTH,
+		m_bounding_box.width, OUTER_DEPTH);
+
+	if ((bottomEdge->check_collision(b)) && bottomEdge->ypos < centerPos.y) {
+		collides = true;
+	}
+	delete bottomEdge;
+
+	return collides;
+}
+
+bool Platform::check_collision_outer_left(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * leftEdge = new BoundingBox(m_bounding_box.xpos, m_bounding_box.ypos, OUTER_DEPTH, m_bounding_box.height);
+
+	if ((leftEdge->check_collision(b) && leftEdge->xpos > centerPos.x)) {
+		collides = true;
+	}
+	delete leftEdge;
+
+	return collides;
+}
+
+bool Platform::check_collision_outer_right(BoundingBox b) {
+	bool collides = false;
+	vec2 centerPos = { b.xpos + (b.width * 0.5), b.ypos + (b.height * 0.5) };
+	BoundingBox * rightEdge = new BoundingBox(m_bounding_box.xpos + m_bounding_box.width - OUTER_DEPTH, m_bounding_box.ypos,
+		OUTER_DEPTH, m_bounding_box.height);
+
+	if ((rightEdge->check_collision(b)) && rightEdge->xpos < centerPos.x) {
+		collides = true;
+	}
 	delete rightEdge;
 
 	return collides;
