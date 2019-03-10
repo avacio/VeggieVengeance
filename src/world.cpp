@@ -190,7 +190,7 @@ bool World::update(float elapsed_ms)
 				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
 				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1)) {
 					//incur damage
-					m_player1.decrease_health(m_damageEffects[i].m_damage);
+					m_player1.apply_damage(m_damageEffects[i]);
 					m_player1.set_hurt(true);
 				}
 				delete b1;
@@ -199,7 +199,7 @@ bool World::update(float elapsed_ms)
 				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
 				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2)) {
 					//incur damage
-					m_player2.decrease_health(m_damageEffects[i].m_damage);
+					m_player2.apply_damage(m_damageEffects[i]);
 					m_player2.set_hurt(true);
 				}
 				delete b2;
@@ -208,7 +208,7 @@ bool World::update(float elapsed_ms)
 				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
 				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b3)) {
 					//incur damage
-					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
+					m_ais[j].apply_damage(m_damageEffects[i]);
 					m_ais[j].set_hurt(true);
 				}
 				delete b3;

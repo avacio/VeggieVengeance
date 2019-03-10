@@ -41,7 +41,7 @@ class Fighter : public Renderable
 
 	void set_hurt(bool hurt);
 
-	void decrease_health(unsigned int damage);
+	void apply_damage(DamageEffect damage_effect);
 
 	// Returns the current health
 	int get_health() const;
@@ -67,6 +67,16 @@ class Fighter : public Renderable
 	unsigned int get_id() const;
 
 	void jump_update();
+
+	void apply_friction();
+
+	void x_position_update(float added_speed);
+	
+	void crouch_update();
+
+	void die();
+
+	void check_respawn(float ms);
 
 	bool is_hurt() const;
 
@@ -99,7 +109,7 @@ class Fighter : public Renderable
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	
-	int m_speed; // each fighter has different speed and strength stats
+	float m_speed; // each fighter has different speed and strength stats
 	int m_strength;
 	float m_vertical_velocity;
 
@@ -117,8 +127,11 @@ class Fighter : public Renderable
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 
+	vec2 m_force;	// in Newtons
+	float m_mass;	// mass in kg
+	float m_friction;
+
 	//CONST VALUES
-	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
 	
 	const float INITIAL_VELOCITY = 10.0;
