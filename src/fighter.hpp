@@ -102,6 +102,7 @@ class Fighter : public Renderable
 
   private:
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
+	vec2 m_sprite_appearance_size; //the apparent width and height of the sprite, without scaling (used for more intuitive bounding boxes)
 	float m_rotation; // in radians
 	
 	int m_speed; // each fighter has different speed and strength stats

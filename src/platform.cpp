@@ -27,10 +27,12 @@ bool Platform::init() {
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
 	//float hr = fighter_texture.height * 3.5f;
-	float wr = m_size.x / 2;
-	float hr = m_size.y / 2;
+	//float wr = m_size.x / 2;
+	//float hr = m_size.y / 2;
+	float width = m_size.x;
+	float height = m_size.y;
 
-	TexturedVertex vertices[4];
+	/*TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
 	vertices[0].texcoord = { 0.f, 1.f };
 	vertices[1].position = { +wr, +hr, -0.02f };
@@ -38,6 +40,16 @@ bool Platform::init() {
 	vertices[2].position = { +wr, -hr, -0.02f };
 	vertices[2].texcoord = { 1.f, 0.f };
 	vertices[3].position = { -wr, -hr, -0.02f };
+	vertices[3].texcoord = { 0.f, 0.f };*/
+
+	TexturedVertex vertices[4];
+	vertices[0].position = { 0.0, height, -0.02f };
+	vertices[0].texcoord = { 0.f, 1.f };
+	vertices[1].position = { width, height, -0.02f };
+	vertices[1].texcoord = { 1.f, 1.f };
+	vertices[2].position = { width, 0.0, -0.02f };
+	vertices[2].texcoord = { 1.f, 0.f };
+	vertices[3].position = { 0.0, 0.0, -0.02f };
 	vertices[3].texcoord = { 0.f, 0.f };
 
 	// counterclockwise as it's the default opengl front winding direction

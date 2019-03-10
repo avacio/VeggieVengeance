@@ -26,8 +26,10 @@ bool Fighter::init(int init_position, std::string name)
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = fighter_texture.width * 3.5f;
-	float hr = fighter_texture.height * 3.5f;
+	//float wr = fighter_texture.width * 3.5f;
+	//float hr = fighter_texture.height * 3.5f;
+	float wr = fighter_texture.width * 0.5f;
+	float hr = fighter_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = {-wr, +hr, -0.02f};
@@ -77,8 +79,9 @@ bool Fighter::init(int init_position, std::string name)
 	//m_facing_front = true;
 	m_is_hurt = false;
 
-	m_scale.x = 0.2f;
-	m_scale.y = 0.2f;
+	m_scale.x = 1.2f;
+	m_scale.y = 1.2f;
+	m_sprite_appearance_size = {fighter_texture.width /2.0f, fighter_texture.height / 1.4f };
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5;
@@ -124,6 +127,7 @@ void Fighter::destroy()
 
 DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 {
+	vec2 oldPos = m_position;
 	DamageEffect * d = NULL;
 
 	//IF JUST DIED
@@ -227,6 +231,7 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 	}
 
 	updatePosition(ms);
+	platform_collision(platforms, oldPos);
 
 	//return null if not attacking, or the collision object if attacking
 	return d;
@@ -320,9 +325,12 @@ void Fighter::move(vec2 off)
 BoundingBox * Fighter::get_bounding_box() const
 {
 	// fabs is to avoid negative scale due to the facing direction
-	float width = std::fabs(m_scale.x) * fighter_texture.width;
-	float height = std::fabs(m_scale.y) * fighter_texture.height;
-	return new BoundingBox(get_position().x, get_position().y, width, height);	
+	float width = std::fabs(m_scale.x) * m_sprite_appearance_size.x;
+	float height = std::fabs(m_scale.y) * m_sprite_appearance_size.y;
+	// get position gets center of texture, but we want top left corner position for bounding box
+	float topLeftXpos = get_position().x - (width / 2);
+	float topLeftYpos = get_position().y - (height / 2);
+	return new BoundingBox(topLeftXpos, topLeftYpos, width, height);
 }
 
 // set fighter's movements
@@ -514,7 +522,7 @@ void Fighter::reset(int init_position)
 
 DamageEffect * Fighter::punch() {
 	//create the bounding box based on fighter position
-	int sizeMultiplier = 4;
+	int sizeMultiplier = 1;
 	BoundingBox* b = get_bounding_box();
 	DamageEffect* d;
 	if (get_facing_front()) {
