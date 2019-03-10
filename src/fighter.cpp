@@ -2,12 +2,22 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
+#define MAX_PROJECTILE_ON_SCREEN 5
+#define MAX_POWER_PUNCH_DMG 29		// +1 (original strength)
+#define POWER_PUNCH_CHARGE_RATE 0.2
+#define POWER_PUNCHING_MOVING_SPEED 1
 #include <math.h>
 #include <cmath>
 
 Texture Fighter::fighter_texture;
 
+
+Fighter::Fighter(unsigned int id) : m_id(id) {
+
+}
+
 bool Fighter::init(int init_position, std::string name)
+
 {
 	// Load shared texture
 	if (!fighter_texture.is_valid())
@@ -68,7 +78,7 @@ bool Fighter::init(int init_position, std::string name)
 
 	m_is_alive = true;
 	m_is_idle = true;
-	m_facing_front = true;
+	//m_facing_front = true;
 	m_is_hurt = false;
 
 	m_scale.x = 0.2f;
@@ -76,7 +86,7 @@ bool Fighter::init(int init_position, std::string name)
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5;
-	m_strength = 5;
+	m_strength = 1;
 	m_lives = STARTING_LIVES;
 	m_vertical_velocity = 0.0;
 	m_name = name;
@@ -84,9 +94,12 @@ bool Fighter::init(int init_position, std::string name)
 	switch (init_position) {
 	case 1:
 		m_position = { 250.f, 525.f };
+		m_facing_front = true;
 		break;
 	case 2:
 		m_position = { 950.f, 525.f };
+		m_facing_front = false;
+		m_scale.x = -m_scale.x;
 		break;
 	default:
 		m_position = { 550.f, 525.f };
@@ -112,15 +125,25 @@ void Fighter::destroy()
 	glDeleteShader(effect.program);
 }
 
-void Fighter::update(float ms)
+DamageEffect * Fighter::update(float ms)
 {
-	const float MOVING_SPEED = 5.0;
+	DamageEffect * d = NULL;
+	float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
 	{
 		m_is_alive = false;
 		m_lives--;
+		m_is_punching = false;
+
+		//uncrouch in death
+		if (m_crouch_state == IS_CROUCHING) {
+			m_crouch_state = NOT_CROUCHING;
+		}
+		else if (m_crouch_state == CROUCH_PRESSED) {
+			m_crouch_state == NOT_CROUCHING;
+		}
 
 		if (m_lives > 0)
 		{
@@ -162,6 +185,8 @@ void Fighter::update(float ms)
 				m_facing_front = true;
 			}
 			if (m_position.x < 1150.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
 				move({MOVING_SPEED, 0.0});
 			}
 		}
@@ -173,33 +198,45 @@ void Fighter::update(float ms)
 				m_facing_front = false;
 			}
 			if (m_position.x > 50.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
 				move({-MOVING_SPEED, 0.0});
 			}
 		}
 
 		if (m_crouch_state == CROUCH_PRESSED)
 		{
-			m_scale.y = 0.1f;
-			m_position.y += 25.f;
 			m_crouch_state = IS_CROUCHING;
 		}
 		if (m_crouch_state == CROUCH_RELEASED)
 		{
-			m_scale.y = 0.2f;
-			m_position.y -= 25.f;
 			m_crouch_state = NOT_CROUCHING;
 		}
 
 		if (m_is_punching)
 		{
-			m_is_hurt = true;
+			//save collision object from punch
+			d = punch();
+		}
 
-			m_health -= 1;
+		if (m_is_holding_power_punch) {
+			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
+				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
 		}
-		else
-		{
-			m_is_hurt = false;
+
+		if (m_is_power_punching) {	
+			d = powerPunch();
+			m_holding_power_punch_timer = 0;
+			m_is_power_punching = false;
 		}
+
+		if (m_is_shooting && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
+			Projectile* p = new Projectile(m_position, m_facing_front);
+			p->init();
+			m_projectiles.push_back(p);
+		}
+			
+		
 	}
 	else
 	{
@@ -208,6 +245,23 @@ void Fighter::update(float ms)
 		else
 			m_rotation = M_PI / 2;
 	}
+
+	// move projectiles and delete out-of-bound ones
+	
+	auto p = std::begin(m_projectiles);
+	while (p != std::end(m_projectiles)) {
+		(*p)->moveProjectile();
+		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
+			p = m_projectiles.erase(p);
+		}
+		else
+			p++;
+	}
+	
+	
+
+	//return null if not attacking, or the collision object if attacking
+	return d;
 }
 
 void Fighter::draw(const mat3 &projection)
@@ -250,6 +304,49 @@ void Fighter::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
+
+	if (get_alive() && is_punching()) {
+		if (!is_crouching()) {
+			if (!fighter_texture.load_from_file(textures_path("broccoli_punch.png")))
+			{
+				fprintf(stderr, "Failed to load fighter texture!");
+			}
+		}
+		else if (is_crouching()) {
+			if (!fighter_texture.load_from_file(textures_path("broccoli_crouch_punch.png")))
+			{
+				fprintf(stderr, "Failed to load fighter texture!");
+			}
+		}
+	}
+	else if (get_alive() && is_crouching()) {
+		if (!fighter_texture.load_from_file(textures_path("broccoli_crouch.png")))
+		{
+			fprintf(stderr, "Failed to load fighter texture!");
+		}
+	}
+	if (!is_punching()) {
+		if (get_alive() && is_idle() && !is_crouching()) {
+			m_idle_counter++;
+			if (m_idle_counter < 25) {
+				if (!fighter_texture.load_from_file(textures_path("broccoli_idle.png")))
+				{
+					fprintf(stderr, "Failed to load fighter texture!");
+				}
+			}
+
+			else if (m_idle_counter > 25 && m_idle_counter < 50) {
+				if (!fighter_texture.load_from_file(textures_path("broccoli.png")))
+				{
+					fprintf(stderr, "Failed to load fighter texture!");
+				}
+			}
+
+			else if (m_idle_counter >= 50)
+				m_idle_counter = 0;
+		}
+	}
+
 	glBindTexture(GL_TEXTURE_2D, fighter_texture.id);
 
 	// Setting uniform values to the currently bound program
@@ -265,6 +362,12 @@ void Fighter::draw(const mat3 &projection)
 	
 	int sWidth = m_nameplate->get_width_of_string(m_name);
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
+}
+
+void Fighter::drawProjectile(const mat3 &projection) {
+	for (auto p : m_projectiles) {
+		p->draw(projection);
+	}
 }
 
 float Fighter::get_rotation() const
@@ -325,14 +428,28 @@ void Fighter::set_movement(int mov)
 		m_is_punching = true;
 		m_is_idle = false;
 		break;
+	case SHOOTING:
+		m_is_shooting = true;
+		m_is_idle = false;
+		break;
+	case HOLDING_POWER_PUNCH:
+		m_is_holding_power_punch = true;
+		m_is_punching = false;
+		m_is_idle = false;
+		break;
+	case POWER_PUNCHING:
+		m_is_holding_power_punch = false;
+		m_is_power_punching = true;
+		m_is_idle = true;
+		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		if (m_moving_backward == false)
+		if (m_moving_backward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		if (m_moving_forward == false)
+		if (m_moving_forward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
@@ -343,6 +460,23 @@ void Fighter::set_movement(int mov)
 		m_is_punching = false;
 		m_is_idle = true;
 		break;
+	case STOP_SHOOTING:
+		m_is_shooting = false;
+		m_is_idle = true;
+		break;
+	}
+}
+
+void Fighter::set_hurt(bool hurt) {
+	m_is_hurt = hurt;
+}
+
+void Fighter::decrease_health(unsigned int damage) {
+	if (damage <= m_health) {
+		m_health -= damage;
+	}
+	else {
+		m_health = 0;
 	}
 }
 
@@ -402,6 +536,14 @@ bool Fighter::is_punching() const
 	return m_is_punching;
 }
 
+bool Fighter::is_holding_power_punch() const {
+	return m_is_holding_power_punch;
+}
+
+bool Fighter::change_power_punch_sprite() const {
+	return m_power_punch_sprite;
+}
+
 bool Fighter::is_crouching() const
 {
 	return (m_crouch_state == IS_CROUCHING);
@@ -420,6 +562,21 @@ void Fighter::set_crouch_state(CrouchState cs) {
 	m_crouch_state = cs;
 }
 
+int Fighter::get_alive() const
+{
+	return m_is_alive;
+}
+
+bool Fighter::get_facing_front() const
+{
+	return m_facing_front;
+}
+
+unsigned int Fighter::get_id() const
+{
+	return m_id;
+}
+
 void Fighter::reset(int init_position)
 {
 	m_health = MAX_HEALTH;
@@ -427,18 +584,64 @@ void Fighter::reset(int init_position)
 	m_is_alive = true;
 	m_rotation = 0;
 	m_is_jumping = false;
+	m_is_punching = false;
+	m_is_shooting = false;
+	m_is_holding_power_punch = false;
+	m_is_power_punching = false;
 	m_vertical_velocity = 0;
 
-	if (init_position == 1)
-	{
-		m_position = {250.f, 525.f};
+	switch (init_position) {
+	case 1:
+		m_position = { 250.f, 525.f };
+		if (!m_facing_front) {
+			m_facing_front = true;
+			m_scale.x = -m_scale.x;
+		}
+		break;
+	case 2:
+		m_position = { 950.f, 525.f };
+		if (m_facing_front) {
+			m_facing_front = false;
+			m_scale.x = -m_scale.x;
+		}
+		break;
+	default:
+		m_position = { 550.f, 525.f };
+		break;
 	}
-	else if (init_position == 2)
-	{
-		m_position = {950.f, 525.f};
+
+	
+	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
+		m_crouch_state = CROUCH_RELEASED;
 	}
-	else
-	{
-		m_position = {550.f, 525.f};
+	
+	
+}
+
+DamageEffect * Fighter::punch() {
+	//create the bounding box based on fighter position
+	int sizeMultiplier = 4;
+	if (get_facing_front()) {
+		//right facing
+		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
+			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+	}
+}
+
+DamageEffect * Fighter::powerPunch() {
+	//create the bounding box based on fighter position
+	int sizeMultiplier = 4;
+	if (get_facing_front()) {
+		//right facing
+		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
+			get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
 	}
 }

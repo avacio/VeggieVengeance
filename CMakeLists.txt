@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(436d)
+project(VeggieVengeance)
 
 # Set c++11
 # https://stackoverflow.com/questions/10851247/how-to-activate-c-11-in-cmake
@@ -40,10 +40,13 @@ set(SOURCE_FILES
 	src/world.cpp
 	src/water.cpp
 	src/background.cpp
+	src/damageEffect.cpp
+	src/boundingBox.cpp
 	src/textRenderer.cpp
 	src/mainMenu.cpp
+	src/projectile.cpp
 
-    src/project_path.hpp
+    	src/project_path.hpp
 	src/common.hpp
 	src/fighter.hpp
 	src/player1.hpp
@@ -52,8 +55,11 @@ set(SOURCE_FILES
 	src/world.hpp
 	src/water.hpp
 	src/background.hpp
+	src/damageEffect.hpp
+	src/boundingBox.hpp
 	src/textRenderer.hpp
 	src/mainMenu.hpp
+	src/projectile.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

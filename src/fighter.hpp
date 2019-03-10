@@ -1,7 +1,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "damageEffect.hpp"
 #include "textRenderer.hpp"
+#include "projectile.hpp"
 #include <random>
 
 class Fighter : public Renderable
@@ -10,6 +12,7 @@ class Fighter : public Renderable
 	static Texture fighter_texture;
 
   public:
+	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
 	bool init(int init_position, std::string name);
 
@@ -18,10 +21,18 @@ class Fighter : public Renderable
 
 	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	void update(float ms);
+	DamageEffect * update(float ms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
+
+	void drawProjectile(const mat3 &projection);
+
+	//get collision object for punch
+	DamageEffect * punch();
+
+	//get collision object for powerpunch
+	DamageEffect * powerPunch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -34,11 +45,19 @@ class Fighter : public Renderable
 	// Set fighter's movements
 	void set_movement(int mov);
 
+	void set_hurt(bool hurt);
+
+	void decrease_health(unsigned int damage);
+
 	// Returns the current health
 	int get_health() const;
 	int get_lives() const;
 	TextRenderer* get_nameplate() const;
 	std::string get_name() const;
+
+	int get_alive() const;
+
+	bool get_facing_front() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
 	vec2 get_bounding_box() const;
@@ -51,6 +70,8 @@ class Fighter : public Renderable
 
 	void start_jumping();
 
+	unsigned int get_id() const;
+
 	void jump_update();
 
 	bool is_hurt() const;
@@ -58,6 +79,10 @@ class Fighter : public Renderable
 	bool is_jumping() const;
 
 	bool is_punching() const;
+
+	bool is_holding_power_punch() const;
+
+	bool change_power_punch_sprite() const;
 
 	bool is_crouching() const;
 
@@ -93,10 +118,18 @@ class Fighter : public Renderable
 	bool m_facing_front = true;
 	bool m_moving_forward = false;
 	bool m_moving_backward = false;
+	bool m_is_holding_power_punch = false;
+	bool m_is_power_punching = false;
+	bool m_power_punch_sprite = false;
 	bool m_is_punching = false;
+	bool m_is_shooting = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
+
+	int m_idle_counter = 0;
 	
+	std::vector<Projectile*> m_projectiles;
+	float m_holding_power_punch_timer = 0;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
@@ -108,6 +141,8 @@ class Fighter : public Renderable
 	
 	const float INITIAL_VELOCITY = 10.0;
 	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
+
+	const unsigned int m_id; //unique identifier given when created
 
 	// C++ rng
 	std::default_random_engine m_rng;

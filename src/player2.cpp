@@ -6,6 +6,9 @@
 
 Texture Player2::player2_texture;
 
+Player2::Player2(unsigned int id) : Fighter(id) {
+}
+
 void Player2::draw(const mat3 &projection)
 {
 	// Transformation code, see Rendering and Transformation in the template specification for more info
@@ -46,14 +49,34 @@ void Player2::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	if (is_punching()) {
-		if (!player2_texture.load_from_file(textures_path("potato_punch.png")))
+	if (get_alive() && is_punching()) {
+		if (!is_crouching()) {
+			if (!player2_texture.load_from_file(textures_path("potato_punch.png")))
+			{
+				fprintf(stderr, "Failed to load fighter texture!");
+			}
+		}
+		else if (is_crouching()) {
+			if (!player2_texture.load_from_file(textures_path("potato_crouch_punch.png")))
+			{
+				fprintf(stderr, "Failed to load fighter texture!");
+			}
+		}
+	}
+	else if (get_alive() && is_crouching()) {
+		if (!player2_texture.load_from_file(textures_path("potato_crouch.png")))
+		{
+			fprintf(stderr, "Failed to load fighter texture!");
+		}
+	}
+	else if (get_alive() && is_holding_power_punch()) {
+		if (!player2_texture.load_from_file(textures_path("potato_charging.png")))
 		{
 			fprintf(stderr, "Failed to load fighter texture!");
 		}
 	}
 	if (!is_punching()) {
-		if (is_idle()) {
+		if (get_alive() && is_idle() && !is_crouching()) {
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
 				if (!player2_texture.load_from_file(textures_path("potato_idle.png")))

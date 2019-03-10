@@ -131,7 +131,8 @@ struct Renderable
 enum AIType
 {
 	CHASE,
-	AVOID
+	AVOID,
+	RANDOM
 };
 
 enum CrouchState
@@ -149,10 +150,24 @@ enum FighterMovementState
 	START_JUMPING = 2,
 	CROUCHING = 3,
 	PUNCHING = 4,
-	STOP_MOVING_FORWARD = 5,
-	STOP_MOVING_BACKWARD = 6,
-	RELEASE_CROUCH = 7,
-	STOP_PUNCHING = 8
+	SHOOTING = 5,
+	HOLDING_POWER_PUNCH = 6,
+	POWER_PUNCHING = 7,
+	STOP_MOVING_FORWARD = 8,
+	STOP_MOVING_BACKWARD = 9,
+	RELEASE_CROUCH = 10,
+	STOP_PUNCHING = 11,
+	STOP_SHOOTING = 12,
+	PAUSED = 13,
+	UNPAUSED = 14
+};
+
+
+enum DeletionTime
+{
+	AFTER_UPDATE,
+	AFTER_HIT,
+	AFTER_OUT_OF_BOUNDS
 };
 
 enum GameMode
@@ -166,3 +181,4 @@ enum GameMode
 
 // For console log printing
 static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+
