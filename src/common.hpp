@@ -149,6 +149,7 @@ enum CrouchState
 	CROUCH_RELEASED
 };
 
+
 enum FighterMovementState
 {
 	MOVING_FORWARD = 0,
@@ -159,7 +160,9 @@ enum FighterMovementState
 	STOP_MOVING_FORWARD = 5,
 	STOP_MOVING_BACKWARD = 6,
 	RELEASE_CROUCH = 7,
-	STOP_PUNCHING = 8
+	STOP_PUNCHING = 8,
+	BLOCKING = 9,
+	STOP_BLOCKING = 10
 };
 
 
