@@ -3,6 +3,8 @@
 
 #define _USE_MATH_DEFINES
 #define MAX_PROJECTILE_ON_SCREEN 5
+#define MAX_PROJECTILE_VELOCITY 20
+#define PROJECTILE_CHARGE_RATE 0.5
 #define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
 #define POWER_PUNCH_CHARGE_RATE 0.5
 #define POWER_PUNCHING_MOVING_SPEED 1
@@ -71,7 +73,6 @@ bool Fighter::init(int init_position, std::string name)
 
 	m_is_alive = true;
 	m_is_idle = true;
-	//m_facing_front = true;
 	m_is_hurt = false;
 
 	m_scale.x = 0.2f;
@@ -221,17 +222,32 @@ DamageEffect * Fighter::update(float ms)
 			//save collision object from punch
 			d = punch();
 		}
-		
+
+		// Power punch
 		if (m_is_holding_power_punch) {
 			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
 				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
 		}
-
 		if (m_is_power_punching) {
 			d = powerPunch();
 			m_holding_power_punch_timer = 0;
 			m_is_power_punching = false;
 		}
+
+		// charging projectile
+		if (m_is_holding_projectile) {
+			if (m_holding_projectile_timer < MAX_PROJECTILE_VELOCITY)
+				m_holding_projectile_timer += PROJECTILE_CHARGE_RATE;
+		}
+		if (m_is_shooting_charged_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
+			Projectile* p = new Projectile(m_position, m_facing_front, 7 + m_holding_projectile_timer, 10 + 2 * m_holding_projectile_timer, get_id());
+			p->init();
+			m_projectiles.insert(p);
+			d = p->projectileDmg();
+			m_holding_projectile_timer = 0;
+			m_is_shooting_charged_projectile = false;
+		}
+
 
 		if (m_is_shooting_bullet && m_bullets.size() < MAX_PROJECTILE_ON_SCREEN) {
 			Bullet* b = new Bullet(m_position, m_facing_front, 5, get_id());
@@ -261,6 +277,7 @@ DamageEffect * Fighter::update(float ms)
 	auto b = begin(m_bullets);
 	while (b != end(m_bullets)) {
 		(*b)->moveBullet();
+		// TODO: CHANGE DELETION
 		if ((*b)->getPosition().x < 0 || (*b)->getPosition().x > 1200) {
 			delete *b;
 			b = m_bullets.erase(b);
@@ -272,6 +289,7 @@ DamageEffect * Fighter::update(float ms)
 	while (p != end(m_projectiles)) {
 		(*p)->moveProjectile();
 		(*p)->accelerate(-ACCELERATION);
+		// TODO: CHANGE DELETION
 		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
 			delete *p;
 			p = m_projectiles.erase(p);
@@ -411,12 +429,22 @@ void Fighter::set_movement(int mov)
 		m_is_punching = true;
 		m_is_idle = false;
 		break;
+	case SHOOTING_BULLET:
+		m_is_shooting_bullet = true;
+		m_is_idle = false;
+		break;
 	case SHOOTING_PROJECTILE:
 		m_is_shooting_projectile = true;
 		m_is_idle = false;
 		break;
-	case SHOOTING_BULLET:
-		m_is_shooting_bullet = true;
+	case HOLDING_PROJECTILE:
+		m_is_holding_projectile = true;
+		m_is_shooting_projectile = false;
+		m_is_idle = false;
+		break;
+	case SHOOTING_CHARGED_PROJECTILE:
+		m_is_holding_projectile = false;
+		m_is_shooting_charged_projectile = true;
 		m_is_idle = false;
 		break;
 	case HOLDING_POWER_PUNCH:
@@ -526,6 +554,10 @@ bool Fighter::is_punching() const
 
 bool Fighter::is_holding_power_punch() const {
 	return m_is_holding_power_punch;
+}
+
+bool Fighter::is_holding_projectile() const {
+	return m_is_holding_projectile;
 }
 
 bool Fighter::is_crouching() const

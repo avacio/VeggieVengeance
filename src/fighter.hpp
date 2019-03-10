@@ -86,6 +86,8 @@ class Fighter : public Renderable
 
 	bool is_holding_power_punch() const;
 
+	bool is_holding_projectile() const;
+
 	bool is_crouching() const;
 
 	bool is_idle() const;
@@ -124,6 +126,8 @@ class Fighter : public Renderable
 	bool m_is_holding_power_punch = false;
 	bool m_is_power_punching = false;
 	bool m_is_shooting_projectile = false;
+	bool m_is_holding_projectile = false;
+	bool m_is_shooting_charged_projectile = false;
 	bool m_is_shooting_bullet = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
@@ -131,6 +135,7 @@ class Fighter : public Renderable
 	std::set<Bullet*> m_bullets;
 	std::set<Projectile*> m_projectiles;
 	float m_holding_power_punch_timer = 0;
+	float m_holding_projectile_timer = 0;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
