@@ -121,7 +121,9 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
 				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
-				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
+				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) &&
+					   POTATO_CHARGING_TEXTURE.load_from_file(textures_path("potato_charging.png")) &&
+					   POTATO_POWER_PUNCH_TEXTURE.load_from_file(textures_path("potato_power_punch.png")) &&
 				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
 				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
 					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
@@ -317,10 +319,14 @@ void World::draw()
 		if (m_player1.get_in_play())
 		{
 			m_player1.draw(projection_2D);
+			m_player1.drawProjectile(projection_2D);
+			m_player1.drawBullet(projection_2D);
 		}
 		if (m_player2.get_in_play())
 		{
 			m_player2.draw(projection_2D);
+			m_player2.drawProjectile(projection_2D);
+			m_player2.drawBullet(projection_2D);
 		}
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
@@ -435,15 +441,22 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_Q)
+				m_player1.set_movement(SHOOTING_BULLET);
+			if (action == GLFW_REPEAT && key == GLFW_KEY_E)
+				m_player1.set_movement(HOLDING_POWER_PUNCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E && m_player1.is_holding_power_punch())
+				m_player1.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E && !m_player1.is_holding_power_punch())
 				m_player1.set_movement(STOP_PUNCHING);
-			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
+				m_player1.set_movement(STOP_SHOOTING);
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -460,24 +473,33 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_U)
+				m_player2.set_movement(SHOOTING_PROJECTILE);
+			if (action == GLFW_REPEAT && key == GLFW_KEY_O)
+				m_player2.set_movement(HOLDING_POWER_PUNCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player2.is_holding_power_punch())
+				m_player2.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O && !m_player2.is_holding_power_punch())
 				m_player2.set_movement(STOP_PUNCHING);
-			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_U)
+				m_player2.set_movement(STOP_SHOOTING);
 		}
 
 		if (m_paused) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
 			m_player1.set_movement(STOP_MOVING_BACKWARD);
 			m_player1.set_movement(STOP_PUNCHING);
+			m_player1.set_movement(STOP_SHOOTING);
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
+			m_player2.set_movement(STOP_SHOOTING);
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)

@@ -3,6 +3,8 @@
 #include "common.hpp"
 #include "damageEffect.hpp"
 #include "textRenderer.hpp"
+#include "bullet.hpp"
+#include "projectile.hpp"
 #include <random>
 
 class Fighter : public Renderable
@@ -25,8 +27,15 @@ class Fighter : public Renderable
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
+	void drawProjectile(const mat3 &projection);
+
+	void drawBullet(const mat3 &projection);
+
 	//get collision object for punch
 	DamageEffect * punch();
+
+	//get collision object for powerpunch
+	DamageEffect * powerPunch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -74,6 +83,8 @@ class Fighter : public Renderable
 
 	bool is_punching() const;
 
+	bool is_holding_power_punch() const;
+
 	bool is_crouching() const;
 
 	bool is_idle() const;
@@ -109,9 +120,16 @@ class Fighter : public Renderable
 	bool m_moving_forward = false;
 	bool m_moving_backward = false;
 	bool m_is_punching = false;
+	bool m_is_holding_power_punch = false;
+	bool m_is_power_punching = false;
+	bool m_is_shooting_projectile = false;
+	bool m_is_shooting_bullet = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
 	
+	std::vector<Bullet*> m_bullets;
+	std::vector<Projectile*> m_projectiles;
+	float m_holding_power_punch_timer = 0;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 

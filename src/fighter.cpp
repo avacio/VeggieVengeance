@@ -2,6 +2,10 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
+#define MAX_PROJECTILE_ON_SCREEN 5
+#define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
+#define POWER_PUNCH_CHARGE_RATE 0.5
+#define POWER_PUNCHING_MOVING_SPEED 1
 #include <math.h>
 #include <cmath>
 
@@ -119,7 +123,7 @@ void Fighter::destroy()
 DamageEffect * Fighter::update(float ms)
 {
 	DamageEffect * d = NULL;
-	const float MOVING_SPEED = 5.0;
+	float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
 	if (m_health <= 0 && m_is_alive)
@@ -180,6 +184,8 @@ DamageEffect * Fighter::update(float ms)
 				m_facing_front = true;
 			}
 			if (m_position.x < 1150.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
 				move({MOVING_SPEED, 0.0});
 			}
 		}
@@ -191,6 +197,8 @@ DamageEffect * Fighter::update(float ms)
 				m_facing_front = false;
 			}
 			if (m_position.x > 50.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
 				move({-MOVING_SPEED, 0.0});
 			}
 		}
@@ -214,6 +222,32 @@ DamageEffect * Fighter::update(float ms)
 			d = punch();
 		}
 		
+		if (m_is_holding_power_punch) {
+			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
+				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
+		}
+
+		if (m_is_power_punching) {
+			d = powerPunch();
+			m_holding_power_punch_timer = 0;
+			m_is_power_punching = false;
+		}
+
+		if (m_is_shooting_bullet && m_bullets.size() < MAX_PROJECTILE_ON_SCREEN) {
+			Bullet* b = new Bullet(m_position, m_facing_front, 5, get_id());
+			b->init();
+			m_bullets.push_back(b);
+			d = b->bulletDmg();
+			printf("shot bullet\n");
+		}
+
+		if (m_is_shooting_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
+			Projectile* p = new Projectile(m_position, m_facing_front, 7, 5, get_id());
+			p->init();
+			m_projectiles.push_back(p);
+			d = p->projectileDmg();
+			printf("shot projectile\n");
+		}
 	}
 	else
 	{
@@ -221,6 +255,28 @@ DamageEffect * Fighter::update(float ms)
 			m_rotation = -M_PI / 2;
 		else
 			m_rotation = M_PI / 2;
+	}
+
+	// move projectiles, bullets and delete out-of-bound ones
+	auto b = std::begin(m_bullets);
+	while (b != std::end(m_bullets)) {
+		(*b)->moveBullet();
+		if ((*b)->getPosition().x < 0 || (*b)->getPosition().x > 1200) {
+			b = m_bullets.erase(b);
+			printf("destroyed bullet\n");
+		}
+		else
+			b++;
+	}
+	auto p = std::begin(m_projectiles);
+	while (p != std::end(m_projectiles)) {
+		(*p)->moveProjectile();
+		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
+			p = m_projectiles.erase(p);
+			printf("destroyed projectile\n");
+		}
+		else
+			p++;
 	}
 
 	//return null if not attacking, or the collision object if attacking
@@ -284,6 +340,18 @@ void Fighter::draw(const mat3 &projection)
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
+void Fighter::drawProjectile(const mat3 &projection) {
+	for (auto p : m_projectiles) {
+		p->draw(projection);
+	}
+}
+
+void Fighter::drawBullet(const mat3 & projection) {
+	for (auto b : m_bullets) {
+		b->draw(projection);
+	}
+}
+
 float Fighter::get_rotation() const
 {
 	return m_rotation;
@@ -342,14 +410,35 @@ void Fighter::set_movement(int mov)
 		m_is_punching = true;
 		m_is_idle = false;
 		break;
+	case SHOOTING_PROJECTILE:
+		m_is_shooting_projectile = true;
+		for (auto p : m_projectiles) {
+			p->accelerate(-ACCELERATION * 2);
+		}
+		m_is_idle = false;
+		break;
+	case SHOOTING_BULLET:
+		m_is_shooting_bullet = true;
+		m_is_idle = false;
+		break;
+	case HOLDING_POWER_PUNCH:
+		m_is_holding_power_punch = true;
+		m_is_punching = false;
+		m_is_idle = false;
+		break;
+	case POWER_PUNCHING:
+		m_is_holding_power_punch = false;
+		m_is_power_punching = true;
+		m_is_idle = true;
+		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		if (m_moving_backward == false)
+		if (m_moving_backward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		if (m_moving_forward == false)
+		if (m_moving_forward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
@@ -358,6 +447,11 @@ void Fighter::set_movement(int mov)
 		break;
 	case STOP_PUNCHING:
 		m_is_punching = false;
+		m_is_idle = true;
+		break;
+	case STOP_SHOOTING:
+		m_is_shooting_bullet = false;
+		m_is_shooting_projectile = false;
 		m_is_idle = true;
 		break;
 	}
@@ -432,6 +526,10 @@ bool Fighter::is_punching() const
 	return m_is_punching;
 }
 
+bool Fighter::is_holding_power_punch() const {
+	return m_is_holding_power_punch;
+}
+
 bool Fighter::is_crouching() const
 {
 	return (m_crouch_state == IS_CROUCHING);
@@ -472,6 +570,11 @@ void Fighter::reset(int init_position)
 	m_is_alive = true;
 	m_rotation = 0;
 	m_is_jumping = false;
+	m_is_punching = false;
+	m_is_shooting_bullet = false;
+	m_is_shooting_projectile = false;
+	m_is_holding_power_punch = false;
+	m_is_power_punching = false;
 	m_vertical_velocity = 0;
 
 	switch (init_position) {
@@ -514,5 +617,19 @@ DamageEffect * Fighter::punch() {
 		//left facing
 		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
 			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+	}
+}
+
+DamageEffect * Fighter::powerPunch() {
+	//create the bounding box based on fighter position
+	int sizeMultiplier = 4;
+	if (get_facing_front()) {
+		//right facing
+		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
+			get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
 	}
 }

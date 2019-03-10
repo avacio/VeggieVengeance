@@ -51,7 +51,11 @@ void Player1::draw(const mat3 &projection)
 	glActiveTexture(GL_TEXTURE0);
 	if (get_alive() && is_punching()) {
 		player1_texture = POTATO_PUNCH_TEXTURE;
-	} else {
+	} 
+	else if (get_alive() && is_holding_power_punch()) {
+		player1_texture = POTATO_CHARGING_TEXTURE;
+	}
+	else {
 		if (get_alive() && is_idle()) {
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
