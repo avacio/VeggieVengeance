@@ -43,6 +43,8 @@ class Fighter : public Renderable
 
 	void apply_damage(DamageEffect damage_effect);
 
+	void set_blocking(bool blocking);
+
 	// Returns the current health
 	int get_health() const;
 	int get_lives() const;
@@ -88,6 +90,8 @@ class Fighter : public Renderable
 
 	bool is_idle() const;
 
+	bool is_blocking() const;
+
 	int get_crouch_state();
 
 	void set_crouch_state(CrouchState cs);
@@ -121,7 +125,8 @@ class Fighter : public Renderable
 	bool m_is_punching = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
-	
+	bool m_is_blocking = false;
+
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 

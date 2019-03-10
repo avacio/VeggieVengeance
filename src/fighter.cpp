@@ -69,6 +69,7 @@ bool Fighter::init(int init_position, std::string name)
 	m_is_idle = true;
 	//m_facing_front = true;
 	m_is_hurt = false;
+	m_is_blocking = false;
 
 	m_scale.x = 0.2f;
 	m_scale.y = 0.2f;
@@ -176,6 +177,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
+	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -201,6 +203,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, m_is_hurt);
+	glUniform1i(is_blocking_uloc, m_is_blocking);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!
@@ -265,8 +268,10 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case PUNCHING:
-		m_is_punching = true;
-		m_is_idle = false;
+		if (!m_is_blocking) {
+			m_is_punching = true;
+			m_is_idle = false;
+		}
 		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
@@ -285,6 +290,12 @@ void Fighter::set_movement(int mov)
 	case STOP_PUNCHING:
 		m_is_punching = false;
 		m_is_idle = true;
+		break;
+	case BLOCKING:
+		if (!m_is_punching)  m_is_blocking = true;
+		break;
+	case STOP_BLOCKING:
+		m_is_blocking = false;
 		break;
 	}
 }
@@ -307,6 +318,10 @@ void Fighter::apply_damage(DamageEffect damage_effect) {
 	else {
 		m_health = 0;
 	}
+}
+
+void Fighter::set_blocking(bool blocking) {
+	m_is_blocking = blocking;
 }
 
 int Fighter::get_health() const
@@ -472,6 +487,11 @@ bool Fighter::is_crouching() const
 bool Fighter::is_idle() const
 {
 	return m_is_idle;
+}
+
+bool Fighter::is_blocking() const
+{
+	return m_is_blocking;
 }
 
 int Fighter::get_crouch_state() {

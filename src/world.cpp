@@ -188,7 +188,7 @@ bool World::update(float elapsed_ms)
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_player1.get_in_play()) {
 				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1)) {
+				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1) && m_player1.is_blocking() == false) {
 					//incur damage
 					m_player1.apply_damage(m_damageEffects[i]);
 					m_player1.set_hurt(true);
@@ -197,7 +197,7 @@ bool World::update(float elapsed_ms)
 			}
 			if (m_player2.get_in_play()) {
 				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2)) {
+				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2) && m_player2.is_blocking() == false) {
 					//incur damage
 					m_player2.apply_damage(m_damageEffects[i]);
 					m_player2.set_hurt(true);
@@ -435,15 +435,23 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(BLOCKING);
+			}
+
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E) 
 				m_player1.set_movement(STOP_PUNCHING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(STOP_BLOCKING);
 			}
+
+			
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -460,6 +468,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(BLOCKING);
+			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
@@ -468,6 +479,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(STOP_BLOCKING);
 			}
 		}
 
