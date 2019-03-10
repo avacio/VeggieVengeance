@@ -4,30 +4,43 @@ Texture Projectile::projectile_texture;
 
 Projectile::Projectile(vec2 pos, bool dir, float velo, float dmg, int id) {
 	position = pos;
-	scale = vec2({ 0.1, 0.15 });
+	scale = vec2({ 0.07, 0.07 });
 	damage = dmg;
 	m_id = id;
 	if (dir) {
 		velocity.x = velo;
-		velocity.y = 0;
+		velocity.y = -10.0;
 	}
 	else {
 		velocity.x = -velo;
-		velocity.y = 0;
+		velocity.y = -10.0;
 	}
+}
+
+Projectile::~Projectile() {
+	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
+	glDisableVertexAttribArray(0);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
+	effect.release();
+	printf("destroyed projectile\n");
 }
 
 bool Projectile::init() {
 	if (!projectile_texture.is_valid()) {
-		if (!projectile_texture.load_from_file(textures_path("french_fry.png"))) {
+		if (!projectile_texture.load_from_file(textures_path("wedge.png"))) {
 			fprintf(stderr, "Failed to load projectile texture!");
 			return false;
 		}
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = projectile_texture.width * 3.5f;
-	float hr = projectile_texture.height * 3.5f;
+	float wr = projectile_texture.width;
+	float hr = projectile_texture.height;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -68,7 +81,6 @@ bool Projectile::init() {
 void Projectile::moveProjectile() {
 	position.x += velocity.x;
 	position.y += velocity.y;
-	// destroy if collide with ground + if collide with fighter + collide with bounds
 }
 
 void Projectile::accelerate(float acc) {
@@ -76,9 +88,7 @@ void Projectile::accelerate(float acc) {
 }
 
 DamageEffect * Projectile::projectileDmg() {
-	//create the bounding box based on fighter position
-	int sizeMultiplier = 4;
-	return new DamageEffect(position.x, position.y, sizeMultiplier * get_bounding_box().x,
+	return new DamageEffect(position.x, position.y, get_bounding_box().x,
 		get_bounding_box().y, damage, m_id, AFTER_HIT);
 }
 

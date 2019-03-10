@@ -14,6 +14,20 @@ Bullet::Bullet(vec2 pos, bool dir, float dmg, int id) {
 		dx = -BULLET_SPEED;
 }
 
+Bullet::~Bullet() {
+	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
+	glDisableVertexAttribArray(0);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
+	effect.release();
+	printf("destroyed bullet\n");
+}
+
+
 bool Bullet::init() {
 	if (!bullet_texture.is_valid()) {
 		if (!bullet_texture.load_from_file(textures_path("french_fry.png"))) {
@@ -67,8 +81,7 @@ void Bullet::moveBullet() {
 }
 
 DamageEffect * Bullet::bulletDmg() {
-	int sizeMultiplier = 4;
-	return new DamageEffect(position.x, position.y, sizeMultiplier * get_bounding_box().x,
+	return new DamageEffect(position.x, position.y, get_bounding_box().x,
 		get_bounding_box().y, damage, m_id, AFTER_HIT);
 }
 

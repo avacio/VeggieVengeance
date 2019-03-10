@@ -7,6 +7,7 @@ class Projectile : public Renderable {
 	static Texture projectile_texture;
 public:
 	Projectile(vec2 pos, bool dir, float velo, float dmg, int id);
+	~Projectile();
 	bool init();
 	void moveProjectile();
 	void accelerate(float acc);

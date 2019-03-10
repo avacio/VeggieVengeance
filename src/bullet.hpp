@@ -7,6 +7,7 @@ class Bullet : public Renderable {
 	static Texture bullet_texture;
 public:
 	Bullet(vec2 pos, bool dir, float dmg, int id);
+	~Bullet();
 	bool init();
 	void moveBullet();
 	DamageEffect * bulletDmg();

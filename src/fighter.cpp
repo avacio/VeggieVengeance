@@ -236,15 +236,15 @@ DamageEffect * Fighter::update(float ms)
 		if (m_is_shooting_bullet && m_bullets.size() < MAX_PROJECTILE_ON_SCREEN) {
 			Bullet* b = new Bullet(m_position, m_facing_front, 5, get_id());
 			b->init();
-			m_bullets.push_back(b);
+			m_bullets.insert(b);
 			d = b->bulletDmg();
 			printf("shot bullet\n");
 		}
 
 		if (m_is_shooting_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
-			Projectile* p = new Projectile(m_position, m_facing_front, 7, 5, get_id());
+			Projectile* p = new Projectile(m_position, m_facing_front, 7, 10, get_id());
 			p->init();
-			m_projectiles.push_back(p);
+			m_projectiles.insert(p);
 			d = p->projectileDmg();
 			printf("shot projectile\n");
 		}
@@ -258,22 +258,23 @@ DamageEffect * Fighter::update(float ms)
 	}
 
 	// move projectiles, bullets and delete out-of-bound ones
-	auto b = std::begin(m_bullets);
-	while (b != std::end(m_bullets)) {
+	auto b = begin(m_bullets);
+	while (b != end(m_bullets)) {
 		(*b)->moveBullet();
 		if ((*b)->getPosition().x < 0 || (*b)->getPosition().x > 1200) {
+			delete *b;
 			b = m_bullets.erase(b);
-			printf("destroyed bullet\n");
 		}
 		else
 			b++;
 	}
-	auto p = std::begin(m_projectiles);
-	while (p != std::end(m_projectiles)) {
+	auto p = begin(m_projectiles);
+	while (p != end(m_projectiles)) {
 		(*p)->moveProjectile();
+		(*p)->accelerate(-ACCELERATION);
 		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
+			delete *p;
 			p = m_projectiles.erase(p);
-			printf("destroyed projectile\n");
 		}
 		else
 			p++;
@@ -412,9 +413,6 @@ void Fighter::set_movement(int mov)
 		break;
 	case SHOOTING_PROJECTILE:
 		m_is_shooting_projectile = true;
-		for (auto p : m_projectiles) {
-			p->accelerate(-ACCELERATION * 2);
-		}
 		m_is_idle = false;
 		break;
 	case SHOOTING_BULLET:

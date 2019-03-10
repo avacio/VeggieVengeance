@@ -5,6 +5,7 @@
 #include "textRenderer.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
+#include <set>
 #include <random>
 
 class Fighter : public Renderable
@@ -127,8 +128,8 @@ class Fighter : public Renderable
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
 	
-	std::vector<Bullet*> m_bullets;
-	std::vector<Projectile*> m_projectiles;
+	std::set<Bullet*> m_bullets;
+	std::set<Projectile*> m_projectiles;
 	float m_holding_power_punch_timer = 0;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
