@@ -437,15 +437,15 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(START_JUMPING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_C) {
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_Q)
+			if (action == GLFW_PRESS && key == GLFW_KEY_V)
 				m_player1.set_movement(SHOOTING_BULLET);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_E)
+			if (action == GLFW_REPEAT && key == GLFW_KEY_C)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E && m_player1.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
 				m_player1.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
@@ -453,41 +453,41 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E && !m_player1.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && !m_player1.is_holding_power_punch())
 				m_player1.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_V)
 				m_player1.set_movement(STOP_SHOOTING);
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
 		{
-			if (action == GLFW_PRESS && key == GLFW_KEY_L)
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(MOVING_FORWARD);
-			if (action == GLFW_PRESS && key == GLFW_KEY_J)
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT)
 				m_player2.set_movement(MOVING_BACKWARD);
-			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP)
 				m_player2.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN)
 				m_player2.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_KP_1) {
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_U)
+			if (action == GLFW_PRESS && key == GLFW_KEY_KP_2)
 				m_player2.set_movement(SHOOTING_PROJECTILE);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_O)
+			if (action == GLFW_REPEAT && key == GLFW_KEY_KP_1)
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player2.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_1 && m_player2.is_holding_power_punch())
 				m_player2.set_movement(POWER_PUNCHING);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
+			if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O && !m_player2.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_KP_1 && !m_player2.is_holding_power_punch())
 				m_player2.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_U)
+			if (action == GLFW_RELEASE && key == GLFW_KEY_KP_2)
 				m_player2.set_movement(STOP_SHOOTING);
 		}
 
