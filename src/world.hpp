@@ -45,6 +45,7 @@ class World
 
 	// Should the game be over ?
 	bool is_over() const;
+	bool is_game_over(); // only for fight levels
 
 	bool set_mode(GameMode mode);
 	void set_paused(bool isPaused);
@@ -93,13 +94,15 @@ class World
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
-
 	Mix_Music *m_background_music;
 	std::vector<Mix_Chunk*> m_grunt_audio;
 
 	GameMode m_mode;
 	bool m_paused;
 	bool m_over;
+	bool m_game_over = false;
+	std::string m_winner_name; // TODO
+	//Fighter *m_winner;
 
 	/////////
 	std::map<FighterCharacter, FighterInfo> fighterInfoMap;

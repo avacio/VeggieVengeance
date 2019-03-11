@@ -187,9 +187,17 @@ bool World::update(float elapsed_ms)
 	// Updating all entities, making the entities
 	// faster based on current
 
-	if (m_paused) {
+	//if (m_paused) {
+	if (m_paused || m_game_over) {
 		return true;
 	}
+
+	if (!m_game_over && is_game_over()) {
+		m_game_over = is_game_over();
+		//m_water.set_game_over(m_winner_name);
+		m_bg.set_game_over(true, m_winner_name);
+	}
+
 	if (!m_paused) {
 		//mark alive players + ai as not having a collision applied before collision check
 		if (m_player1.get_in_play() && m_player1.get_alive()) {
@@ -364,15 +372,7 @@ void World::draw()
 
 	////////////////////////////
 
-
-
-
-
-
 	m_water.draw(projection_2D);
-	//text->renderString(mat3{}, "Health: 100");
-	//text->renderString(projection_2D, "Health: 100");
-
 	//////////////////
 	// Presenting
 	glfwSwapBuffers(m_window);
@@ -452,6 +452,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 	//////////////////////
 	// MAIN MENU CONTROLS
+	//if ((m_mode == MENU || m_mode == CHARSELECT) && m_menu.m_initialized)
 	if (m_mode == MENU || m_mode == CHARSELECT)
 	{
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
@@ -473,16 +474,17 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				set_mode(CHARSELECT);
 			} else if (m_mode == CHARSELECT) {
 				FighterCharacter result = m_menu.get_selected_char();
+				GameMode selMode = m_menu.get_selected_mode();
 				if (result == BLANK) {
 					set_mode(MENU);
-				} else if (m_menu.get_selected_mode() == PVP) {
+				} else if (selMode == PVP) {
 					if (!m_menu.is_player_1_chosen) {
 						selectedP1 = result;
 						m_menu.is_player_1_chosen = true;
 					} else {
 						selectedP2 = result;
 						m_menu.is_player_1_chosen = false;
-						set_mode(m_menu.get_selected_mode());
+						set_mode(selMode);
 					}
 				} else {
 					selectedP1 = m_menu.get_selected_char();
@@ -490,7 +492,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				}
 			}
 		}
-
 	}
 	else {
 		// Handle player movement here
@@ -559,7 +560,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			}
 		}
 
-		if (m_paused) {
+		//if (m_paused) {
+		if (m_paused || m_game_over) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
 			m_player1.set_movement(STOP_MOVING_BACKWARD);
 			m_player1.set_movement(STOP_PUNCHING);
@@ -584,6 +586,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 					set_mode(MENU);
 				} else if (selectedOption == QUIT) {
 					m_over = true;
+				} else if (selectedOption == RESTART) {
+					reset();
 				}
 			}
 		}
@@ -632,6 +636,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
+	m_game_over = false;
+	m_bg.set_game_over(false, "");
 	m_damageEffects.clear();
 	switch (m_mode) {
 	case DEV:
@@ -676,6 +682,8 @@ void World::reset()
 bool World::set_mode(GameMode mode) {
 	m_player1.set_in_play(false);
 	m_player2.set_in_play(false);
+	m_game_over = false;
+	m_bg.set_game_over(false, "");
 
 	clear_all_fighters();
 
@@ -694,9 +702,9 @@ bool World::set_mode(GameMode mode) {
 			spawn_ai(RANDOM, POTATO);
 			set_paused(false);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
-			m_menu.is_player_1_chosen = false;
+			//m_menu.is_player_1_chosen = false;
 			m_menu.m_selected_mode = MENU;
-			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap);
+			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap) && m_menu.set_mode(MENU);
 			break;
 		case CHARSELECT:
 		{
@@ -820,4 +828,29 @@ void World::draw_rectangle() {
 	 0.5f, -0.5f, 0.0f,
 	 0.0f,  0.5f, 0.0f
 	};
+}
+
+bool World::is_game_over() {
+	if (m_mode == PVP) {
+		if (!m_player1.get_alive() && m_player1.get_lives() == 0) {
+			m_winner_name = m_player1.get_name();
+			return true;
+		}
+		else if (!m_player2.get_alive() && m_player2.get_lives() == 0) {
+			m_winner_name = m_player2.get_name();
+			return true;
+		}
+		return false;
+	}
+	if (m_mode == PVC || m_mode == TUTORIAL) {
+		bool ais_alive = false;
+		for (int i = 0; i < m_ais.size(); i++) {
+			if (m_ais[i].get_alive() || m_ais[i].get_lives() > 0) {
+				m_winner_name = m_ais[i].get_name();
+				ais_alive = true; }
+		}
+		if (!ais_alive) { m_winner_name = m_player1.get_name(); }
+		return ((!m_player1.get_alive() && m_player1.get_lives() == 0) || !ais_alive);
+	}
+	return false;
 }

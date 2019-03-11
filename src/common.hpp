@@ -214,7 +214,8 @@ enum PauseMenuOption
 {
 	RESUME,
 	MAINMENU,
-	QUIT
+	QUIT,
+	RESTART
 };
 
 // For console log printing

@@ -79,6 +79,7 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 void MainMenu::destroy()
 {
 	m_initialized = false;
+	//is_player_1_chosen = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -91,7 +92,7 @@ void MainMenu::destroy()
 	reset();
 
 	effect.release();
-	std::cout << "Destroyed MainMenu." << std::endl;
+	//std::cout << "Destroyed MainMenu." << std::endl;
 }
 
 void MainMenu::draw(const mat3& projection)
@@ -293,6 +294,7 @@ void MainMenu::reset() {
 		delete t;
 	}
 	text.clear();
+	selectedButtonIndex = 0;
 }
 
 

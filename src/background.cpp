@@ -113,6 +113,11 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
 	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
 
+	winnerText = new TextRenderer(mainFontBold, 42);
+	winnerText->setColor({ 0.4f,0.1f,0.1f });
+	width = winnerText->get_width_of_string("QUEEN OF CROP:aaaaaaaaaa");
+	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 150.f });
+
 	init_buttons();
 
 	return true;
@@ -136,12 +141,8 @@ void Background::destroy()
 		delete nameplate;
 	}
 	nameplates.clear();
-
-	for (int i = 0; i < buttons.size(); i++) {
-		TextRenderer* button = buttons[i];
-		delete button;
-	}
-	buttons.clear();
+	destroyButtons();
+	winnerName = "";
 
 	delete health1;
 	delete health2;
@@ -161,6 +162,7 @@ void Background::destroy()
 	delete resumeMusic;
 	delete increaseVolume;
 	delete decreaseVolume;
+	delete winnerText;
 	effect.release();
 }
 
@@ -217,7 +219,7 @@ void Background::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	drawPlayerInfo(projection);
 
-	if (m_mode == TUTORIAL || m_paused) {
+	if (m_mode == TUTORIAL || m_paused || m_is_game_over) {
 		drawTutorialText(projection);
 	}
 	drawNameplates(projection);
@@ -279,7 +281,12 @@ void Background::drawPlayerInfo(const mat3& projection) {
 }
 
 void Background::drawTutorialText(const mat3& projection) {
-	if (m_paused) {
+	if (m_is_game_over) {
+		winnerText->renderString(projection, "QUEEN OF THE CROP: " + winnerName);
+		buttons[0]->renderString(projection, "RESTART");
+		buttons[1]->renderString(projection, "MAIN MENU");
+		buttons[2]->renderString(projection, "QUIT");
+	} else if (m_paused) {
 		isPausedText->renderString(projection, "PAUSED");
 		buttons[0]->renderString(projection, "RESUME");
 		buttons[1]->renderString(projection, "MAIN MENU");
@@ -301,7 +308,6 @@ void Background::drawTutorialText(const mat3& projection) {
 	}
 }
 void Background::addNameplate(TextRenderer* td, std::string name) {
-	//nameplates.insert(std::make_pair(td, name));
 	nameplates[td] = name;
 }
 void Background::drawNameplates(const mat3& projection) {
@@ -315,7 +321,6 @@ void Background::drawNameplates(const mat3& projection) {
 
 void Background::init_buttons()
 {
-	selectedButtonIndex = 0; // default: first button selected
 	TextRenderer* resume = new TextRenderer(mainFont, 60);
 	TextRenderer* mainMenu = new TextRenderer(mainFont, 60);
 	TextRenderer* quit = new TextRenderer(mainFont, 60);
@@ -325,45 +330,33 @@ void Background::init_buttons()
 	quit->setColor(defaultColor);
 
 	int width = resume->get_width_of_string("RESUME");
-	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
+	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-150.f });
 	width = mainMenu->get_width_of_string("MAIN-MENU");
-	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) -75.f});
 	width = quit->get_width_of_string("QUIT");
-	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
+	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f)});
 	buttons.emplace_back(resume);
 	buttons.emplace_back(mainMenu);
 	buttons.emplace_back(quit);
+
+	reset_selection();
 }
+
+void Background::set_game_over(bool go, std::string wn) {
+	m_is_game_over = go;
+	winnerName = wn;
+}
+
 
 PauseMenuOption Background::get_selected()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		return RESUME;
+		if (m_is_game_over) { return RESTART; }
+		else { return RESUME; }
 	case 1:
 		return MAINMENU;
 	case 2:
 		return QUIT;
-	}
-}
-
-void Background::change_selection(bool goDown)
-{
-	buttons[selectedButtonIndex]->setColor(defaultColor);
-	if (selectedButtonIndex == buttons.size() - 1 && goDown) {
-		buttons[0]->setColor(selectedColor);
-		selectedButtonIndex = 0;
-	}
-	else if (selectedButtonIndex == 0 && !goDown) {
-		buttons[buttons.size() - 1]->setColor(selectedColor);
-		selectedButtonIndex = buttons.size() - 1;
-	}
-	else if (goDown) {
-		selectedButtonIndex++;
-		buttons[selectedButtonIndex]->setColor(selectedColor);
-	}
-	else {
-		selectedButtonIndex--;
-		buttons[selectedButtonIndex]->setColor(selectedColor);
 	}
 }
