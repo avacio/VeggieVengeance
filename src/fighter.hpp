@@ -42,7 +42,9 @@ class Fighter : public Renderable
 
 	void set_hurt(bool hurt);
 
-	void decrease_health(unsigned int damage);
+	void apply_damage(DamageEffect damage_effect);
+
+	void set_blocking(bool blocking);
 
 	// Returns the current health
 	int get_health() const;
@@ -67,7 +69,17 @@ class Fighter : public Renderable
 
 	unsigned int get_id() const;
 
-	void jump_update(float ms);
+	void apply_friction();
+
+	void x_position_update(float added_speed);
+
+	void y_position_update(float ms);
+	
+	void crouch_update();
+
+	void die();
+
+	void check_respawn(float ms);
 
 	bool is_hurt() const;
 
@@ -79,15 +91,15 @@ class Fighter : public Renderable
 
 	bool is_idle() const;
 
+	bool is_blocking() const;
+
 	int get_crouch_state();
 
 	void set_crouch_state(CrouchState cs);
 
-	void reset(int init_position);
+	void reset();
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
-
-	void updatePosition(float ms);
 
   protected:
   	const int MAX_HEALTH = 100;
@@ -106,10 +118,8 @@ class Fighter : public Renderable
 	float m_rotation; // in radians
 	vec2 m_intial_pos;
 	
-	int m_speed; // each fighter has different speed and strength stats
+	float m_speed; // each fighter has different speed and strength stats
 	int m_strength;
-	float m_vertical_velocity;
-	vec2 m_velocity;
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
@@ -119,20 +129,23 @@ class Fighter : public Renderable
 	bool m_is_punching = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
-	
+	bool m_is_blocking = false;
+
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 
+	vec2 m_force;	// in Newtons
+	float m_mass;	// mass in kg
+	float m_friction;
+	float m_velocity_y;
+
 	//CONST VALUES
-	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
 	
-	const float INITIAL_VELOCITY = 400.0;
-	const float TERMINAL_VELOCITY = 400.0;
-	const float MOVEMENT_SPEED = 5.0;
-	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
+	const float INITIAL_JUMP_VELOCITY = 400.0;
+	const float TERMINAL_VELOCITY_Y = 400.0;
 	const vec2 GRAVITY = {0.0, 400.0};
 
 	const unsigned int m_id; //unique identifier given when created

@@ -96,6 +96,7 @@ class World
 
 	GameMode m_mode;
 	bool m_paused;
+	bool m_over;
 
 	// C++ rng
 	std::default_random_engine m_rng;

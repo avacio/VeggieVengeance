@@ -25,7 +25,6 @@ std::string fonts_path(std::string name);
 static const std::string mainFont = "HABESHAPIXELS.ttf";
 static const std::string mainFontBold = "HABESHAPIXELS-Bold.ttf";
 
-
 // Not much math is needed and there are already way too many libraries linked (:
 // If you want to do some overloads..
 struct vec2
@@ -85,6 +84,13 @@ struct Texture
 	bool is_valid() const; // True if texture is valid
 };
 
+extern Texture POTATO_TEXTURE;
+extern Texture POTATO_IDLE_TEXTURE;
+extern Texture POTATO_PUNCH_TEXTURE;
+extern Texture BROCCOLI_TEXTURE;
+extern Texture MAIN_MENU_TEXTURE;
+extern Texture BACKGROUND_TEXTURE;
+
 // A Mesh is a collection of a VertexBuffer and an IndexBuffer. A VAO
 // represents a Vertex Array Object and is the container for 1 or more Vertex Buffers and
 // an Index Buffer
@@ -143,6 +149,7 @@ enum CrouchState
 	CROUCH_RELEASED
 };
 
+
 enum FighterMovementState
 {
 	MOVING_FORWARD = 0,
@@ -153,7 +160,9 @@ enum FighterMovementState
 	STOP_MOVING_FORWARD = 5,
 	STOP_MOVING_BACKWARD = 6,
 	RELEASE_CROUCH = 7,
-	STOP_PUNCHING = 8
+	STOP_PUNCHING = 8,
+	BLOCKING = 9,
+	STOP_BLOCKING = 10
 };
 
 
@@ -171,6 +180,13 @@ enum GameMode
 	PVP, // 2 player
 	TUTORIAL,
 	DEV
+};
+
+enum PauseMenuOption
+{
+	RESUME,
+	MAINMENU,
+	QUIT
 };
 
 // For console log printing

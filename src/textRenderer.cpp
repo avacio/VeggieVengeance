@@ -44,13 +44,12 @@ TextRenderer::TextRenderer(std::string font_name, int size) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// Now store character for later use
-		Character character = {
-			texture,
-		{ static_cast<float>(face->glyph->bitmap.width),  static_cast<float>(face->glyph->bitmap.rows) },
-		{ static_cast<float>(face->glyph->bitmap_left),  static_cast<float>(face->glyph->bitmap_top) },
-		static_cast<GLuint>(face->glyph->advance.x)
-		};
-		characters.insert(std::pair<GLchar, Character>(c, character));
+		Character *character = new Character();
+		character->textureId = texture;
+		character->size = { static_cast<float>(face->glyph->bitmap.width),  static_cast<float>(face->glyph->bitmap.rows) };
+		character->bearing = { static_cast<float>(face->glyph->bitmap_left),  static_cast<float>(face->glyph->bitmap_top) };
+		character->advance = static_cast<GLuint>(face->glyph->advance.x);
+		characters.insert(std::pair<GLchar, Character*>(c, character));
 	}
 
 	FT_Done_Face(face);
@@ -69,9 +68,28 @@ TextRenderer::TextRenderer(std::string font_name, int size) {
 	m_color = { 1.f, 0.f, 0.f };
 	m_scale = { 1.f, -1.f };
 	m_position = { 0.f, 0.f };
-
 	if (!effect.load_from_file(shader_path("text.vs.glsl"), shader_path("text.fs.glsl")))
 		printf("textRenderer text shaders failed!");
+}
+
+TextRenderer::~TextRenderer() {
+	for (GLubyte c = 0; c < 128; c++) {
+		Character *character = characters[c];
+		glDeleteTextures(1, &(character->textureId));
+		delete character;
+	}
+	characters.clear();
+	glDeleteBuffers(1, &mesh.vbo);
+	glDeleteBuffers(1, &mesh.ibo);
+	glDeleteVertexArrays(1, &mesh.vao);
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+	glDisableVertexAttribArray(0);
+
+	glDeleteShader(effect.vertex);
+	glDeleteShader(effect.fragment);
+	glDeleteShader(effect.program);
+	effect.release();
 }
 
 void TextRenderer::setColor(vec3 color) {
@@ -113,7 +131,7 @@ void TextRenderer::renderString(const mat3& projection, std::string text) {
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)
 	{
-		Character ch = characters[*c];
+		Character ch = *characters[*c];
 
 		GLfloat xpos = x + ch.bearing.x;
 		GLfloat ypos = y - (ch.size.y - ch.bearing.y);
@@ -154,7 +172,7 @@ float TextRenderer::get_width_of_string(std::string text) {
 	float return_value = 0.f;
 	Character ch;
 	for (c = text.begin(); c != text.end(); c++) {
-		ch = characters[*c]; return_value += (ch.advance >> 6);
+		ch = *characters[*c]; return_value += (ch.advance >> 6);
 	}
 	return return_value + ch.size.x;
 }

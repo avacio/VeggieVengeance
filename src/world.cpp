@@ -1,4 +1,5 @@
 // Header
+#include "common.hpp"
 #include "world.hpp"
 
 // stlib
@@ -117,10 +118,14 @@ bool World::init(vec2 screen, GameMode mode)
 
 	fprintf(stderr, "Loaded music\n");
 
-
-
 	m_screen = screen; // to pass on screen size to renderables
-	bool initSuccess = set_mode(mode);
+	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
+				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
+				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
+				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
+				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
+					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
+					   set_mode(mode);
 
 	spawn_platform(200, 600, 800, 50);
 
@@ -150,11 +155,17 @@ void World::destroy()
 	m_ais.clear();
 	m_fighters.clear();
 	m_damageEffects.clear();
-	m_bg.destroy();
 	for (auto &platform : m_platforms) {
 		platform.destroy();
 	}
 	m_platforms.clear();
+
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	glfwDestroyWindow(m_window);
 }
 
@@ -189,27 +200,27 @@ bool World::update(float elapsed_ms)
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_player1.get_in_play()) {
 				BoundingBox* b1 = m_player1.get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
+				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
 					//incur damage
-					m_player1.decrease_health(m_damageEffects[i].m_damage);
+					m_player1.apply_damage(m_damageEffects[i]);
 					m_player1.set_hurt(true);
 				}
 				delete b1;
 			}
 			if (m_player2.get_in_play()) {
 				BoundingBox* b2 = m_player2.get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
+				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
 					//incur damage
-					m_player2.decrease_health(m_damageEffects[i].m_damage);
+					m_player2.apply_damage(m_damageEffects[i]);
 					m_player2.set_hurt(true);
 				}
 				delete b2;
 			}
 			for (int j = 0; j < m_ais.size(); j++) {
 				BoundingBox* b3 = m_ais[j].get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
+				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
 					//incur damage
-					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
+					m_ais[j].apply_damage(m_damageEffects[i]);
 					m_ais[j].set_hurt(true);
 				}
 				delete b3;
@@ -362,7 +373,7 @@ void World::draw()
 // Should the game be over ?
 bool World::is_over() const
 {
-	return glfwWindowShouldClose(m_window);
+	return glfwWindowShouldClose(m_window) || m_over;
 }
 
 // Creates a ai and if successful, adds it to the list of ai
@@ -453,7 +464,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			//	m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
+				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(BLOCKING);
+			}
+
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
@@ -462,9 +478,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			//	m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
 				m_player1.set_movement(STOP_PUNCHING);
-
-				play_grunt_audio();
 			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(STOP_BLOCKING);
+			}
+
+			
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -479,6 +498,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			//	m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 				m_player2.set_movement(PUNCHING);
+				play_grunt_audio();
+			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(BLOCKING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -488,7 +511,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			//	m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
-				play_grunt_audio();
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(STOP_BLOCKING);
 			}
 		}
 
@@ -499,6 +524,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
+
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+			{
+				m_bg.change_selection(false);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+			{
+				m_bg.change_selection(true);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+			{
+				PauseMenuOption selectedOption = m_bg.get_selected();
+				if (selectedOption == RESUME) {
+					set_paused(!m_paused);
+				} else if (selectedOption == MAINMENU) {
+					set_mode(MENU);
+				} else if (selectedOption == QUIT) {
+					m_over = true;
+				}
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
@@ -542,37 +587,37 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_ResumeMusic();
 }
 
+
 void World::reset()
 {
 	m_damageEffects.clear();
 	switch (m_mode) {
 	case DEV:
-		m_player1.reset(1);
-		m_player2.reset(2);
-
-		for (AI ai : m_ais)
+		m_player1.reset();
+		m_player2.reset();
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case PVP:
-		m_player1.reset(1);
-		m_player2.reset(2);
+		m_player1.reset();
+		m_player2.reset();
 		break;
 	case PVC:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case TUTORIAL:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case MENU:	// TESTING TRANSITIONS, REDUNDANT NOW
@@ -587,71 +632,86 @@ void World::reset()
 bool World::set_mode(GameMode mode) {
 	m_player1.set_in_play(false);
 	m_player2.set_in_play(false);
+
+	for (AI& ai : m_ais) {
+		ai.destroy();
+	}
 	m_ais.clear();
+
+	for (Fighter& fighter : m_fighters) {
+		fighter.destroy();
+	}
 	m_fighters.clear();
-	m_bg.clearNameplates();
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	
 	m_mode = mode;
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
 
 	switch (mode) {
-	case MENU:
-		m_player1.set_in_play(true); // needed to make AI respond
-		spawn_ai(RANDOM);
-		m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
-		initSuccess = initSuccess && m_menu.init(m_screen);
-		break;
-	case DEV:
-		if (MAX_PLAYERS >= 1)
-		{
-			m_player1.set_in_play(true);
-		}
-		if (MAX_PLAYERS >= 2)
-		{
-			m_player2.set_in_play(true);
-		}
-
-		if (m_player1.get_in_play())
-		{
-			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
-			m_fighters.emplace_back(m_player1);
-		}
-
-		if (m_player2.get_in_play())
-		{
-			initSuccess = initSuccess && m_player2.init(2, "Spud");
-			m_fighters.emplace_back(m_player2);
-		}
-
-		for (int i = 0; i < MAX_AI; i++)
-		{
-			AIType type = AVOID;
-			if (i % 2 == 0)
+		case MENU:
+			m_player1.set_in_play(true); // needed to make AI respond
+			spawn_ai(RANDOM);
+			set_paused(false);
+			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
+			initSuccess = initSuccess && m_menu.init(m_screen);
+			break;
+		case DEV:
+			if (MAX_PLAYERS >= 1)
 			{
-				type = CHASE;
+				m_player1.set_in_play(true);
 			}
-			initSuccess = initSuccess && spawn_ai(type);
-		}
-		initSuccess = initSuccess && m_bg.init(m_screen, mode);
-		break;
-	case PVP: // 2 player
-		m_player1.set_in_play(true);
-		m_player2.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
-		m_fighters.emplace_back(m_player1);
-		m_fighters.emplace_back(m_player2);
-		break;
-	case PVC: // single player
-		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
-		m_fighters.emplace_back(m_player1);
-		break;
-	case TUTORIAL:
-		m_player1.set_in_play(true);
-		initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
-		m_fighters.emplace_back(m_player1);
-		break;
+			if (MAX_PLAYERS >= 2)
+			{
+				m_player2.set_in_play(true);
+			}
+
+			if (m_player1.get_in_play())
+			{
+				initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
+				m_fighters.emplace_back(m_player1);
+			}
+
+			if (m_player2.get_in_play())
+			{
+				initSuccess = initSuccess && m_player2.init(2, "Spud");
+				m_fighters.emplace_back(m_player2);
+			}
+
+			for (int i = 0; i < MAX_AI; i++)
+			{
+				AIType type = AVOID;
+				if (i % 2 == 0)
+				{
+					type = CHASE;
+				}
+				initSuccess = initSuccess && spawn_ai(type);
+			}
+			initSuccess = initSuccess && m_bg.init(m_screen, mode);
+			break;
+		case PVP: // 2 player
+			m_player1.set_in_play(true);
+			m_player2.set_in_play(true);
+			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+			m_fighters.emplace_back(m_player1);
+			m_fighters.emplace_back(m_player2);
+			break;
+		case PVC: // single player
+			m_player1.set_in_play(true);
+			initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			m_fighters.emplace_back(m_player1);
+			break;
+		case TUTORIAL:
+			m_player1.set_in_play(true);
+			initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			m_fighters.emplace_back(m_player1);
+			break;
 	}
 
 	if (mode != MENU)
