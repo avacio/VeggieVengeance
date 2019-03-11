@@ -121,7 +121,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	winnerText = new TextRenderer(mainFontBold, 42);
 	winnerText->setColor({ 0.4f,0.1f,0.1f });
-	width = winnerText->get_width_of_string("QUEEN OF CROP:aaaaaaaaaa");
+	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaa");
 	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 150.f });
 
 	init_buttons();
@@ -299,7 +299,7 @@ void Background::drawPlayerInfo(const mat3& projection) {
 
 void Background::drawTutorialText(const mat3& projection) {
 	if (m_is_game_over) {
-		winnerText->renderString(projection, "QUEEN OF THE CROP: " + winnerName);
+		winnerText->renderString(projection, "CREAM OF THE CROP: " + winnerName);
 		buttons[0]->renderString(projection, "RESTART");
 		buttons[1]->renderString(projection, "MAIN MENU");
 		buttons[2]->renderString(projection, "QUIT");
