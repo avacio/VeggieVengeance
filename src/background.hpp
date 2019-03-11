@@ -13,6 +13,8 @@ class Background : public Renderable, public Screen
 	// GUI text renderer
 	TextRenderer* health1;
 	TextRenderer* health2;
+	TextRenderer* block1;
+	TextRenderer* block2;
 	TextRenderer* lives1;
 	TextRenderer* lives2;
 	TextRenderer* isPausedText;
@@ -49,7 +51,7 @@ public:
 	void set_position(vec2 position);
 
 	void setPaused(bool isPaused);
-	void setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP); // set to -1 if player is not initialized
+	void setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL); // set to -1 if player is not initialized
 	void drawPlayerInfo(const mat3& projection);
 	void drawTutorialText(const mat3& projection);
 
@@ -72,9 +74,11 @@ private:
 
 	int p1Lives = -1;
 	int p1HP = -1;
+	int p1BL = -1;
 	int p2Lives = -1;
 	int p2HP = -1;
 	std::string winnerName = "";
+	int p2BL = -1;
 
 	std::map<TextRenderer*, std::string> nameplates;
 };

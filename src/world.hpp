@@ -14,7 +14,6 @@
 #include "mainMenu.hpp"
 #include "platform.hpp"
 
-
 // stlib
 #include <vector>
 #include <random>
