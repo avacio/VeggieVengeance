@@ -1,3 +1,63 @@
+# PLAYABILITY MILESTONE PROGRESS - Mar. 8
+
+
+
+Overview: For this milestone, we focused on improving the gameplay by introducing character selection, new abilities, also fixing and adding many new assets and features
+
+
+
+## Milestone Requirements
+
+
+- Provide complete playable prior-milestone implementation
+	- everything from previous milestones are kept and improved upon
+
+- Sustain progressive, non-repetitive gameplay for 4min or more including all new features (with minimal tutorial) 
+	- Character Selection System: allow player to choose between 2 veggie characters
+    - New fighting abilities
+ 		- Blocking (blocking enemy attacks, but cannot initiate attacks)
+ 		- Bullet (linear projectile)
+		- Projectile (parabolic projectile)
+ 		- Power punching (charging up a punch that deals more damage)
+
+- Implement time stepping based physical animation: A subset of the game entities (main or background) should now possess non-trivial physics properties such as linear momentum or angular momentum, and acceleration and 
+  act based on those. Specifically, you should implement some form of physical simulation, which can be either background effects (e.g. water, smoke implemented using particles) or active game elements (throwing a ball,
+  swinging a rope, etc…)
+	- gravity-based acceleration
+	- physical simulation for fighter moves
+ 		- projectile (parabolic projectile using gravity)
+        
+- Incorporate one or more polygonal geometric assets 
+
+- Implement smooth non-linear motion of one or more assets or characters 
+	- jumping for all characters are gravity-based
+    
+- Implement an accurate and efficient collision detection method (include multiple moving assets that necessitate collision checks)
+	- fighters/projectiles/bullets/platforms all require collision checks
+    
+- Stable game code supporting continuing execution and graceful termination.
+	- polished paused menu
+ 		- fixed: pausing all background actions
+		- resume: supporting continuing execution
+		- going back to main menu: allow players to switch modes without closing the game
+		- quit: graceful termination
+
+Creative: You should implement one or more additional creative elements. These can include additional integrated assets or rendering effects or pre-emptive implementation of one or more features from subsequent milestones.
+	
+- Planned Work
+	- new animations:
+		- Potato holding power punches + release
+		- replaces all crouches with actual texture instead of changing position
+		- Broccoli punches, crouching
+	- Blocking: effects using shaders
+	- new background music
+    
+- Unplanned Work
+	- polished paused menu (resume, main menu, quit)
+	- improving main menu
+	- fixed grunting sounds
+
+
 # MINIMAL PLAYABILITY MILESTONE PROGRESS - Feb. 22
 
 
