@@ -66,6 +66,12 @@ bool Background::init(vec2 screen, GameMode mode)
 	health1->setPosition({ 50.f, 100.f });
 	health2->setPosition({ screen.x-(width*1.15f), 100.f });
 
+	block1 = new TextRenderer(mainFont, 44);
+	block2 = new TextRenderer(mainFont, 44);
+	int width1 = block1->get_width_of_string("BLOCK: 100"); // TODO
+	block1->setPosition({ 50.f, 250.f });
+	block2->setPosition({ screen.x - (width1*1.15f), 250.f });
+
 	lives1 = new TextRenderer(mainFont, 70);
 	lives2 = new TextRenderer(mainFont, 70);
 	width = lives2->get_width_of_string("XXX");
@@ -135,6 +141,8 @@ void Background::destroy()
 
 	delete health1;
 	delete health2;
+	delete block1;
+	delete block2;
 	delete lives1;
 	delete lives2;
 	delete isPausedText;
@@ -229,11 +237,13 @@ void Background::setPaused(bool isPaused) {
 }
 
 
-void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
+void Background::setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL) {
 	this->p1Lives = p1Lives;
 	this->p1HP = p1HP;
+	this->p1BL = p1BL;
 	this->p2Lives = p2Lives;
 	this->p2HP = p2HP;
+	this->p2BL = p2BL;
 }
 
 void Background::drawPlayerInfo(const mat3& projection) {
@@ -243,6 +253,13 @@ void Background::drawPlayerInfo(const mat3& projection) {
 
 	health1->renderString(projection, ss1.str());
 	health2->renderString(projection, ss2.str());
+
+	std::stringstream blss1, blss2;
+	blss1 << "BLOCK: " << p1BL;
+	blss2 << "BLOCK: " << p2BL;
+
+	block1->renderString(projection, blss1.str());
+	block2->renderString(projection, blss2.str());
 
 	switch (p1Lives) {
 	case 3:
