@@ -130,6 +130,7 @@ bool World::init(vec2 screen, GameMode mode)
 				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
 				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
 				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
+					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && set_mode(mode);
 
 	spawn_platform(200, 600, 800, 50);
