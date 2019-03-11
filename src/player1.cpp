@@ -50,22 +50,26 @@ void Player1::draw(const mat3 &projection)
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
 	if (get_alive() && is_punching()) {
-		if (m_fc == POTATO) { player1_texture = POTATO_PUNCH_TEXTURE; }
+		if (m_fc == POTATO) {player1_texture = POTATO_PUNCH_TEXTURE; }
+		else { player1_texture = BROCCOLI_TEXTURE; }
 	} else {
 		if (get_alive() && is_idle()) {
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
 				if (m_fc == POTATO) { player1_texture = POTATO_IDLE_TEXTURE; }
+				else { player1_texture = BROCCOLI_TEXTURE; }
 			}
 
 			else if (m_idle_counter > 25 && m_idle_counter < 50) {
 				if (m_fc == POTATO) { player1_texture = POTATO_TEXTURE; }
+				else { player1_texture = BROCCOLI_TEXTURE; }
 			}
 
 			else if (m_idle_counter >= 50)
 				m_idle_counter = 0;
 		} else if(!get_alive()) {
 			if (m_fc == POTATO) { player1_texture = POTATO_TEXTURE; }
+			else { player1_texture = BROCCOLI_TEXTURE; }
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, player1_texture.id);
