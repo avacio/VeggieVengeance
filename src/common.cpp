@@ -93,6 +93,13 @@ vec2 normalize(vec2 v)
 	return { v.x / m, v.y / m };
 }
 
+int get_random_number(int max) {
+	std::random_device rd; // non-deterministic generator
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(0, max);
+	return dist(gen);
+}
+
 Texture::Texture()
 {
 
@@ -301,3 +308,36 @@ void Renderable::transform_end()
 {
 	//
 }
+
+//FighterInfo::FighterInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names) {
+void FighterInfo::setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names)
+{
+	this->fc = fc;
+	this->strength = strength;
+	this->sciName = sciName;
+	this->speed = speed;
+	this->names = names;
+}
+
+std::string FighterInfo::getFCName() {
+	int r = get_random_number(names.size()-1);
+	//std::cout << "NAMES SIZE: " << names.size() << std::endl;
+	//std::cout << "rand: " << r << std::endl;
+	std::string p = names.at(r);
+
+	if (std::find(takenNames.begin(), takenNames.end(), p) != takenNames.end()) {
+		std::string newP = p + "Jr";
+		names.emplace_back(newP);
+		takenNames.emplace_back(newP);
+		return newP;
+	}
+	else {
+		takenNames.emplace_back(p);
+		return p;
+	}
+}
+
+void FighterInfo::clearTaken() {
+	takenNames.clear();
+}
+

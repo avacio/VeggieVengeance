@@ -3,6 +3,7 @@
 // stlib
 #include <fstream> // stdout, stderr..
 #include <sstream>
+#include <random>
 
 // glfw
 #define NOMINMAX
@@ -45,6 +46,7 @@ float dot(vec2 l, vec2 r);
 float dot(vec3 l, vec3 r);
 mat3 mul(const mat3 &l, const mat3 &r);
 vec2 normalize(vec2 v);
+int get_random_number(int max);
 
 // OpenGL utilities
 // cleans error buffer
@@ -173,9 +175,35 @@ enum DeletionTime
 	AFTER_OUT_OF_BOUNDS
 };
 
+enum FighterCharacter
+{
+	BLANK = 0,
+	POTATO,
+	BROCCOLI
+};
+
+struct FighterInfo
+{
+public:
+	void setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names);
+
+	FighterCharacter fc;
+	std::string sciName;
+	int strength;
+	int speed;
+
+	std::string getFCName();
+	void clearTaken();
+
+protected:
+	std::vector<std::string> names;
+	std::vector<std::string> takenNames;
+};
+
 enum GameMode
 {
 	MENU = 0,
+	CHARSELECT,
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
@@ -186,9 +214,10 @@ enum PauseMenuOption
 {
 	RESUME,
 	MAINMENU,
-	QUIT
+	QUIT,
+	RESTART
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "CHARSELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
 

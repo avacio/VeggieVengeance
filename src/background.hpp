@@ -2,9 +2,10 @@
 
 #include "common.hpp"
 #include "textRenderer.hpp"
+#include "mainMenu.hpp"
 
 // Background
-class Background : public Renderable
+class Background : public Renderable, public Screen
 {
 	// Background texture
 	static Texture bg_texture;
@@ -31,6 +32,8 @@ class Background : public Renderable
 	TextRenderer* increaseVolume;
 	TextRenderer* decreaseVolume;
 
+	TextRenderer* winnerText;
+
 public:
 	// Creates all the associated render resources and default transform
 	bool init(vec2 screen, GameMode mode);
@@ -54,10 +57,9 @@ public:
 
 	void addNameplate(TextRenderer* td, std::string name);
 	void drawNameplates(const mat3& projection);
-	void clearNameplates();
 	void init_buttons();
-	void change_selection(bool goDown);
 	PauseMenuOption get_selected();
+	void set_game_over(bool go, std::string wn);
 
 	bool m_initialized = false;
 
@@ -68,18 +70,15 @@ private:
 	float m_rotation; // in radians
 	GameMode m_mode;
 	bool m_paused = false;
+	bool m_is_game_over = false;
 
 	int p1Lives = -1;
 	int p1HP = -1;
 	int p1BL = -1;
 	int p2Lives = -1;
 	int p2HP = -1;
+	std::string winnerName = "";
 	int p2BL = -1;
-
-	int selectedButtonIndex = -1;
-	std::vector<TextRenderer*> buttons;
-	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
-	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
 
 	std::map<TextRenderer*, std::string> nameplates;
 };

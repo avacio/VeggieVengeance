@@ -13,11 +13,12 @@ Fighter::Fighter(unsigned int id) : m_id(id) {
 
 }
 
-bool Fighter::init(int init_position, std::string name)
-
+bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 {
 	// Load shared texture
-	fighter_texture = BROCCOLI_TEXTURE;
+	m_fc = fc;
+	if (fc == BROCCOLI) { fighter_texture = BROCCOLI_TEXTURE; }
+	else { fighter_texture = POTATO_TEXTURE; }
 
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
@@ -608,8 +609,6 @@ void Fighter::reset()
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
-	
-	
 }
 
 DamageEffect * Fighter::punch() {

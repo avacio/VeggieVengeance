@@ -16,9 +16,6 @@ vec2 distort(vec2 uv) {
     return uv;
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// HANDLE THE COLOR SHIFTING HERE (you may want to make the image slightly blue-ish)
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 vec4 color_shift(vec4 in_color) {
 	vec4 color = in_color;
 	color +=  vec4(0.1, 0.1, 0.1, 0);

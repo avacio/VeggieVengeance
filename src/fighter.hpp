@@ -14,7 +14,7 @@ class Fighter : public Renderable
   public:
 	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
-	bool init(int init_position, std::string name);
+	bool init(int init_position, std::string name, FighterCharacter fc);
 
 	// Releases all the associated resources
 	void destroy();
@@ -112,6 +112,7 @@ class Fighter : public Renderable
 	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
 
+	FighterCharacter m_fc;
 	std::string m_name;
 	TextRenderer* m_nameplate;
 
