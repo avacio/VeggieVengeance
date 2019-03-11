@@ -44,6 +44,7 @@ set(SOURCE_FILES
 	src/boundingBox.cpp
 	src/textRenderer.cpp
 	src/mainMenu.cpp
+	src/platform.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -58,6 +59,7 @@ set(SOURCE_FILES
 	src/boundingBox.hpp
 	src/textRenderer.hpp
 	src/mainMenu.hpp
+	src/platform.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

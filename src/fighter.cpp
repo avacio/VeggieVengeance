@@ -19,8 +19,10 @@ bool Fighter::init(int init_position, std::string name)
 	fighter_texture = BROCCOLI_TEXTURE;
 
 	// The position corresponds to the center of the texture
-	float wr = fighter_texture.width * 3.5f;
-	float hr = fighter_texture.height * 3.5f;
+	//float wr = fighter_texture.width * 3.5f;
+	//float hr = fighter_texture.height * 3.5f;
+	float wr = fighter_texture.width * 0.5f;
+	float hr = fighter_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = {-wr, +hr, -0.02f};
@@ -71,14 +73,15 @@ bool Fighter::init(int init_position, std::string name)
 	m_is_hurt = false;
 	m_is_blocking = false;
 
-	m_scale.x = 0.2f;
-	m_scale.y = 0.2f;
+	m_scale.x = 1.2f;
+	m_scale.y = 1.2f;
+	m_sprite_appearance_size = {fighter_texture.width /2.0f, fighter_texture.height / 1.4f };
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5.f;
 	m_strength = 1;
 	m_lives = STARTING_LIVES;
-	m_vertical_velocity = 0.0;
+	m_velocity_y = 0.0;
 	m_name = name;
 
 	m_mass = 1.f;
@@ -99,6 +102,8 @@ bool Fighter::init(int init_position, std::string name)
 		m_position = { 550.f, 525.f };
 		break;
 	}
+
+	m_intial_pos = m_position;
 
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
@@ -121,13 +126,13 @@ void Fighter::destroy()
 	effect.release();
 }
 
-DamageEffect * Fighter::update(float ms)
+DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 {
+	vec2 oldPos = m_position;
 	DamageEffect * d = NULL;
 
 	die();	
 	check_respawn(ms);
-	jump_update();
 
 	if (m_is_alive)
 	{
@@ -149,6 +154,9 @@ DamageEffect * Fighter::update(float ms)
 		else
 			m_rotation = M_PI / 2;
 	}
+
+	y_position_update(ms);
+	platform_collision(platforms, oldPos);
 
 	//return null if not attacking, or the collision object if attacking
 	return d;
@@ -241,10 +249,15 @@ void Fighter::move(vec2 off)
 }
 
 //// Returns the local bounding coordinates scaled by the current size of the bubble
-vec2 Fighter::get_bounding_box() const
+BoundingBox * Fighter::get_bounding_box() const
 {
 	// fabs is to avoid negative scale due to the facing direction
-	return {std::fabs(m_scale.x) * fighter_texture.width, std::fabs(m_scale.y) * fighter_texture.height};
+	float width = std::fabs(m_scale.x) * m_sprite_appearance_size.x;
+	float height = std::fabs(m_scale.y) * m_sprite_appearance_size.y;
+	// get position gets center of texture, but we want top left corner position for bounding box
+	float topLeftXpos = get_position().x - (width / 2);
+	float topLeftYpos = get_position().y - (height / 2);
+	return new BoundingBox(topLeftXpos, topLeftYpos, width, height);
 }
 
 // set fighter's movements
@@ -346,22 +359,7 @@ void Fighter::start_jumping()
 	{
 		m_is_jumping = true;
 		m_is_idle = false;
-		m_vertical_velocity = INITIAL_VELOCITY;
-	}
-}
-
-void Fighter::jump_update()
-{
-	if (m_is_jumping)
-	{
-		move({0.0, -m_vertical_velocity});
-		m_vertical_velocity += ACCELERATION;
-	}
-
-	if (m_vertical_velocity < -INITIAL_VELOCITY)
-	{
-		m_is_jumping = false;
-		m_vertical_velocity = 0.0;
+		m_velocity_y = -INITIAL_JUMP_VELOCITY;
 	}
 }
 
@@ -416,12 +414,14 @@ void Fighter::crouch_update() {
 }
 
 void Fighter::die() {
-	if (m_health <= 0 && m_is_alive)
+	if (m_health <= 0 && m_is_alive || (m_position.y > (800 + 100) && m_is_alive))
 	{
 		m_is_alive = false;
 		m_lives--;
 		set_movement(STOP_MOVING_BACKWARD);
 		set_movement(STOP_MOVING_FORWARD);
+		m_is_punching = false;
+		m_is_jumping = false;
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {
@@ -460,6 +460,7 @@ void Fighter::check_respawn(float ms) {
 			m_health = MAX_HEALTH;
 			//unrotate the potate
 			m_rotation = 0;
+			m_position = m_intial_pos;
 		}
 	}
 }
@@ -517,34 +518,17 @@ unsigned int Fighter::get_id() const
 	return m_id;
 }
 
-void Fighter::reset(int init_position)
+void Fighter::reset()
 {
 	m_health = MAX_HEALTH;
 	m_lives = STARTING_LIVES;
 	m_is_alive = true;
 	m_rotation = 0;
 	m_is_jumping = false;
-	m_vertical_velocity = 0;
-
-	switch (init_position) {
-	case 1:
-		m_position = { 250.f, 525.f };
-		if (!m_facing_front) {
-			m_facing_front = true;
-			m_scale.x = -m_scale.x;
-		}
-		break;
-	case 2:
-		m_position = { 950.f, 525.f };
-		if (m_facing_front) {
-			m_facing_front = false;
-			m_scale.x = -m_scale.x;
-		}
-		break;
-	default:
-		m_position = { 550.f, 525.f };
-		break;
-	}
+	m_velocity_y = 0.0;
+	m_moving_forward = false;
+	m_moving_backward = false;
+	m_position = m_intial_pos;
 
 	
 	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
@@ -557,14 +541,70 @@ void Fighter::reset(int init_position)
 
 DamageEffect * Fighter::punch() {
 	//create the bounding box based on fighter position
-	int sizeMultiplier = 4;
+	float sizeMultiplier = 1.75;
+	BoundingBox* b = get_bounding_box();
+	DamageEffect* d;
 	if (get_facing_front()) {
 		//right facing
-		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		d = new DamageEffect(b->xpos + (b->width / 2.0), b->ypos, sizeMultiplier * (b->width / 2.0), b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
 	else {
 		//left facing
-		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
-			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
+			b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
+
+	delete b;
+	return d;
+}
+
+//revert to old position if new position causes a collision with platforms
+void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPosition) {
+	for (int i = 0; i < platforms.size(); i++) {
+		BoundingBox* b = get_bounding_box();
+		if (platforms[i].check_collision(*b)) {
+			if (platforms[i].check_collision_outer_left(*b)) {
+				m_position = oldPosition;
+				m_velocity_y = 0.0;
+				m_is_jumping = false;
+			}
+			else if (platforms[i].check_collision_outer_right(*b)) {
+				m_position = oldPosition;
+				m_velocity_y = 0.0;
+				m_is_jumping = false;
+			}
+
+			if (platforms[i].check_collision_outer_top(*b)) {
+				m_position.y = oldPosition.y;
+				m_velocity_y = 0.0;
+				m_is_jumping = false;
+			}
+			else if (platforms[i].check_collision_outer_bottom(*b)) {
+				m_position.y = oldPosition.y;
+				m_velocity_y = 0.0;
+			}
+
+			if (!platforms[i].check_collision_outer_left(*b) && !platforms[i].check_collision_outer_right(*b) &&
+				!platforms[i].check_collision_outer_top(*b) && !platforms[i].check_collision_outer_bottom(*b)) {
+				m_position = oldPosition;
+				m_velocity_y = 0.0;
+				m_is_jumping = false;
+			}
+		}
+		delete b;
+	}
+}
+
+void Fighter::y_position_update(float ms) {
+	float s = ms / 1000;
+	m_position.y += m_velocity_y * s;
+	m_velocity_y += GRAVITY.y * s;
+
+	if (m_velocity_y > TERMINAL_VELOCITY_Y) {
+		m_velocity_y = TERMINAL_VELOCITY_Y;
+	}
+	else if (m_velocity_y < -TERMINAL_VELOCITY_Y) {
+		m_velocity_y = -TERMINAL_VELOCITY_Y;
+	}
+
 }
