@@ -4,14 +4,13 @@
 #include "damageEffect.hpp"
 #include "attack.hpp"
 
-class Bullet : public Attack {
+class Punch : public Attack {
 	static Texture bullet_texture;
 public:
-	Bullet(int id, vec2 pos, unsigned int damage, bool direction);
-	~Bullet();
+	Punch(int id, vec2 pos, vec2 size, unsigned int damage, bool direction);
+	~Punch();
 	bool init();
 	void update();
 	void draw(const mat3 &projection) override;
 private:
-	
 };

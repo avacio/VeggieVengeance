@@ -121,9 +121,9 @@ void Fighter::destroy()
 	effect.release();
 }
 
-DamageEffect * Fighter::update(float ms)
+Attack * Fighter::update(float ms)
 {
-	DamageEffect * d = NULL;
+	Attack * attack = NULL;
 	float MOVING_SPEED = 5.0;
 
 	//IF JUST DIED
@@ -220,7 +220,7 @@ DamageEffect * Fighter::update(float ms)
 		if (m_is_punching)
 		{
 			//save collision object from punch
-			d = punch();
+			attack = punch();
 		}
 
 		// Power punch
@@ -229,7 +229,7 @@ DamageEffect * Fighter::update(float ms)
 				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
 		}
 		if (m_is_power_punching) {
-			d = powerPunch();
+			attack = powerPunch();
 			m_holding_power_punch_timer = 0;
 			m_is_power_punching = false;
 		}
@@ -240,28 +240,19 @@ DamageEffect * Fighter::update(float ms)
 				m_holding_projectile_timer += PROJECTILE_CHARGE_RATE;
 		}
 		if (m_is_shooting_charged_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
-			Projectile* p = new Projectile(m_position, m_facing_front, 7 + m_holding_projectile_timer, 10 + 2 * m_holding_projectile_timer, get_id());
-			p->init();
-			m_projectiles.insert(p);
-			d = p->projectileDmg();
+			attack = new Projectile(get_id(), m_position, 7 + m_holding_projectile_timer, m_facing_front);
 			m_holding_projectile_timer = 0;
 			m_is_shooting_charged_projectile = false;
 		}
 
 
 		if (m_is_shooting_bullet && m_bullets.size() < MAX_PROJECTILE_ON_SCREEN) {
-			Bullet* b = new Bullet(m_position, m_facing_front, 5, get_id());
-			b->init();
-			m_bullets.insert(b);
-			d = b->bulletDmg();
+			attack = new Bullet(get_id(), m_position, 5, m_facing_front);
 			printf("shot bullet\n");
 		}
 
 		if (m_is_shooting_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
-			Projectile* p = new Projectile(m_position, m_facing_front, 7, 10, get_id());
-			p->init();
-			m_projectiles.insert(p);
-			d = p->projectileDmg();
+			attack = new Projectile(get_id(), m_position, 7, m_facing_front);
 			printf("shot projectile\n");
 		}
 	}
@@ -273,33 +264,8 @@ DamageEffect * Fighter::update(float ms)
 			m_rotation = M_PI / 2;
 	}
 
-	// move projectiles, bullets and delete out-of-bound ones
-	auto b = begin(m_bullets);
-	while (b != end(m_bullets)) {
-		(*b)->moveBullet();
-		// TODO: CHANGE DELETION
-		if ((*b)->getPosition().x < 0 || (*b)->getPosition().x > 1200) {
-			delete *b;
-			b = m_bullets.erase(b);
-		}
-		else
-			b++;
-	}
-	auto p = begin(m_projectiles);
-	while (p != end(m_projectiles)) {
-		(*p)->moveProjectile();
-		(*p)->accelerate(-ACCELERATION);
-		// TODO: CHANGE DELETION
-		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
-			delete *p;
-			p = m_projectiles.erase(p);
-		}
-		else
-			p++;
-	}
-
 	//return null if not attacking, or the collision object if attacking
-	return d;
+	return attack;
 }
 
 void Fighter::draw(const mat3 &projection)
@@ -636,30 +602,40 @@ void Fighter::reset(int init_position)
 	
 }
 
-DamageEffect * Fighter::punch() {
+Punch * Fighter::punch() {
 	//create the bounding box based on fighter position
 	int sizeMultiplier = 4;
 	if (get_facing_front()) {
 		//right facing
-		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		float width = sizeMultiplier * get_bounding_box().x;
+		float height = get_bounding_box().y;
+		return new Punch(get_id(), { get_position().x, get_position().y }, { width, height }, m_strength, true);
 	}
 	else {
 		//left facing
-		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
-			get_bounding_box().y, m_strength, get_id(), AFTER_UPDATE);
+		float xpos = get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x);
+		float ypos = get_position().y;
+		float width = sizeMultiplier * get_bounding_box().x;
+		float height = get_bounding_box().y;
+		return new Punch(get_id(), { xpos, ypos }, { width, height }, m_strength, false);
 	}
 }
 
-DamageEffect * Fighter::powerPunch() {
+Punch * Fighter::powerPunch() {
 	//create the bounding box based on fighter position
 	int sizeMultiplier = 4;
 	if (get_facing_front()) {
 		//right facing
-		return new DamageEffect(get_position().x, get_position().y, sizeMultiplier * get_bounding_box().x, get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+		float width = sizeMultiplier * get_bounding_box().x;
+		float height = get_bounding_box().y;
+		return new Punch(get_id(), { get_position().x, get_position().y }, { width, height }, m_strength + m_holding_power_punch_timer, true);
 	}
 	else {
 		//left facing
-		return new DamageEffect(get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x), get_position().y, sizeMultiplier * get_bounding_box().x,
-			get_bounding_box().y, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+		float xpos = get_position().x - ((sizeMultiplier - 1) * get_bounding_box().x);
+		float ypos = get_position().y;
+		float width = sizeMultiplier * get_bounding_box().x;
+		float height = get_bounding_box().y;
+		return new Punch(get_id(), { xpos, ypos }, { width, height }, m_strength + m_holding_power_punch_timer, false);
 	}
 }

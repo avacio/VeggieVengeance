@@ -3,6 +3,8 @@
 #include "common.hpp"
 #include "damageEffect.hpp"
 #include "textRenderer.hpp"
+#include "attack.hpp"
+#include "punch.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
 #include <set>
@@ -23,7 +25,7 @@ class Fighter : public Renderable
 
 	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	DamageEffect * update(float ms);
+	Attack * update(float ms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
@@ -33,10 +35,10 @@ class Fighter : public Renderable
 	void drawBullet(const mat3 &projection);
 
 	//get collision object for punch
-	DamageEffect * punch();
+	Punch * punch();
 
 	//get collision object for powerpunch
-	DamageEffect * powerPunch();
+	Punch * powerPunch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;

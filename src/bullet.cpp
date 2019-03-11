@@ -1,20 +1,29 @@
 #include "bullet.hpp"
-#define BULLET_SPEED 7
 
 Texture Bullet::bullet_texture;
 
-Bullet::Bullet(vec2 pos, bool dir, float dmg, int id) {
-	scale = vec2({ 0.1, 0.15 });
-	position = pos;
-	damage = dmg;
-	m_id = id;
-	if (dir)
-		dx = BULLET_SPEED;
-	else
-		dx = -BULLET_SPEED;
+Bullet::Bullet(int id, vec2 pos, unsigned int damage, bool direction) {
+	//variable bullet attributes
+	this->m_fighter_id = id;
+	this->m_position = pos;
+	this->m_damage = damage;
+
+	//pre-determined bullet attributes
+	this->m_scale = vec2({ 0.1, 0.15 });
+	this->m_velocity = vec2({ 7.0, 0.0 });
+	//flip velocity if moving left
+	if (!direction) {
+		this->m_velocity.x *= -1.0;
+	}
+	this->m_width = std::fabs(this->m_scale.x) * bullet_texture.width;
+	this->m_height = std::fabs(this->m_scale.y) * bullet_texture.height;
+	this->m_delete_when = AFTER_HIT;
+	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when);
 }
 
 Bullet::~Bullet() {
+	delete m_damageEffect;
+
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -37,8 +46,8 @@ bool Bullet::init() {
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = bullet_texture.width;
-	float hr = bullet_texture.height;
+	float wr = bullet_texture.width * 0.5;
+	float hr = bullet_texture.height * 0.5;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -76,25 +85,16 @@ bool Bullet::init() {
 		return false;
 }
 
-void Bullet::moveBullet() {
-	position.x += dx;
-}
-
-DamageEffect * Bullet::bulletDmg() {
-	return new DamageEffect(position.x, position.y, get_bounding_box().x,
-		get_bounding_box().y, damage, m_id, AFTER_HIT);
-}
-
-vec2 Bullet::get_bounding_box() const
-{
-	// fabs is to avoid negative scale due to the facing direction
-	return { std::fabs(scale.x) * bullet_texture.width, std::fabs(scale.y) * bullet_texture.height };
+void Bullet::update() {
+	m_position.x += m_velocity.x;
+	m_damageEffect->m_bounding_box.xpos = m_position.x;
+	m_damageEffect->m_bounding_box.ypos = m_position.y;
 }
 
 void Bullet::draw(const mat3 &projection) {
 	transform_begin();
-	transform_translate(position);
-	transform_scale(scale);
+	transform_translate(m_position);
+	transform_scale(m_scale);
 	transform_end();
 	
 	// Setting shaders
@@ -138,8 +138,4 @@ void Bullet::draw(const mat3 &projection) {
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	
-}
-
-vec2 Bullet::getPosition() {
-	return position;
 }

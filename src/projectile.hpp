@@ -2,23 +2,16 @@
 
 #include "common.hpp"
 #include "damageEffect.hpp"
+#include "attack.hpp"
 
-class Projectile : public Renderable {
+class Projectile : public Attack {
 	static Texture projectile_texture;
 public:
-	Projectile(vec2 pos, bool dir, float velo, float dmg, int id);
+	Projectile(int id, vec2 pos, unsigned int damage, bool direction);
 	~Projectile();
 	bool init();
-	void moveProjectile();
-	void accelerate(float acc);
-	DamageEffect * projectileDmg();
-	vec2 get_bounding_box() const;
+	void update();
 	void draw(const mat3 &projection) override;
-	vec2 getPosition();
 private:
-	vec2 position;
-	vec2 velocity;
-	vec2 scale;
-	float damage;
-	int m_id;
+	float m_acceleration;
 };

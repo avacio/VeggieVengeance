@@ -46,6 +46,8 @@ set(SOURCE_FILES
 	src/mainMenu.cpp
 	src/bullet.cpp
 	src/projectile.cpp
+	src/attack.cpp
+	src/punch.cpp
 
     src/project_path.hpp
 	src/common.hpp
@@ -62,6 +64,8 @@ set(SOURCE_FILES
 	src/mainMenu.hpp
 	src/bullet.hpp
 	src/projectile.hpp
+	src/attack.hpp
+	src/punch.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

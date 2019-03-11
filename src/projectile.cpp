@@ -2,22 +2,31 @@
 
 Texture Projectile::projectile_texture;
 
-Projectile::Projectile(vec2 pos, bool dir, float velo, float dmg, int id) {
-	position = pos;
-	scale = vec2({ 0.07, 0.07 });
-	damage = dmg;
-	m_id = id;
-	if (dir) {
-		velocity.x = velo;
-		velocity.y = -10.0;
+Projectile::Projectile(int id, vec2 pos, unsigned int damage, bool direction) {
+	//variable projectile attributes
+	m_fighter_id = id;
+	m_position = pos;
+	m_damage = damage;
+
+	//inherent projectile attributes
+	m_scale = vec2({ 0.07, 0.07 });
+	m_velocity = { 7.0, 5.0 };
+	//if facing left, change direction of velocity to move left
+	if (!direction) {
+		m_velocity.x *= -1.0;
 	}
-	else {
-		velocity.x = -velo;
-		velocity.y = -10.0;
-	}
+	m_width = std::fabs(m_scale.x) * projectile_texture.width;
+	m_height = std::fabs(m_scale.y) * projectile_texture.height;
+	m_delete_when = AFTER_HIT;
+	m_damageEffect = new DamageEffect(m_position.x, m_position.y, m_width, m_height, m_damage, m_fighter_id, m_delete_when);
+
+	m_acceleration = 0.5;
+
 }
 
 Projectile::~Projectile() {
+	delete m_damageEffect;
+
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -39,8 +48,8 @@ bool Projectile::init() {
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = projectile_texture.width;
-	float hr = projectile_texture.height;
+	float wr = projectile_texture.width * 0.5;
+	float hr = projectile_texture.height * 0.5;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -78,30 +87,19 @@ bool Projectile::init() {
 		return false;
 }
 
-void Projectile::moveProjectile() {
-	position.x += velocity.x;
-	position.y += velocity.y;
-}
+void Projectile::update() {
+	m_position.x += m_velocity.x;
+	m_position.y += m_velocity.y;
+	m_damageEffect->m_bounding_box.xpos = m_position.x;
+	m_damageEffect->m_bounding_box.ypos = m_position.y;
 
-void Projectile::accelerate(float acc) {
-	velocity.y += acc;
-}
-
-DamageEffect * Projectile::projectileDmg() {
-	return new DamageEffect(position.x, position.y, get_bounding_box().x,
-		get_bounding_box().y, damage, m_id, AFTER_HIT);
-}
-
-vec2 Projectile::get_bounding_box() const
-{
-	// fabs is to avoid negative scale due to the facing direction
-	return { std::fabs(scale.x) * projectile_texture.width, std::fabs(scale.y) * projectile_texture.height };
+	m_velocity.y += m_acceleration;
 }
 
 void Projectile::draw(const mat3 &projection) {
 	transform_begin();
-	transform_translate(position);
-	transform_scale(scale);
+	transform_translate(m_position);
+	transform_scale(m_scale);
 	transform_end();
 	
 	// Setting shaders
@@ -145,8 +143,4 @@ void Projectile::draw(const mat3 &projection) {
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	
-}
-
-vec2 Projectile::getPosition() {
-	return position;
 }

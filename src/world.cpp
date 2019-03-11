@@ -186,76 +186,45 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-		//damage effect collision loop
-		for (int i = 0; i < m_damageEffects.size(); i++) {
-			if (m_player1.get_in_play()) {
-				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1)) {
-					//incur damage
-					m_player1.decrease_health(m_damageEffects[i].m_damage);
-					m_player1.set_hurt(true);
-				}
-				delete b1;
-			}
-			if (m_player2.get_in_play()) {
-				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2)) {
-					//incur damage
-					m_player2.decrease_health(m_damageEffects[i].m_damage);
-					m_player2.set_hurt(true);
-				}
-				delete b2;
-			}
-			for (int j = 0; j < m_ais.size(); j++) {
-				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b3)) {
-					//incur damage
-					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
-					m_ais[j].set_hurt(true);
-				}
-				delete b3;
-			}
-		}
-
+		
+		attack_collision();
 		//damage effect removal loop
-		for (int i = 0; i < m_damageEffects.size(); i++) {
-			if (m_damageEffects[i].m_delete_when == AFTER_UPDATE ||
-				(m_damageEffects[i].m_delete_when == AFTER_HIT && m_damageEffects[i].m_hit_fighter) ||
-				!check_collision_world(m_damageEffects[i].m_bounding_box)) {
-				//remove from list
-				m_damageEffects.erase(m_damageEffects.begin() + i);
-				i--;
-			}
-		}
+		attack_deletion();
+		
 
 		
 		//update players + ai
-		DamageEffect * d = NULL;
+		Attack * attack = NULL;
 		if (m_player1.get_in_play())
 		{
-			d = m_player1.update(elapsed_ms);
-			if (d != NULL) {
-				m_damageEffects.push_back(*d);
+			attack = m_player1.update(elapsed_ms);
+			if (attack != NULL) {
+				attack->init();
+				m_attacks.push_back(attack);
 			}
 		}
 		if (m_player2.get_in_play())
 		{
-			d = m_player2.update(elapsed_ms);
-			if (d != NULL) {
-				m_damageEffects.push_back(*d);
+			attack = m_player2.update(elapsed_ms);
+			if (attack != NULL) {
+				attack->init();
+				m_attacks.push_back(attack);
 			}
 		}
 
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				d = ai.update(elapsed_ms * 0.5, m_player1.get_position());
-				if (d != NULL) {
-					m_damageEffects.push_back(*d);
+				attack = ai.update(elapsed_ms, m_player1.get_position());
+				if (attack != NULL) {
+					attack->init();
+					m_attacks.push_back(attack);
 				}
 			}
 		}
 	}
+
+	attack_update();
 	
 
 	return true;
@@ -319,17 +288,15 @@ void World::draw()
 		if (m_player1.get_in_play())
 		{
 			m_player1.draw(projection_2D);
-			m_player1.drawProjectile(projection_2D);
-			m_player1.drawBullet(projection_2D);
 		}
 		if (m_player2.get_in_play())
 		{
 			m_player2.draw(projection_2D);
-			m_player2.drawProjectile(projection_2D);
-			m_player2.drawBullet(projection_2D);
 		}
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
+		for (auto &attack : m_attacks)
+			attack->draw(projection_2D);
 	}
 	/////////////////////
 	// Truly render to the screen
@@ -557,7 +524,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
-	m_damageEffects.clear();
+	m_attacks.clear();
 	switch (m_mode) {
 	case DEV:
 		m_player1.reset(1);
@@ -713,4 +680,59 @@ void World::play_grunt_audio() {
 	std::uniform_int_distribution<> dist(0, 3); //ADD FOR MORE ACTIONS
 	int	randNum = dist(gen);
 	Mix_PlayChannel(-1, m_grunt_audio[randNum], 0);
+}
+
+void World::attack_collision() {
+	//damage effect collision loop
+	for (int i = 0; i < m_attacks.size(); i++) {
+		if (m_player1.get_in_play() && m_player1.get_alive()) {
+			BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
+			if (m_attacks[i]->m_fighter_id != m_player1.get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b1)) {
+				//incur damage
+				m_player1.decrease_health(m_attacks[i]->m_damage);
+				m_player1.set_hurt(true);
+				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+			}
+			delete b1;
+		}
+		if (m_player2.get_in_play() && m_player2.get_alive()) {
+			BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
+			if (m_attacks[i]->m_fighter_id != m_player2.get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b2)) {
+				//incur damage
+				m_player2.decrease_health(m_attacks[i]->m_damage);
+				m_player2.set_hurt(true);
+				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+			}
+			delete b2;
+		}
+		for (int j = 0; j < m_ais.size(); j++) {
+			if (m_ais[j].get_alive()) {
+				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
+				if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b3)) {
+					//incur damage
+					m_ais[j].decrease_health(m_attacks[i]->m_damage);
+					m_ais[j].set_hurt(true);
+					m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+				}
+				delete b3;
+			}
+		}
+	}
+}
+
+void World::attack_deletion() {
+	for (int i = 0; i < m_attacks.size(); i++) {
+		if (m_attacks[i]->m_damageEffect->m_delete_when == AFTER_UPDATE ||
+			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
+			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
+			//remove from list
+			m_attacks.erase(m_attacks.begin() + i);
+			i--;
+		}
+	}
+}
+
+void World::attack_update() {
+	for (auto &attack : m_attacks)
+		attack->update();
 }
