@@ -63,6 +63,8 @@ bool MainMenu::init(vec2 screen)
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
+	m_initialized = true;
+
 	////////////////
 	//// TEXT
 	title = new TextRenderer(mainFontBold, 90);
@@ -78,6 +80,7 @@ bool MainMenu::init(vec2 screen)
 // Releases all graphics resources
 void MainMenu::destroy()
 {
+	m_initialized = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);

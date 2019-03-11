@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "damageEffect.hpp"
+#include "platform.hpp"
 #include "textRenderer.hpp"
 #include <random>
 
@@ -20,7 +21,7 @@ class Fighter : public Renderable
 
 	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	DamageEffect * update(float ms);
+	DamageEffect * update(float ms, std::vector<Platform> platforms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
@@ -41,9 +42,9 @@ class Fighter : public Renderable
 
 	void set_hurt(bool hurt);
 
-	void set_blocking(bool blocking);
+	void apply_damage(DamageEffect damage_effect);
 
-	void decrease_health(unsigned int damage);
+	void set_blocking(bool blocking);
 
 	// Returns the current health
 	int get_health() const;
@@ -57,7 +58,7 @@ class Fighter : public Renderable
 	bool get_facing_front() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
-	vec2 get_bounding_box() const;
+	BoundingBox * get_bounding_box() const;
 
 	// Returns the current fighter scale
 	vec2 get_scale() const;
@@ -69,7 +70,17 @@ class Fighter : public Renderable
 
 	unsigned int get_id() const;
 
-	void jump_update();
+	void apply_friction();
+
+	void x_position_update(float added_speed);
+
+	void y_position_update(float ms);
+	
+	void crouch_update();
+
+	void die();
+
+	void check_respawn(float ms);
 
 	bool is_hurt() const;
 
@@ -89,7 +100,9 @@ class Fighter : public Renderable
 
 	void set_crouch_state(CrouchState cs);
 
-	void reset(int init_position);
+	void reset();
+
+	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
   protected:
   	const int MAX_HEALTH = 100;
@@ -104,11 +117,12 @@ class Fighter : public Renderable
 
   private:
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
+	vec2 m_sprite_appearance_size; //the apparent width and height of the sprite, without scaling (used for more intuitive bounding boxes)
 	float m_rotation; // in radians
+	vec2 m_intial_pos;
 	
-	int m_speed; // each fighter has different speed and strength stats
+	float m_speed; // each fighter has different speed and strength stats
 	int m_strength;
-	float m_vertical_velocity;
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
@@ -128,12 +142,17 @@ class Fighter : public Renderable
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 
+	vec2 m_force;	// in Newtons
+	float m_mass;	// mass in kg
+	float m_friction;
+	float m_velocity_y;
+
 	//CONST VALUES
-	const int MAX_JUMP = 20;
 	const int RESPAWN_TIME = 1000; //in ms
 	
-	const float INITIAL_VELOCITY = 10.0;
-	const float ACCELERATION = -INITIAL_VELOCITY / 20.0;
+	const float INITIAL_JUMP_VELOCITY = 400.0;
+	const float TERMINAL_VELOCITY_Y = 400.0;
+	const vec2 GRAVITY = {0.0, 400.0};
 
 	const unsigned int m_id; //unique identifier given when created
 
