@@ -81,6 +81,7 @@ class World
 	// Game entities
 	MainMenu m_menu;
 	Background m_bg;
+	std::map<FighterCharacter, FighterInfo> m_fighterTypes;
 	Player1 m_player1;
 	Player2 m_player2;
 	std::vector<AI> m_ais;
@@ -88,11 +89,16 @@ class World
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
+
 	Mix_Music *m_background_music;
 	std::vector<Mix_Chunk*> m_grunt_audio;
 
 	GameMode m_mode;
 	bool m_paused;
+
+	/////////
+	FighterCharacter selectedP1 = POTATO;
+	FighterCharacter selectedP2 = POTATO;
 
 	// C++ rng
 	std::default_random_engine m_rng;

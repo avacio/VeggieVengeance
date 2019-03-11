@@ -117,6 +117,14 @@ bool World::init(vec2 screen, GameMode mode)
 	Mix_PlayMusic(m_background_music, -1);
 
 	fprintf(stderr, "Loaded music\n");
+
+	FighterInfo potato, broccoli;
+	potato.setInfo(POTATO, 5, 1, "solanum tuberosum", { "Spud", "PoeTatum", "BabyTater", "TaterHater" });
+	m_fighterTypes[POTATO] = potato;
+	broccoli.setInfo(BROCCOLI, 3, 3, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" });
+	m_fighterTypes[BROCCOLI] = broccoli;
+	fprintf(stderr, "Loaded fighter templates\n");
+
 	
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
@@ -307,7 +315,7 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	if (m_mode == MENU) { 
+	if (m_mode == MENU || m_mode == CHARSELECT) { 
 		m_menu.draw(projection_2D); 
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
@@ -399,9 +407,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		set_mode(TUTORIAL);
 	}
 	//////////////////////
-
 	// MAIN MENU CONTROLS
-	if (m_mode == MENU)
+	if (m_mode == MENU || m_mode == CHARSELECT)
 	{
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 		{
@@ -413,9 +420,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
-			reset();
-			//m_ais.clear();
-			set_mode(m_menu.get_selected());
+			//reset();
+			if (m_mode == MENU) {
+				m_menu.set_selected_mode();
+				set_mode(CHARSELECT);
+			} else if (m_mode == CHARSELECT) {
+				selectedP1 = m_menu.get_selected_char();
+				//P2
+				set_mode(m_menu.get_selected_mode());
+				//std::cout << "SELECTED GAME MODE: " << ModeMap[m_menu.get_selected_mode()] << std::endl;
+			}
 		}
 
 	}
@@ -560,6 +574,10 @@ void World::reset()
 		//set_mode(DEV);
 		//set_mode(PVC);
 		break;
+	case CHARSELECT:
+		break;
+	default:
+		break;
 	}
 }
 
@@ -577,8 +595,7 @@ bool World::set_mode(GameMode mode) {
 	}
 	m_fighters.clear();
 	m_bg.destroy();
-	
-	m_mode = mode;
+
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
 
@@ -587,8 +604,17 @@ bool World::set_mode(GameMode mode) {
 			m_player1.set_in_play(true); // needed to make AI respond
 			spawn_ai(RANDOM);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
-			initSuccess = initSuccess && m_menu.init(m_screen);
+			//initSuccess = initSuccess && m_menu.init(m_screen);
+			initSuccess = initSuccess && m_menu.init(m_screen, m_fighterTypes);
 			break;
+		case CHARSELECT:
+		{
+			m_player1.set_in_play(true); // needed to make AI respond
+			spawn_ai(RANDOM);
+			m_ais[0].set_position({ 250.f, m_screen.y*.85f }); // TODO
+			initSuccess = initSuccess && m_menu.set_mode(CHARSELECT);
+			break;
+		}
 		case DEV:
 			if (MAX_PLAYERS >= 1)
 			{
@@ -639,12 +665,16 @@ bool World::set_mode(GameMode mode) {
 			initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			break;
+		default:
+			break;
 	}
 
-	if (mode != MENU)
+	if (mode != MENU && mode != CHARSELECT) {
 		for (Fighter &f : m_fighters)
 			m_bg.addNameplate(f.get_nameplate(), f.get_name());
+	}
 
+	m_mode = mode;
 	return initSuccess;
 }
 
@@ -674,9 +704,5 @@ void World::set_paused(bool isPaused) {
 }
 
 void World::play_grunt_audio() {
-	std::random_device rd; // non-deterministic generator
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dist(0, 3); //ADD FOR MORE ACTIONS
-	int	randNum = dist(gen);
-	Mix_PlayChannel(-1, m_grunt_audio[randNum], 0);
+	Mix_PlayChannel(-1, m_grunt_audio[get_random_number(3)], 0);
 }
