@@ -65,6 +65,8 @@ public:
 	bool is_player_1_chosen = false; // for picking PVP
 	GameMode m_selected_mode = MENU;
 
+	bool m_initialized = false;
+
 private:
 	vec2 screen;
 	vec2 m_position; // Window coordinates

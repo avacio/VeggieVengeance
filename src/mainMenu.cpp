@@ -60,6 +60,8 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
+	m_initialized = true;
+
 	////////////////
 	//// TEXT
 	title = new TextRenderer(mainFontBold, 80);
@@ -76,6 +78,7 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 // Releases all graphics resources
 void MainMenu::destroy()
 {
+	m_initialized = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -85,12 +88,8 @@ void MainMenu::destroy()
 	glDeleteShader(effect.program);
 	delete title;
 
-	for (int i = 0; i < buttons.size(); i++) {
-		TextRenderer *button = buttons[i];
-		delete button;
-	}
+	reset();
 
-	buttons.clear();
 	effect.release();
 	std::cout << "Destroyed MainMenu." << std::endl;
 }
@@ -155,7 +154,6 @@ void MainMenu::draw(const mat3& projection)
 	else {
 		if (m_selected_mode == PVP) {
 			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
-			//if (selectedP1 == BLANK) { title->renderString(projection, "P1 CHARACTER SELECT"); }
 			else { title->renderString(projection, "P2 CHARACTER SELECT"); }
 		} else { title->renderString(projection, "CHARACTER SELECT"); }
 		buttons[0]->renderString(projection, "POTATO");

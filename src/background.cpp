@@ -58,6 +58,8 @@ bool Background::init(vec2 screen, GameMode mode)
 	m_rotation = 0.f;
 	m_position = { 595.f, 455.f };
 
+	m_initialized = true;
+
 	//////////////
 	// TEXT
 	health1 = new TextRenderer(mainFont, 44);
@@ -74,7 +76,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	isPausedText = new TextRenderer(mainFontBold, 60);
 	width = isPausedText->get_width_of_string("PAUSED");
-	isPausedText->setPosition({ screen.x/2.f - width*0.4f, 150.f });
+	isPausedText->setPosition({ screen.x/2.f - width / 2.f, 150.f }); // screen.x/2.f - width*0.4f
 	isPausedText->setColor({ 0.f,0.f,0.f });
 
 	jump = new TextRenderer(mainFont, 44);
@@ -111,6 +113,8 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
 	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
 
+	init_buttons();
+
 	return true;
 }
 
@@ -118,6 +122,7 @@ bool Background::init(vec2 screen, GameMode mode)
 // Releases all graphics resources
 void Background::destroy()
 {
+	m_initialized = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -130,8 +135,13 @@ void Background::destroy()
 		TextRenderer* nameplate = iter->first;
 		delete nameplate;
 	}
-
 	nameplates.clear();
+
+	for (int i = 0; i < buttons.size(); i++) {
+		TextRenderer* button = buttons[i];
+		delete button;
+	}
+	buttons.clear();
 
 	delete health1;
 	delete health2;
@@ -269,37 +279,91 @@ void Background::drawPlayerInfo(const mat3& projection) {
 }
 
 void Background::drawTutorialText(const mat3& projection) {
-	jump->renderString(projection, "W/I: Jump");
-	left->renderString(projection, "A/J: Move left");
-	right->renderString(projection, "D/L: Move right");
-	crouch->renderString(projection, "S/K: Crouch");
-	pause->renderString(projection, "Esc: Pause");
-	reset->renderString(projection, "B: Reset");
-	ability1->renderString(projection, "Q/U: Special Ability");
-	ability2->renderString(projection, "R/P: Special Ability");
-	punch->renderString(projection, "E/O: Punch");
-	pauseMusic->renderString(projection, "End: Pause music");
-	resumeMusic->renderString(projection, "Home: Resume music");
-	increaseVolume->renderString(projection, "Page Up: Inc. volume");
-	decreaseVolume->renderString(projection, "Page Down: Dec. volume");
-
 	if (m_paused) {
 		isPausedText->renderString(projection, "PAUSED");
+		buttons[0]->renderString(projection, "RESUME");
+		buttons[1]->renderString(projection, "MAIN MENU");
+		buttons[2]->renderString(projection, "QUIT");
+	} else {
+		jump->renderString(projection, "W/I: Jump");
+		left->renderString(projection, "A/J: Move left");
+		right->renderString(projection, "D/L: Move right");
+		crouch->renderString(projection, "S/K: Crouch");
+		pause->renderString(projection, "Esc: Pause");
+		reset->renderString(projection, "B: Reset");
+		ability1->renderString(projection, "Q/U: Special Ability");
+		ability2->renderString(projection, "R/P: Special Ability");
+		punch->renderString(projection, "E/O: Punch");
+		pauseMusic->renderString(projection, "End: Pause music");
+		resumeMusic->renderString(projection, "Home: Resume music");
+		increaseVolume->renderString(projection, "Page Up: Inc. volume");
+		decreaseVolume->renderString(projection, "Page Down: Dec. volume");
 	}
 }
 void Background::addNameplate(TextRenderer* td, std::string name) {
-	nameplates.insert(std::make_pair(td, name));
+	//nameplates.insert(std::make_pair(td, name));
+	nameplates[td] = name;
 }
 void Background::drawNameplates(const mat3& projection) {
 	std::map<TextRenderer*, std::string>::iterator it = nameplates.begin();
 	while (it != nameplates.end())
 	{
-		//std::cout << it->first << " :: " << it->second << std::endl;
 		it->first->renderString(projection, it->second);
 		it++;
 	}
 }
 
-void Background::clearNameplates() {
-	nameplates.clear();
+void Background::init_buttons()
+{
+	selectedButtonIndex = 0; // default: first button selected
+	TextRenderer* resume = new TextRenderer(mainFont, 60);
+	TextRenderer* mainMenu = new TextRenderer(mainFont, 60);
+	TextRenderer* quit = new TextRenderer(mainFont, 60);
+
+	resume->setColor(selectedColor);
+	mainMenu->setColor(defaultColor);
+	quit->setColor(defaultColor);
+
+	int width = resume->get_width_of_string("RESUME");
+	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
+	width = mainMenu->get_width_of_string("MAIN-MENU");
+	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	width = quit->get_width_of_string("QUIT");
+	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
+	buttons.emplace_back(resume);
+	buttons.emplace_back(mainMenu);
+	buttons.emplace_back(quit);
+}
+
+PauseMenuOption Background::get_selected()
+{
+	switch (selectedButtonIndex) {
+	case 0:
+		return RESUME;
+	case 1:
+		return MAINMENU;
+	case 2:
+		return QUIT;
+	}
+}
+
+void Background::change_selection(bool goDown)
+{
+	buttons[selectedButtonIndex]->setColor(defaultColor);
+	if (selectedButtonIndex == buttons.size() - 1 && goDown) {
+		buttons[0]->setColor(selectedColor);
+		selectedButtonIndex = 0;
+	}
+	else if (selectedButtonIndex == 0 && !goDown) {
+		buttons[buttons.size() - 1]->setColor(selectedColor);
+		selectedButtonIndex = buttons.size() - 1;
+	}
+	else if (goDown) {
+		selectedButtonIndex++;
+		buttons[selectedButtonIndex]->setColor(selectedColor);
+	}
+	else {
+		selectedButtonIndex--;
+		buttons[selectedButtonIndex]->setColor(selectedColor);
+	}
 }

@@ -12,6 +12,7 @@
 #include "boundingBox.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
+#include "platform.hpp"
 
 
 // stlib
@@ -49,11 +50,13 @@ class World
 	void set_paused(bool isPaused);
 
 	void play_grunt_audio();
+	void draw_rectangle();
 
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
 	bool spawn_ai(AIType type, FighterCharacter fc);
+	bool spawn_platform(float xpos, float ypos, float width, float height);
 
 	void reset();
 
@@ -61,7 +64,6 @@ class World
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
-	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
 
 	void spawn_char_select_AI(FighterCharacter fc);
@@ -87,6 +89,7 @@ class World
 	Player2 m_player2;
 	std::vector<AI> m_ais;
 	std::vector<DamageEffect> m_damageEffects;
+	std::vector<Platform> m_platforms;
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
@@ -96,6 +99,7 @@ class World
 
 	GameMode m_mode;
 	bool m_paused;
+	bool m_over;
 
 	/////////
 	std::map<FighterCharacter, FighterInfo> fighterInfoMap;

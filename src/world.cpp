@@ -125,7 +125,6 @@ bool World::init(vec2 screen, GameMode mode)
 	fighterInfoMap[BROCCOLI] = broccoli;
 	fprintf(stderr, "Loaded fighter templates\n");
 
-	
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
 				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
@@ -135,7 +134,10 @@ bool World::init(vec2 screen, GameMode mode)
 					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 					   set_mode(mode);
 
-	return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
+	spawn_platform(200, 600, 800, 50);
+
+	//return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
+	return m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -160,8 +162,18 @@ void World::destroy()
 		ai.destroy();
 	m_ais.clear();
 	m_fighters.clear();
-	m_bg.destroy();
-	m_menu.destroy();
+	m_damageEffects.clear();
+	for (auto &platform : m_platforms) {
+		platform.destroy();
+	}
+	m_platforms.clear();
+
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	glfwDestroyWindow(m_window);
 }
 
@@ -195,28 +207,28 @@ bool World::update(float elapsed_ms)
 		//damage effect collision loop
 		for (int i = 0; i < m_damageEffects.size(); i++) {
 			if (m_player1.get_in_play()) {
-				BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b1)) {
+				BoundingBox* b1 = m_player1.get_bounding_box();
+				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
 					//incur damage
-					m_player1.decrease_health(m_damageEffects[i].m_damage);
+					m_player1.apply_damage(m_damageEffects[i]);
 					m_player1.set_hurt(true);
 				}
 				delete b1;
 			}
 			if (m_player2.get_in_play()) {
-				BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b2)) {
+				BoundingBox* b2 = m_player2.get_bounding_box();
+				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
 					//incur damage
-					m_player2.decrease_health(m_damageEffects[i].m_damage);
+					m_player2.apply_damage(m_damageEffects[i]);
 					m_player2.set_hurt(true);
 				}
 				delete b2;
 			}
 			for (int j = 0; j < m_ais.size(); j++) {
-				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
-				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && check_collision(m_damageEffects[i].m_bounding_box, *b3)) {
+				BoundingBox* b3 = m_ais[j].get_bounding_box();
+				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
 					//incur damage
-					m_ais[j].decrease_health(m_damageEffects[i].m_damage);
+					m_ais[j].apply_damage(m_damageEffects[i]);
 					m_ais[j].set_hurt(true);
 				}
 				delete b3;
@@ -239,14 +251,14 @@ bool World::update(float elapsed_ms)
 		DamageEffect * d = NULL;
 		if (m_player1.get_in_play())
 		{
-			d = m_player1.update(elapsed_ms);
+			d = m_player1.update(elapsed_ms, m_platforms);
 			if (d != NULL) {
 				m_damageEffects.push_back(*d);
 			}
 		}
 		if (m_player2.get_in_play())
 		{
-			d = m_player2.update(elapsed_ms);
+			d = m_player2.update(elapsed_ms, m_platforms);
 			if (d != NULL) {
 				m_damageEffects.push_back(*d);
 			}
@@ -255,7 +267,7 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				d = ai.update(elapsed_ms * 0.5, m_player1.get_position());
+				d = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
 				if (d != NULL) {
 					m_damageEffects.push_back(*d);
 				}
@@ -332,6 +344,8 @@ void World::draw()
 		}
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
+		for (auto &platform : m_platforms)
+			platform.draw(projection_2D);
 	}
 	/////////////////////
 	// Truly render to the screen
@@ -351,6 +365,10 @@ void World::draw()
 	////////////////////////////
 
 
+
+
+
+
 	m_water.draw(projection_2D);
 	//text->renderString(mat3{}, "Health: 100");
 	//text->renderString(projection_2D, "Health: 100");
@@ -363,7 +381,7 @@ void World::draw()
 // Should the game be over ?
 bool World::is_over() const
 {
-	return glfwWindowShouldClose(m_window);
+	return glfwWindowShouldClose(m_window) || m_over;
 }
 
 // Creates a ai and if successful, adds it to the list of ai
@@ -394,6 +412,18 @@ bool World::spawn_ai(AIType type, FighterCharacter fc)
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
+	return false;
+}
+// Creates a platform and if successful, adds it to the list of platform
+bool World::spawn_platform(float xpos, float ypos, float width, float height)
+{
+	Platform platform(xpos, ypos, width, height);
+	if (platform.init())
+	{
+		m_platforms.emplace_back(platform);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn platform");
 	return false;
 }
 
@@ -472,21 +502,30 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_S)
-				m_player1.set_movement(CROUCHING);
+			//if (action == GLFW_PRESS && key == GLFW_KEY_S)
+			//	m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(BLOCKING);
+			}
+
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
-				m_player1.set_movement(RELEASE_CROUCH);
+			//if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
+			//	m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
 				m_player1.set_movement(STOP_PUNCHING);
 			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(STOP_BLOCKING);
+			}
+
+			
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -497,20 +536,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
 				m_player2.set_movement(START_JUMPING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_K)
-				m_player2.set_movement(CROUCHING);
+			//if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			//	m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
+			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(BLOCKING);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
-				m_player2.set_movement(RELEASE_CROUCH);
+			//if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
+			//	m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 				m_player2.set_movement(STOP_PUNCHING);
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(STOP_BLOCKING);
 			}
 		}
 
@@ -521,6 +566,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
+
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+			{
+				m_bg.change_selection(false);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+			{
+				m_bg.change_selection(true);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+			{
+				PauseMenuOption selectedOption = m_bg.get_selected();
+				if (selectedOption == RESUME) {
+					set_paused(!m_paused);
+				} else if (selectedOption == MAINMENU) {
+					set_mode(MENU);
+				} else if (selectedOption == QUIT) {
+					m_over = true;
+				}
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
@@ -564,37 +629,37 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_ResumeMusic();
 }
 
+
 void World::reset()
 {
 	m_damageEffects.clear();
 	switch (m_mode) {
 	case DEV:
-		m_player1.reset(1);
-		m_player2.reset(2);
-
-		for (AI ai : m_ais)
+		m_player1.reset();
+		m_player2.reset();
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case PVP:
-		m_player1.reset(1);
-		m_player2.reset(2);
+		m_player1.reset();
+		m_player2.reset();
 		break;
 	case PVC:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case TUTORIAL:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case MENU:
@@ -613,8 +678,13 @@ bool World::set_mode(GameMode mode) {
 	m_player2.set_in_play(false);
 
 	clear_all_fighters();
-	m_bg.destroy();
 
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
 
@@ -622,17 +692,18 @@ bool World::set_mode(GameMode mode) {
 		case MENU:
 			m_player1.set_in_play(true); // needed to make AI respond
 			spawn_ai(RANDOM, POTATO);
+			set_paused(false);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 			m_menu.is_player_1_chosen = false;
 			m_menu.m_selected_mode = MENU;
-			initSuccess = initSuccess && m_menu.set_mode(MENU);
+			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap);
 			break;
 		case CHARSELECT:
 		{
-			m_player1.set_in_play(true); // needed to make AI respond
+			m_player1.set_in_play(true);
 			spawn_ai(RANDOM, POTATO);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f }); // TODO
-			initSuccess = initSuccess && m_menu.set_mode(CHARSELECT);
+			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap) && m_menu.set_mode(CHARSELECT);
 			break;
 		}
 		case DEV:
@@ -702,18 +773,10 @@ void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
 
-
-bool World::check_collision(BoundingBox b1, BoundingBox b2) {
-	return (b1.xpos < b2.xpos + b2.width &&
-		b1.xpos + b1.width > b2.xpos &&
-		b1.ypos < b2.ypos + b2.height &&
-		b1.ypos + b1.height > b2.ypos);
-}
-
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers
 	BoundingBox* b3 = new BoundingBox(0, 0, 1200, 800);
-	bool collision = check_collision(b1, *b3);
+	bool collision = b1.check_collision(*b3);
 	delete b3;
 	return collision;
 }
@@ -749,4 +812,12 @@ void World::clear_all_fighters() {
 	{
 		it->second.clearTaken();
 	}
+}
+
+void World::draw_rectangle() {
+	float vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
+	};
 }
