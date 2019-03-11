@@ -6,6 +6,7 @@
 #include <cmath>
 
 Texture Fighter::fighter_texture;
+int full_Block_Tank;
 
 
 Fighter::Fighter(unsigned int id) : m_id(id) {
@@ -72,6 +73,7 @@ bool Fighter::init(int init_position, std::string name)
 	//m_facing_front = true;
 	m_is_hurt = false;
 	m_is_blocking = false;
+	m_blocking_tank = full_Block_Tank = 4000;
 
 	m_scale.x = 1.2f;
 	m_scale.y = 1.2f;
@@ -130,6 +132,69 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 {
 	vec2 oldPos = m_position;
 	DamageEffect * d = NULL;
+	float MOVING_SPEED;
+	// If blocking, movement is slower
+	if (m_is_blocking) MOVING_SPEED = 3.0;
+	else MOVING_SPEED = 5.0;
+
+	
+	//BLOCKING 
+	//Deplete blocking tank if blocking
+	if (m_is_blocking) {
+		m_blocking_tank -= ms;
+	}
+	//Stop blocking if blocking tank is empty
+	if (m_is_blocking && m_blocking_tank <= 0) this->set_movement(STOP_BLOCKING);
+	//Recharche blocking tank
+	if (m_is_alive && m_blocking_tank < full_Block_Tank && !m_is_blocking) {
+		m_blocking_tank += ms;
+	}
+
+	//IF JUST DIED
+	if (m_health <= 0 && m_is_alive)
+	{
+		m_is_alive = false;
+		m_lives--;
+		m_is_punching = false;
+		m_blocking_tank = full_Block_Tank;
+
+		//uncrouch in death
+		if (m_crouch_state == IS_CROUCHING) {
+			m_scale.y = 0.2f;
+			m_position.y -= 25.f;
+			m_crouch_state = NOT_CROUCHING;
+		}
+		else if (m_crouch_state == CROUCH_PRESSED) {
+			m_crouch_state = NOT_CROUCHING;
+		}
+
+		if (m_lives > 0)
+		{
+			m_respawn_timer = RESPAWN_TIME;
+			m_respawn_flag = true;
+		}
+	}
+
+	//If respawn pending
+	if (m_respawn_flag)
+	{
+		if (m_respawn_timer > 0)
+		{
+			//count down by time passed
+			m_respawn_timer -= ms;
+		}
+		else
+		{
+			//reset flags and revive
+			m_respawn_flag = false;
+			m_respawn_timer = 0;
+			m_is_alive = true;
+			m_is_hurt = false;
+			m_health = MAX_HEALTH;
+			//unrotate the potate
+			m_rotation = 0;
+		}
+	}
 
 	die();	
 	check_respawn(ms);
@@ -305,13 +370,16 @@ void Fighter::set_movement(int mov)
 		m_is_idle = true;
 		break;
 	case BLOCKING:
-		if (!m_is_punching)  m_is_blocking = true;
+		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
+		if (!m_is_punching && m_blocking_tank >= 1000) 
+			m_is_blocking = true;
 		break;
 	case STOP_BLOCKING:
 		m_is_blocking = false;
 		break;
 	}
 }
+
 
 void Fighter::set_hurt(bool hurt) {
 	m_is_hurt = hurt;
@@ -340,6 +408,11 @@ void Fighter::set_blocking(bool blocking) {
 int Fighter::get_health() const
 {
 	return m_health;
+}
+
+int Fighter::get_block_tank() const
+{
+	return m_blocking_tank;
 }
 
 int Fighter::get_lives() const

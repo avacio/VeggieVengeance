@@ -123,9 +123,7 @@ bool World::init(vec2 screen, GameMode mode)
 				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
 				  	   POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) && 
 				  	   BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) && 
-				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
-					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
-					   set_mode(mode);
+				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) && set_mode(mode);
 
 	spawn_platform(200, 600, 800, 50);
 
@@ -285,12 +283,12 @@ void World::draw()
 	
 	if (m_mode == DEV || m_mode == PVP)
 	{
-		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player2.get_lives(), m_player2.get_health());
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player1.get_block_tank(), m_player2.get_lives(), m_player2.get_health(), m_player2.get_block_tank());
 	}
 	else if (m_mode == TUTORIAL || m_mode == PVC)
 	{
 		AI ai = m_ais.front();
-		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), ai.get_lives(), ai.get_health());
+		m_bg.setPlayerInfo(m_player1.get_lives(), m_player1.get_health(), m_player1.get_block_tank(), ai.get_lives(), ai.get_health(), ai.get_block_tank());
 	}
 
 	/////////////////////////////////////
@@ -409,6 +407,7 @@ bool World::spawn_platform(float xpos, float ypos, float width, float height)
 // On key callback
 void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
+	
 	////////////// TEST MODES
 	if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
 	{
@@ -452,6 +451,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 	else {
 		// Handle player movement here
+		
 		if (m_player1.get_in_play() && !m_paused && m_player1.get_alive())
 		{
 			if (action == GLFW_PRESS && key == GLFW_KEY_D)
@@ -469,7 +469,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
 				m_player1.set_movement(BLOCKING);
 			}
-
+		
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
@@ -503,6 +503,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
 				m_player2.set_movement(BLOCKING);
 			}
+		
 			if (action == GLFW_RELEASE && key == GLFW_KEY_L)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_J)
@@ -672,46 +673,46 @@ bool World::set_mode(GameMode mode) {
 				m_player2.set_in_play(true);
 			}
 
-			if (m_player1.get_in_play())
-			{
-				initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
-				m_fighters.emplace_back(m_player1);
-			}
-
-			if (m_player2.get_in_play())
-			{
-				initSuccess = initSuccess && m_player2.init(2, "Spud");
-				m_fighters.emplace_back(m_player2);
-			}
-
-			for (int i = 0; i < MAX_AI; i++)
-			{
-				AIType type = AVOID;
-				if (i % 2 == 0)
-				{
-					type = CHASE;
-				}
-				initSuccess = initSuccess && spawn_ai(type);
-			}
-			initSuccess = initSuccess && m_bg.init(m_screen, mode);
-			break;
-		case PVP: // 2 player
-			m_player1.set_in_play(true);
-			m_player2.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+		if (m_player1.get_in_play())
+		{
+			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
 			m_fighters.emplace_back(m_player1);
+		}
+
+		if (m_player2.get_in_play())
+		{
+			initSuccess = initSuccess && m_player2.init(2, "Spud");
 			m_fighters.emplace_back(m_player2);
-			break;
-		case PVC: // single player
-			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
-			m_fighters.emplace_back(m_player1);
-			break;
-		case TUTORIAL:
-			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
-			m_fighters.emplace_back(m_player1);
-			break;
+		}
+
+		for (int i = 0; i < MAX_AI; i++)
+		{
+			AIType type = AVOID;
+			if (i % 2 == 0)
+			{
+				type = CHASE;
+			}
+			initSuccess = initSuccess && spawn_ai(type);
+		}
+		initSuccess = initSuccess && m_bg.init(m_screen, mode);
+		break;
+	case PVP: // 2 player
+		m_player1.set_in_play(true);
+		m_player2.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		m_fighters.emplace_back(m_player2);
+		break;
+	case PVC: // single player
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		break;
+	case TUTORIAL:
+		m_player1.set_in_play(true);
+		initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+		m_fighters.emplace_back(m_player1);
+		break;
 	}
 
 	if (mode != MENU)
