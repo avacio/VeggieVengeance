@@ -53,6 +53,7 @@ class World
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
+	bool spawn_ai(AIType type, FighterCharacter fc);
 
 	void reset();
 
@@ -63,8 +64,9 @@ class World
 	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
 
+	void spawn_char_select_AI(FighterCharacter fc);
+	void clear_all_fighters();
 
-  private:
 	// Window handle
 	GLFWwindow *m_window;
 
@@ -81,7 +83,6 @@ class World
 	// Game entities
 	MainMenu m_menu;
 	Background m_bg;
-	std::map<FighterCharacter, FighterInfo> m_fighterTypes;
 	Player1 m_player1;
 	Player2 m_player2;
 	std::vector<AI> m_ais;
@@ -97,8 +98,9 @@ class World
 	bool m_paused;
 
 	/////////
-	FighterCharacter selectedP1 = POTATO;
-	FighterCharacter selectedP2 = POTATO;
+	std::map<FighterCharacter, FighterInfo> fighterInfoMap;
+	FighterCharacter selectedP1 = POTATO; // POTATO
+	FighterCharacter selectedP2 = POTATO; // POTATO
 
 	// C++ rng
 	std::default_random_engine m_rng;

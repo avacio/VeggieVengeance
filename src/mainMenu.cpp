@@ -62,10 +62,11 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 
 	////////////////
 	//// TEXT
-	title = new TextRenderer(mainFontBold, 90);
+	title = new TextRenderer(mainFontBold, 80);
 	title->setColor({ 0.f,0.f,0.f });
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
-	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
+	//title->setPosition({ screen.x/2.f - width/2.f, 180.f });
+	title->setPosition({ 80.f, 180.f });
 	set_mode(MENU);
 
 	return true;
@@ -152,7 +153,11 @@ void MainMenu::draw(const mat3& projection)
 		buttons[2]->renderString(projection, "TUTORIAL");
 	}
 	else {
-		title->renderString(projection, "CHARACTER SELECT");
+		if (m_selected_mode == PVP) {
+			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
+			//if (selectedP1 == BLANK) { title->renderString(projection, "P1 CHARACTER SELECT"); }
+			else { title->renderString(projection, "P2 CHARACTER SELECT"); }
+		} else { title->renderString(projection, "CHARACTER SELECT"); }
 		buttons[0]->renderString(projection, "POTATO");
 		buttons[1]->renderString(projection, "BROCCOLI");
 		buttons[2]->renderString(projection, "return");
@@ -172,9 +177,9 @@ void MainMenu::set_position(vec2 position)
 
 void MainMenu::init_menu_buttons()
 {
-	TextRenderer* b1 = new TextRenderer(mainFont, 60);
-	TextRenderer* b2 = new TextRenderer(mainFont, 60);
-	TextRenderer* b3 = new TextRenderer(mainFont, 60);
+	TextRenderer* b1 = new TextRenderer(mainFont, 50);
+	TextRenderer* b2 = new TextRenderer(mainFont, 50);
+	TextRenderer* b3 = new TextRenderer(mainFont, 50);
 
 	b1->setColor(selectedColor);
 	b2->setColor(defaultColor);
@@ -214,6 +219,7 @@ void MainMenu::init_select_char_buttons() {
 	buttons[0]->setPosition({ width / 3.f, screen.y / 2.f - 100.f });
 	buttons[1]->setPosition({ width / 3.f, (screen.y / 2.f) });
 	buttons[2]->setPosition({ width / 3.f, (screen.y / 2.f) + 100.f });
+
 	reset_selection();
 }
 
@@ -238,13 +244,10 @@ FighterCharacter MainMenu::get_selected_char()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		//const FighterCharacter& ptr = POTATO;
-		//return ptr;
 		return POTATO;
 	case 1:
 		return BROCCOLI;
 	case 2: {
-		m_selected_mode = MENU;
 		return BLANK;
 	}
 	default:
@@ -273,7 +276,7 @@ bool MainMenu::set_mode(GameMode mode)
 	m_mode = mode;
 	switch (mode) {
 	case MENU: {
-		destroyButtons();
+		reset();
 		init_menu_buttons();
 	}
 	case CHARSELECT:
@@ -284,6 +287,16 @@ bool MainMenu::set_mode(GameMode mode)
 	}
 	return true;
 }
+
+void MainMenu::reset() {
+	destroyButtons();
+	for (int i = 0; i < text.size(); i++) {
+		TextRenderer *t = text[i];
+		delete t;
+	}
+	text.clear();
+}
+
 
 void Screen::change_selection(bool goDown)
 {

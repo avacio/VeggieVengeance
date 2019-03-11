@@ -120,9 +120,9 @@ bool World::init(vec2 screen, GameMode mode)
 
 	FighterInfo potato, broccoli;
 	potato.setInfo(POTATO, 5, 1, "solanum tuberosum", { "Spud", "PoeTatum", "BabyTater", "TaterHater" });
-	m_fighterTypes[POTATO] = potato;
+	fighterInfoMap[POTATO] = potato;
 	broccoli.setInfo(BROCCOLI, 3, 3, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" });
-	m_fighterTypes[BROCCOLI] = broccoli;
+	fighterInfoMap[BROCCOLI] = broccoli;
 	fprintf(stderr, "Loaded fighter templates\n");
 
 	
@@ -135,7 +135,7 @@ bool World::init(vec2 screen, GameMode mode)
 					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 					   set_mode(mode);
 
-	return m_water.init() && initSuccess;
+	return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
 }
 
 // Releases all the associated resources
@@ -371,9 +371,23 @@ bool World::spawn_ai(AIType type)
 {
 	//intialize ai with next ID and provided type
 	AI ai(idCounter, type);
-	if (ai.init(3, "AI"))
+	if (ai.init(3, "AI", BROCCOLI)) // TODO: RANDOMIZE BUT NOT INCLUDING BLANK PLACEHOLDER 
 	{
 		//assure the next ID given is unique
+		idCounter++;
+		m_ais.emplace_back(ai);
+		m_fighters.emplace_back(ai);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn fighter");
+	return false;
+}
+
+bool World::spawn_ai(AIType type, FighterCharacter fc)
+{
+	AI ai(idCounter, type);
+	if (ai.init(3, "AI", fc))
+	{
 		idCounter++;
 		m_ais.emplace_back(ai);
 		m_fighters.emplace_back(ai);
@@ -410,25 +424,40 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	// MAIN MENU CONTROLS
 	if (m_mode == MENU || m_mode == CHARSELECT)
 	{
-		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
-		{
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
 			m_menu.change_selection(false);
+			if (m_mode == CHARSELECT && m_menu.get_selected_char() != BLANK) {
+				spawn_char_select_AI(m_menu.get_selected_char());
+			}
 		}
-		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
-		{
+		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) {
 			m_menu.change_selection(true);
+			if (m_mode == CHARSELECT && m_menu.get_selected_char() != BLANK) {
+				spawn_char_select_AI(m_menu.get_selected_char());
+			}
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
-			//reset();
 			if (m_mode == MENU) {
 				m_menu.set_selected_mode();
 				set_mode(CHARSELECT);
 			} else if (m_mode == CHARSELECT) {
-				selectedP1 = m_menu.get_selected_char();
-				//P2
-				set_mode(m_menu.get_selected_mode());
-				//std::cout << "SELECTED GAME MODE: " << ModeMap[m_menu.get_selected_mode()] << std::endl;
+				FighterCharacter result = m_menu.get_selected_char();
+				if (result == BLANK) {
+					set_mode(MENU);
+				} else if (m_menu.get_selected_mode() == PVP) {
+					if (!m_menu.is_player_1_chosen) {
+						selectedP1 = result;
+						m_menu.is_player_1_chosen = true;
+					} else {
+						selectedP2 = result;
+						m_menu.is_player_1_chosen = false;
+						set_mode(m_menu.get_selected_mode());
+					}
+				} else {
+					selectedP1 = m_menu.get_selected_char();
+					set_mode(m_menu.get_selected_mode());
+				}
 			}
 		}
 
@@ -568,11 +597,9 @@ void World::reset()
 			ai.reset(3);
 		}
 		break;
-	case MENU:	// TESTING TRANSITIONS, REDUNDANT NOW
+	case MENU:
 		m_player1.set_in_play(false);
 		m_ais.clear();
-		//set_mode(DEV);
-		//set_mode(PVC);
 		break;
 	case CHARSELECT:
 		break;
@@ -585,15 +612,7 @@ bool World::set_mode(GameMode mode) {
 	m_player1.set_in_play(false);
 	m_player2.set_in_play(false);
 
-	for (AI& ai : m_ais) {
-		ai.destroy();
-	}
-	m_ais.clear();
-
-	for (Fighter& fighter : m_fighters) {
-		fighter.destroy();
-	}
-	m_fighters.clear();
+	clear_all_fighters();
 	m_bg.destroy();
 
 	bool initSuccess = true;
@@ -602,15 +621,16 @@ bool World::set_mode(GameMode mode) {
 	switch (mode) {
 		case MENU:
 			m_player1.set_in_play(true); // needed to make AI respond
-			spawn_ai(RANDOM);
+			spawn_ai(RANDOM, POTATO);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
-			//initSuccess = initSuccess && m_menu.init(m_screen);
-			initSuccess = initSuccess && m_menu.init(m_screen, m_fighterTypes);
+			m_menu.is_player_1_chosen = false;
+			m_menu.m_selected_mode = MENU;
+			initSuccess = initSuccess && m_menu.set_mode(MENU);
 			break;
 		case CHARSELECT:
 		{
 			m_player1.set_in_play(true); // needed to make AI respond
-			spawn_ai(RANDOM);
+			spawn_ai(RANDOM, POTATO);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f }); // TODO
 			initSuccess = initSuccess && m_menu.set_mode(CHARSELECT);
 			break;
@@ -627,13 +647,13 @@ bool World::set_mode(GameMode mode) {
 
 			if (m_player1.get_in_play())
 			{
-				initSuccess = initSuccess && m_player1.init(1, "Poe Tatum");
+				initSuccess = initSuccess && m_player1.init(1, "Poe Tatum", selectedP1);
 				m_fighters.emplace_back(m_player1);
 			}
 
 			if (m_player2.get_in_play())
 			{
-				initSuccess = initSuccess && m_player2.init(2, "Spud");
+				initSuccess = initSuccess && m_player2.init(2, "Spud", selectedP2);
 				m_fighters.emplace_back(m_player2);
 			}
 
@@ -651,18 +671,18 @@ bool World::set_mode(GameMode mode) {
 		case PVP: // 2 player
 			m_player1.set_in_play(true);
 			m_player2.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Poe Tatum") && m_player2.init(2, "Spud") && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && m_player2.init(2, fighterInfoMap[selectedP2].getFCName(), selectedP2) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			m_fighters.emplace_back(m_player2);
 			break;
 		case PVC: // single player
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Spud") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			break;
 		case TUTORIAL:
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, "Baby Tater") && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			break;
 		default:
@@ -705,4 +725,28 @@ void World::set_paused(bool isPaused) {
 
 void World::play_grunt_audio() {
 	Mix_PlayChannel(-1, m_grunt_audio[get_random_number(3)], 0);
+}
+
+void World::spawn_char_select_AI(FighterCharacter fc) {
+	clear_all_fighters();
+	spawn_ai(RANDOM, fc);
+	m_ais[0].set_position({ 250.f, m_screen.y*.85f });
+}
+
+void World::clear_all_fighters() {
+	for (AI& ai : m_ais) {
+		ai.destroy();
+	}
+	m_ais.clear();
+
+	for (Fighter& fighter : m_fighters) {
+		fighter.destroy();
+	}
+	m_fighters.clear();
+
+	std::map<FighterCharacter, FighterInfo>::iterator it;
+	for (it = fighterInfoMap.begin(); it != fighterInfoMap.end(); it++)
+	{
+		it->second.clearTaken();
+	}
 }

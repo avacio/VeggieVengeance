@@ -47,6 +47,8 @@ public:
 	// Sets the new bubble position
 	void set_position(vec2 position);
 
+	void reset();
+
 	bool set_mode(GameMode mode);
 	GameMode get_mode() { return m_mode; }
 	GameMode get_selected_mode() { return m_selected_mode; }
@@ -59,18 +61,17 @@ public:
 	void draw_char_info(const mat3& projection);
 	std::string int_to_stat_string(int in);
 
+	FighterCharacter selectedP1 = BLANK;
+	bool is_player_1_chosen = false; // for picking PVP
+	GameMode m_selected_mode = MENU;
+
 private:
 	vec2 screen;
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	GameMode m_mode = MENU;
-	GameMode m_selected_mode = MENU;
 	std::map<FighterCharacter, FighterInfo> fighterMap;
 
-	//int selectedButtonIndex = 0;
-	//std::vector<TextRenderer*> buttons;
 	std::vector<TextRenderer*> text;
-	//const vec3 selectedColor = { 0.7f,0.2f,0.2f };
-	//const vec3 defaultColor = { 0.4f,0.4f,0.4f };
 };
