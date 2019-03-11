@@ -320,8 +320,11 @@ void FighterInfo::setInfo(FighterCharacter fc, int strength, int speed, std::str
 }
 
 std::string FighterInfo::getFCName() {
-	int r = get_random_number(names.size());
+	int r = get_random_number(names.size()-1);
+	//std::cout << "NAMES SIZE: " << names.size() << std::endl;
+	//std::cout << "rand: " << r << std::endl;
 	std::string p = names.at(r);
+
 	if (std::find(takenNames.begin(), takenNames.end(), p) != takenNames.end()) {
 		std::string newP = p + "Jr";
 		names.emplace_back(newP);
