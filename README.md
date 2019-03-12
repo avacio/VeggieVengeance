@@ -43,7 +43,12 @@ Overview: For this milestone, we focused on improving the gameplay by introducin
 		- resume: supporting continuing execution
 		- going back to main menu: allow players to switch modes without closing the game
 		- quit: graceful termination
-        - restart: resets game after game over
+    - game over screen
+    	- quit, return to menu, restart
+    - character select screen
+    	- AI changes based on character type that is currently selected
+        - shows stats
+        - will determine actual player type
 
 Creative: You should implement one or more additional creative elements. These can include additional integrated assets or rendering effects or pre-emptive implementation of one or more features from subsequent milestones.
 	
