@@ -771,18 +771,6 @@ void Fighter::reset()
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
-	
-	//m_velocity_y = 0.0;
-	m_moving_forward = false;
-	m_moving_backward = false;
-	//m_position = m_intial_pos;
-
-	//
-	//if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
-	//	m_crouch_state = CROUCH_RELEASED;
-	//	m_position.y += 25.f;
-	//}
-
 }
 
 DamageEffect * Fighter::punch() {
@@ -799,7 +787,6 @@ DamageEffect * Fighter::punch() {
 		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
 			b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
-
 	delete b;
 	return d;
 }

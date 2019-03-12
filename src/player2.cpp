@@ -77,7 +77,7 @@ void Player2::draw(const mat3 &projection)
 				m_idle_counter++;
 				if (m_idle_counter < 25) {
 					if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
-					else { p_texture = BROCCOLI_TEXTURE; }
+					else { p_texture = BROCCOLI_IDLE_TEXTURE; }
 				}
 
 				else if (m_idle_counter > 25 && m_idle_counter < 50) {

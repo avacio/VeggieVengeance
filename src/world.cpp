@@ -502,18 +502,18 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
-			//if (action == GLFW_PRESS && key == GLFW_KEY_S)
-			//	m_player1.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_S)
+				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
 				m_player1.set_movement(PUNCHING);
 			}
 			else if (action == GLFW_REPEAT && key == GLFW_KEY_E)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E && m_player1.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_E && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_Q)
+				play_grunt_audio();
+			} if (action == GLFW_PRESS && key == GLFW_KEY_Q)
 				m_player1.set_movement(SHOOTING);
-			play_grunt_audio();
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
 				m_player1.set_movement(BLOCKING);
 			}
@@ -549,18 +549,32 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(MOVING_BACKWARD);
 		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
 			m_player2.set_movement(START_JUMPING);
-		//if (action == GLFW_PRESS && key == GLFW_KEY_K)
-		//	m_player2.set_movement(CROUCHING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_K)
+			m_player2.set_movement(CROUCHING);
+		/*if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 			m_player2.set_movement(PUNCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_U)
 				m_player2.set_movement(SHOOTING);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_O)
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player2.is_holding_power_punch())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player2.is_holding_power_punch()) {
 				m_player2.set_movement(POWER_PUNCHING);
-			play_grunt_audio();
+				play_grunt_audio();
+			}
 		}
+		if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+			m_player2.set_movement(BLOCKING);
+		}*/
+		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
+			m_player2.set_movement(PUNCHING);
+		}
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_O)
+			m_player2.set_movement(HOLDING_POWER_PUNCH);
+		if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player1.is_holding_power_punch()) {
+			m_player2.set_movement(POWER_PUNCHING);
+			play_grunt_audio();
+		} if (action == GLFW_PRESS && key == GLFW_KEY_U)
+			m_player2.set_movement(SHOOTING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
 			m_player2.set_movement(BLOCKING);
 		}
@@ -573,7 +587,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(RELEASE_CROUCH);
 		if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
 			m_player2.set_movement(STOP_PUNCHING);
-			play_grunt_audio();
 		}
 		if (action == GLFW_RELEASE && key == GLFW_KEY_U)
 			m_player2.set_movement(STOP_SHOOTING);
@@ -863,11 +876,11 @@ void World::draw_rectangle() {
 bool World::is_game_over() {
 	if (m_mode == PVP) {
 		if (!m_player1.get_alive() && m_player1.get_lives() == 0) {
-			m_winner_name = m_player1.get_name();
+			m_winner_name = m_player2.get_name();
 			return true;
 		}
 		else if (!m_player2.get_alive() && m_player2.get_lives() == 0) {
-			m_winner_name = m_player2.get_name();
+			m_winner_name = m_player1.get_name();
 			return true;
 		}
 		return false;
