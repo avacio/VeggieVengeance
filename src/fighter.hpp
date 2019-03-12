@@ -82,6 +82,8 @@ class Fighter : public Renderable
 	bool is_idle() const;
 
 	bool is_blocking() const;
+
+	int get_blocking_tank() ;
 	
 
 
