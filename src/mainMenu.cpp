@@ -3,16 +3,13 @@
 
 Texture MainMenu::m_texture;
 
-///////////////
-// NOTE: REPEAT FROM BACKGROUND.HPP MIGHT NOT BE NECESSARY
-// if we only want a monocolour background (i.e. water) we can copy that format instead
-
-bool MainMenu::init(vec2 screen)
+bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighterMap)
 {
 	// Load shared texture
 	m_texture = MAIN_MENU_TEXTURE;
 
 	this->screen = screen;
+	this->fighterMap = fighterMap;
 
 	// The position corresponds to the center of the texture
 	float wr = m_texture.width * 3.5f;
@@ -67,11 +64,12 @@ bool MainMenu::init(vec2 screen)
 
 	////////////////
 	//// TEXT
-	title = new TextRenderer(mainFontBold, 90);
+	title = new TextRenderer(mainFontBold, 80);
 	title->setColor({ 0.f,0.f,0.f });
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
-	title->setPosition({ screen.x/2.f - width/2.f, 180.f });
-	init_buttons();
+	//title->setPosition({ screen.x/2.f - width/2.f, 180.f });
+	title->setPosition({ 80.f, 180.f });
+	set_mode(MENU);
 
 	return true;
 }
@@ -81,6 +79,7 @@ bool MainMenu::init(vec2 screen)
 void MainMenu::destroy()
 {
 	m_initialized = false;
+	//is_player_1_chosen = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -90,13 +89,10 @@ void MainMenu::destroy()
 	glDeleteShader(effect.program);
 	delete title;
 
-	for (int i = 0; i < buttons.size(); i++) {
-		TextRenderer *button = buttons[i];
-		delete button;
-	}
+	reset();
 
-	buttons.clear();
 	effect.release();
+	//std::cout << "Destroyed MainMenu." << std::endl;
 }
 
 void MainMenu::draw(const mat3& projection)
@@ -150,10 +146,22 @@ void MainMenu::draw(const mat3& projection)
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	title->renderString(projection, "VEGGIE VENGEANCE");
-	buttons[0]->renderString(projection, "ONE-PLAYER");
-	buttons[1]->renderString(projection, "TWO-PLAYER");
-	buttons[2]->renderString(projection, "TUTORIAL");
+	if (m_mode == MENU) {
+		title->renderString(projection, "VEGGIE VENGEANCE");
+		buttons[0]->renderString(projection, "ONE-PLAYER");
+		buttons[1]->renderString(projection, "TWO-PLAYER");
+		buttons[2]->renderString(projection, "TUTORIAL");
+	}
+	else {
+		if (m_selected_mode == PVP) {
+			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
+			else { title->renderString(projection, "P2 CHARACTER SELECT"); }
+		} else { title->renderString(projection, "CHARACTER SELECT"); }
+		buttons[0]->renderString(projection, "POTATO");
+		buttons[1]->renderString(projection, "BROCCOLI");
+		buttons[2]->renderString(projection, "return");
+		draw_char_info(projection);
+	}
 }
 
 vec2 MainMenu::get_position()const
@@ -166,82 +174,154 @@ void MainMenu::set_position(vec2 position)
 	m_position = position;
 }
 
-void MainMenu::init_buttons()
+void MainMenu::init_menu_buttons()
 {
-	selectedButtonIndex = 0; // default: first button selected
-	TextRenderer* play1 = new TextRenderer(mainFont, 60);
-	TextRenderer* play2 = new TextRenderer(mainFont, 60);
-	TextRenderer* playTut = new TextRenderer(mainFont, 60);
+	TextRenderer* b1 = new TextRenderer(mainFont, 50);
+	TextRenderer* b2 = new TextRenderer(mainFont, 50);
+	TextRenderer* b3 = new TextRenderer(mainFont, 50);
 
-	play1->setColor(selectedColor);
-	play2->setColor(defaultColor);
-	playTut->setColor(defaultColor);
+	b1->setColor(selectedColor);
+	b2->setColor(defaultColor);
+	b3->setColor(defaultColor);
 
-	int width = play1->get_width_of_string("ONE-PLAYER");
-	play1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
-	width = play2->get_width_of_string("TWO-PLAYER");
-	play2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
-	width = playTut->get_width_of_string("TUTORIAL");
-	playTut->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
-	buttons.emplace_back(play1);
-	buttons.emplace_back(play2);
-	buttons.emplace_back(playTut);
+	int width = b1->get_width_of_string("ONE-PLAYER");
+	b1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
+	width = b2->get_width_of_string("TWO-PLAYER");
+	b2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	width = b3->get_width_of_string("TUTORIAL");
+	b3->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
+	buttons.emplace_back(b1);
+	buttons.emplace_back(b2);
+	buttons.emplace_back(b3);
+
+	reset_selection();
 }
 
-// TODO: may want to change design so that selection does not loop
-void MainMenu::change_selection(bool goDown)
+void MainMenu::init_select_char_buttons() {
+	TextRenderer* t1 = new TextRenderer(mainFont, 40);
+	TextRenderer* t2 = new TextRenderer(mainFont, 40);
+	TextRenderer* t3 = new TextRenderer(mainFont, 40);
+
+	t1->setColor({0.f,0.f,0.f});
+	t2->setColor({ 0.f,0.f,0.f });
+	t3->setColor({ 0.f,0.f,0.f });
+
+	int width = t1->get_width_of_string("solanum tuberosum");
+	t1->setPosition({ screen.x / 2.f, screen.y / 2.f - 100.f }); //  width / 4.f
+	t2->setPosition({ screen.x / 2.f, (screen.y / 2.f) });
+	t3->setPosition({ screen.x / 2.f, (screen.y / 2.f) + 100.f });
+	text.emplace_back(t1);
+	text.emplace_back(t2);
+	text.emplace_back(t3);
+
+	width = buttons[0]->get_width_of_string("POTATO");
+	buttons[0]->setPosition({ width / 3.f, screen.y / 2.f - 100.f });
+	buttons[1]->setPosition({ width / 3.f, (screen.y / 2.f) });
+	buttons[2]->setPosition({ width / 3.f, (screen.y / 2.f) + 100.f });
+
+	reset_selection();
+}
+
+GameMode MainMenu::set_selected_mode()
+{
+	switch (selectedButtonIndex) {
+	case 0: {
+		m_selected_mode = PVC;
+		break; }
+	case 1: {
+		m_selected_mode = PVP; 
+		break; }
+	case 2: {
+		m_selected_mode = TUTORIAL;
+		break;
+		}
+	}
+	return m_selected_mode;
+}
+
+FighterCharacter MainMenu::get_selected_char()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		if (goDown) {
-			selectedButtonIndex = 1;
-			buttons[0]->setColor(defaultColor);
-			buttons[1]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 2;
-			buttons[0]->setColor(defaultColor);
-			buttons[2]->setColor(selectedColor);
-		}
-		break;
+		return POTATO;
 	case 1:
-		if (goDown) {
-			selectedButtonIndex = 2;
-			buttons[1]->setColor(defaultColor);
-			buttons[2]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 0;
-			buttons[1]->setColor(defaultColor);
-			buttons[0]->setColor(selectedColor);
-		}
-		break;
-	case 2:
-		if (goDown) {
-			selectedButtonIndex = 0;
-			buttons[2]->setColor(defaultColor);
-			buttons[0]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 1;
-			buttons[2]->setColor(defaultColor);
-			buttons[1]->setColor(selectedColor);
-		}
-		break;
+		return BROCCOLI;
+	case 2: {
+		return BLANK;
+	}
+	default:
+		return POTATO;
 	}
 }
 
-GameMode MainMenu::get_selected()
+void MainMenu::draw_char_info(const mat3& projection)
 {
-	switch (selectedButtonIndex) {
-	case 0:
-		return PVC;
+	if (get_selected_char() == BLANK) { return; }
+	text[0]->renderString(projection, fighterMap[get_selected_char()].sciName);
+	text[1]->renderString(projection, "STR: " + int_to_stat_string(fighterMap[get_selected_char()].strength));
+	text[2]->renderString(projection, "SPD: " + int_to_stat_string(fighterMap[get_selected_char()].speed));
+}
+
+std::string MainMenu::int_to_stat_string(int in) {
+	std::string stat = "";
+	for (int i = 0; i < in; i++) {
+		stat += "X";
+	}
+	return stat;
+}
+
+bool MainMenu::set_mode(GameMode mode)
+{
+	m_mode = mode;
+	switch (mode) {
+	case MENU: {
+		reset();
+		init_menu_buttons();
+	}
+	case CHARSELECT:
+		init_select_char_buttons();
 		break;
-	case 1:
-		return PVP;
-		break;
-	case 2:
-		return TUTORIAL;
+	default:
 		break;
 	}
+	return true;
+}
+
+void MainMenu::reset() {
+	destroyButtons();
+	for (int i = 0; i < text.size(); i++) {
+		TextRenderer *t = text[i];
+		delete t;
+	}
+	text.clear();
+	selectedButtonIndex = 0;
+}
+
+
+void Screen::change_selection(bool goDown)
+{
+	buttons[selectedButtonIndex]->setColor(defaultColor);
+	if (selectedButtonIndex == buttons.size() - 1 && goDown) {
+		buttons[0]->setColor(selectedColor);
+		selectedButtonIndex = 0;
+	}
+	else if (selectedButtonIndex == 0 && !goDown) {
+		buttons[buttons.size() - 1]->setColor(selectedColor);
+		selectedButtonIndex = buttons.size() - 1;
+	}
+	else if (goDown) {
+		selectedButtonIndex++;
+		buttons[selectedButtonIndex]->setColor(selectedColor);
+	}
+	else {
+		selectedButtonIndex--;
+		buttons[selectedButtonIndex]->setColor(selectedColor);
+	}
+}
+
+void Screen::reset_selection()
+{
+	buttons[selectedButtonIndex]->setColor(defaultColor);
+	buttons[0]->setColor(selectedColor);
+	selectedButtonIndex = 0;
 }

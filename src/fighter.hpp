@@ -4,30 +4,41 @@
 #include "damageEffect.hpp"
 #include "platform.hpp"
 #include "textRenderer.hpp"
+#include "attack.hpp"
+#include "punch.hpp"
+#include "bullet.hpp"
+#include "projectile.hpp"
+#include <set>
 #include <random>
 
 class Fighter : public Renderable
 {
 	// Shared between all bubbles, no need to load one for each instance
-	static Texture fighter_texture;
+	static Texture f_texture;
 
   public:
 	 Fighter(unsigned int id);
 	// Creates all the associated render resources and default transform
-	bool init(int init_position, std::string name);
+	bool init(int init_position, std::string name, FighterCharacter fc);
 
 	// Releases all the associated resources
 	void destroy();
 
-	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	DamageEffect * update(float ms, std::vector<Platform> platforms);
+	Attack * update(float ms, std::vector<Platform> platforms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
+	void drawProjectile(const mat3 &projection);
+
+	void drawBullet(const mat3 &projection);
+
 	//get collision object for punch
-	DamageEffect * punch();
+	Punch * punch();
+
+	//get collision object for powerpunch
+	Punch * powerPunch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -42,7 +53,7 @@ class Fighter : public Renderable
 
 	void set_hurt(bool hurt);
 
-	void apply_damage(DamageEffect damage_effect);
+	void apply_damage(DamageEffect * damage_effect);
 
 	void set_blocking(bool blocking);
 
@@ -70,6 +81,7 @@ class Fighter : public Renderable
 
 	unsigned int get_id() const;
 
+	//void jump_update();
 	void apply_friction();
 
 	void x_position_update(float added_speed);
@@ -87,6 +99,16 @@ class Fighter : public Renderable
 	bool is_jumping() const;
 
 	bool is_punching() const;
+
+	bool is_punching_on_cooldown() const;
+
+	bool is_holding_power_punch() const;
+
+	bool is_holding_projectile() const;
+
+
+	bool change_power_punch_sprite() const;
+
 
 	bool is_crouching() const;
 
@@ -114,6 +136,7 @@ class Fighter : public Renderable
 	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
 
+	FighterCharacter m_fc;
 	std::string m_name;
 	TextRenderer* m_nameplate;
 
@@ -121,7 +144,7 @@ class Fighter : public Renderable
 	vec2 m_scale;	 // 1.f in each dimension. 1.f is as big as the associated texture
 	vec2 m_sprite_appearance_size; //the apparent width and height of the sprite, without scaling (used for more intuitive bounding boxes)
 	float m_rotation; // in radians
-	vec2 m_intial_pos;
+	vec2 m_initial_pos;
 	
 	float m_speed; // each fighter has different speed and strength stats
 	int m_strength;
@@ -131,14 +154,34 @@ class Fighter : public Renderable
 	bool m_facing_front = true;
 	bool m_moving_forward = false;
 	bool m_moving_backward = false;
+	bool m_is_holding_power_punch = false;
+	bool m_is_power_punching = false;
+	bool m_power_punch_sprite = false;
 	bool m_is_punching = false;
+	bool m_is_shooting_projectile = false;
+	bool m_is_holding_projectile = false;
+	bool m_is_shooting_charged_projectile = false;
+	bool m_is_shooting_bullet = false;
+	bool m_punch_on_cooldown = false;
+	bool m_bullet_on_cooldown = false;
+	bool m_projectile_on_cooldown = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
 	
-	bool m_is_blocking = false;
+	std::set<Attack*> m_bullets;
+	std::set<Attack*> m_projectiles;
+	float punching_cooldown = 0;
+	float bullet_cooldown = 0;
+	float projectile_cooldown = 0;
+	float m_holding_power_punch_timer = 0;
+	float m_holding_projectile_timer = 0;
+	bool m_is_shooting = false;
+
+	int m_idle_counter = 0;
+	
 	int m_blocking_tank;
 
-
+	bool m_is_blocking = false;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 

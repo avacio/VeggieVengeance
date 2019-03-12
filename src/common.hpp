@@ -3,6 +3,7 @@
 // stlib
 #include <fstream> // stdout, stderr..
 #include <sstream>
+#include <random>
 
 // glfw
 #define NOMINMAX
@@ -45,6 +46,9 @@ float dot(vec2 l, vec2 r);
 float dot(vec3 l, vec3 r);
 mat3 mul(const mat3 &l, const mat3 &r);
 vec2 normalize(vec2 v);
+int get_random_number(int max);
+bool load_all_sprites_from_file();
+
 
 // OpenGL utilities
 // cleans error buffer
@@ -87,7 +91,17 @@ struct Texture
 extern Texture POTATO_TEXTURE;
 extern Texture POTATO_IDLE_TEXTURE;
 extern Texture POTATO_PUNCH_TEXTURE;
+extern Texture POTATO_POWER_PUNCH_TEXTURE;
+extern Texture POTATO_POWER_PUNCH_TEXTURE;
+extern Texture POTATO_CROUCH_PUNCH_TEXTURE;
+extern Texture POTATO_CROUCH_TEXTURE;
+extern Texture POTATO_CHARGING_TEXTURE;
+
 extern Texture BROCCOLI_TEXTURE;
+extern Texture BROCCOLI_IDLE_TEXTURE;
+extern Texture BROCCOLI_PUNCH_TEXTURE;
+extern Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
+extern Texture BROCCOLI_CROUCH_TEXTURE;
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
 
@@ -162,7 +176,17 @@ enum FighterMovementState
 	RELEASE_CROUCH = 7,
 	STOP_PUNCHING = 8,
 	BLOCKING = 9,
-	STOP_BLOCKING = 10
+	STOP_BLOCKING = 10,
+	SHOOTING_BULLET = 11,
+	SHOOTING_PROJECTILE = 12,
+	HOLDING_PROJECTILE = 13,
+	SHOOTING_CHARGED_PROJECTILE = 14,
+	HOLDING_POWER_PUNCH = 15,
+	POWER_PUNCHING = 16,
+	STOP_SHOOTING = 17,
+	SHOOTING = 18,
+	PAUSED = 19,
+	UNPAUSED = 20
 };
 
 
@@ -173,9 +197,35 @@ enum DeletionTime
 	AFTER_OUT_OF_BOUNDS
 };
 
+enum FighterCharacter
+{
+	BLANK = 0,
+	POTATO,
+	BROCCOLI
+};
+
+struct FighterInfo
+{
+public:
+	void setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names);
+
+	FighterCharacter fc;
+	std::string sciName;
+	int strength;
+	int speed;
+
+	std::string getFCName();
+	void clearTaken();
+
+protected:
+	std::vector<std::string> names;
+	std::vector<std::string> takenNames;
+};
+
 enum GameMode
 {
 	MENU = 0,
+	CHARSELECT,
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
@@ -186,9 +236,10 @@ enum PauseMenuOption
 {
 	RESUME,
 	MAINMENU,
-	QUIT
+	QUIT,
+	RESTART
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "PVC", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "CHARSELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
 

@@ -44,7 +44,12 @@ set(SOURCE_FILES
 	src/boundingBox.cpp
 	src/textRenderer.cpp
 	src/mainMenu.cpp
+	src/bullet.cpp
+	src/projectile.cpp
+	src/attack.cpp
+	src/punch.cpp
 	src/platform.cpp
+
 
     src/project_path.hpp
 	src/common.hpp
@@ -59,6 +64,10 @@ set(SOURCE_FILES
 	src/boundingBox.hpp
 	src/textRenderer.hpp
 	src/mainMenu.hpp
+	src/bullet.hpp
+	src/projectile.hpp
+	src/attack.hpp
+	src/punch.hpp
 	src/platform.hpp
 	)
 

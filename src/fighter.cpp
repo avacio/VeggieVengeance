@@ -2,28 +2,37 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
+#define MAX_PROJECTILE_ON_SCREEN 5
+#define MAX_PROJECTILE_VELOCITY 20
+#define PROJECTILE_CHARGE_RATE 0.5
+#define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
+#define POWER_PUNCH_CHARGE_RATE 0.5
+#define POWER_PUNCHING_MOVING_SPEED 1
+#define MAX_PUNCH_COOLDOWN 20
+#define MAX_BULLET_COOLDOWN 200
+#define MAX_PROJECTILE_COOLDOWN 200
 #include <math.h>
 #include <cmath>
 
-Texture Fighter::fighter_texture;
+Texture Fighter::f_texture;
 int full_Block_Tank;
 
 
 Fighter::Fighter(unsigned int id) : m_id(id) {
-
 }
 
-bool Fighter::init(int init_position, std::string name)
-
+bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 {
 	// Load shared texture
-	fighter_texture = BROCCOLI_TEXTURE;
+	m_fc = fc;
+	if (fc == BROCCOLI) { f_texture = BROCCOLI_TEXTURE; }
+	else { f_texture = POTATO_TEXTURE; }
 
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
 	//float hr = fighter_texture.height * 3.5f;
-	float wr = fighter_texture.width * 0.5f;
-	float hr = fighter_texture.height * 0.5f;
+	float wr = f_texture.width * 0.5f;
+	float hr = f_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = {-wr, +hr, -0.02f};
@@ -70,14 +79,13 @@ bool Fighter::init(int init_position, std::string name)
 
 	m_is_alive = true;
 	m_is_idle = true;
-	//m_facing_front = true;
 	m_is_hurt = false;
 	m_is_blocking = false;
 	m_blocking_tank = full_Block_Tank = 4000;
 
 	m_scale.x = 1.2f;
 	m_scale.y = 1.2f;
-	m_sprite_appearance_size = {fighter_texture.width /2.0f, fighter_texture.height / 1.4f };
+	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5.f;
@@ -105,7 +113,7 @@ bool Fighter::init(int init_position, std::string name)
 		break;
 	}
 
-	m_intial_pos = m_position;
+	m_initial_pos = m_position;
 
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
@@ -128,16 +136,11 @@ void Fighter::destroy()
 	effect.release();
 }
 
-DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
+Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 {
 	vec2 oldPos = m_position;
-	DamageEffect * d = NULL;
-	float MOVING_SPEED;
-	// If blocking, movement is slower
-	if (m_is_blocking) MOVING_SPEED = 3.0;
-	else MOVING_SPEED = 5.0;
+	Attack * attack = NULL;
 
-	
 	//BLOCKING 
 	//Deplete blocking tank if blocking
 	if (m_is_blocking) {
@@ -150,67 +153,114 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		m_blocking_tank += ms;
 	}
 
-	//IF JUST DIED
-	if (m_health <= 0 && m_is_alive)
-	{
-		m_is_alive = false;
-		m_lives--;
-		m_is_punching = false;
-		m_blocking_tank = full_Block_Tank;
-
-		//uncrouch in death
-		if (m_crouch_state == IS_CROUCHING) {
-			m_scale.y = 0.2f;
-			m_position.y -= 25.f;
-			m_crouch_state = NOT_CROUCHING;
-		}
-		else if (m_crouch_state == CROUCH_PRESSED) {
-			m_crouch_state = NOT_CROUCHING;
-		}
-
-		if (m_lives > 0)
-		{
-			m_respawn_timer = RESPAWN_TIME;
-			m_respawn_flag = true;
-		}
-	}
-
-	//If respawn pending
-	if (m_respawn_flag)
-	{
-		if (m_respawn_timer > 0)
-		{
-			//count down by time passed
-			m_respawn_timer -= ms;
-		}
-		else
-		{
-			//reset flags and revive
-			m_respawn_flag = false;
-			m_respawn_timer = 0;
-			m_is_alive = true;
-			m_is_hurt = false;
-			m_health = MAX_HEALTH;
-			//unrotate the potate
-			m_rotation = 0;
-		}
-	}
-
 	die();	
 	check_respawn(ms);
 
-	if (m_is_alive)
+	/*if (m_is_alive)
 	{
+		if (m_moving_forward)
+		{
+			if (!m_facing_front)
+			{
+				m_scale.x = -m_scale.x;
+				m_facing_front = true;
+			}
+			if (m_position.x < 1150.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
+				move({MOVING_SPEED, 0.0});
+			}
+		}
+		if (m_moving_backward)
+		{
+			if (m_facing_front)
+			{
+				m_scale.x = -m_scale.x;
+				m_facing_front = false;
+			}
+			if (m_position.x > 50.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
+				move({-MOVING_SPEED, 0.0});
+			}
+		}*/
+	if(m_is_alive){
+		if (m_crouch_state == CROUCH_PRESSED)
+		{
+			m_crouch_state = IS_CROUCHING;
+		}
+		if (m_crouch_state == CROUCH_RELEASED)
+		{
+			m_crouch_state = NOT_CROUCHING;
+		}
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
 		x_position_update(added_speed);
 		crouch_update();
 
-		if (m_is_punching)
+		if (m_is_punching && !m_punch_on_cooldown)
 		{
 			//save collision object from punch
-			d = punch();
+			attack = punch();
+			m_punch_on_cooldown = true;
 		}
+
+		// Power punch
+		else if (m_is_holding_power_punch) {
+			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
+				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
+		}
+		else if (m_is_power_punching) {
+			attack = powerPunch();
+			m_holding_power_punch_timer = 0;
+			m_is_power_punching = false;
+		}
+		// charging projectile
+		else if (m_is_holding_projectile) {
+			if (m_holding_projectile_timer < MAX_PROJECTILE_VELOCITY)
+				m_holding_projectile_timer += PROJECTILE_CHARGE_RATE;
+		}
+		else if (m_is_shooting_charged_projectile && !m_projectile_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, m_holding_projectile_timer, 10 + m_holding_projectile_timer, m_facing_front);
+			m_projectile_on_cooldown = true;
+			m_holding_projectile_timer = 0;
+			m_is_shooting_charged_projectile = false;
+		}
+
+		else if (m_is_shooting_bullet && !m_bullet_on_cooldown) {
+			attack = new Bullet(get_id(), m_position, 5, m_facing_front);
+			m_bullet_on_cooldown = true;
+		}
+
+		else if (m_is_shooting_projectile && !m_projectile_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
+			m_bullet_on_cooldown = true;
+		}
+		if (m_punch_on_cooldown) {
+			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
+				m_punch_on_cooldown = false;
+				punching_cooldown = 0;
+			}
+			else
+				punching_cooldown++;
+		}
+		if (m_bullet_on_cooldown) {
+			if (bullet_cooldown >= MAX_BULLET_COOLDOWN) {
+				m_bullet_on_cooldown = false;
+				bullet_cooldown = 0;
+			}
+			else
+				bullet_cooldown++;
+		}
+		if (m_projectile_on_cooldown) {
+			if (projectile_cooldown >= MAX_PROJECTILE_COOLDOWN) {
+				m_projectile_on_cooldown = false;
+				projectile_cooldown = 0;
+			}
+			else
+				projectile_cooldown++;
+		}
+			
 	}
 	else
 	{
@@ -219,12 +269,13 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		else
 			m_rotation = M_PI / 2;
 	}
-
+	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
 
+
 	//return null if not attacking, or the collision object if attacking
-	return d;
+	return attack;
 }
 
 void Fighter::draw(const mat3 &projection)
@@ -269,7 +320,54 @@ void Fighter::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fighter_texture.id);
+
+	if (get_alive() && is_punching()) {
+		if (!is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_PUNCH_TEXTURE; }
+			else { f_texture = BROCCOLI_PUNCH_TEXTURE; }
+		}
+		else if (is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_CROUCH_PUNCH_TEXTURE; }
+			else { f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; }
+		}
+	}
+	else if (get_alive() && is_crouching()) {
+		if (m_fc == POTATO) { f_texture = POTATO_CROUCH_TEXTURE; }
+		else { f_texture = BROCCOLI_CROUCH_TEXTURE; }
+	}
+	else if (get_alive() && is_holding_power_punch()) {
+		if (m_fc == POTATO) { f_texture = POTATO_CHARGING_TEXTURE; }
+		else { f_texture = BROCCOLI_PUNCH_TEXTURE; }
+	}
+	if (!is_punching()) {
+		if (get_alive() && is_idle() && !is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_IDLE_TEXTURE; }
+			else { f_texture = BROCCOLI_IDLE_TEXTURE; }
+		}
+		else {
+			if (get_alive() && is_idle()) {
+				m_idle_counter++;
+				if (m_idle_counter < 25) {
+					if (m_fc == POTATO) { f_texture = POTATO_IDLE_TEXTURE; }
+					else { f_texture = BROCCOLI_TEXTURE; }
+				}
+
+				else if (m_idle_counter > 25 && m_idle_counter < 50) {
+					if (m_fc == POTATO) { f_texture = POTATO_TEXTURE; }
+					else { f_texture = BROCCOLI_TEXTURE; }
+				}
+
+				else if (m_idle_counter >= 50)
+					m_idle_counter = 0;
+			}
+			else if (!get_alive()) {
+				if (m_fc == POTATO) { f_texture = POTATO_TEXTURE; }
+				else { f_texture = BROCCOLI_TEXTURE; }
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, f_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -286,6 +384,18 @@ void Fighter::draw(const mat3 &projection)
 	
 	int sWidth = m_nameplate->get_width_of_string(m_name);
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
+}
+
+void Fighter::drawProjectile(const mat3 &projection) {
+	for (auto p : m_projectiles) {
+		p->draw(projection);
+	}
+}
+
+void Fighter::drawBullet(const mat3 & projection) {
+	for (auto b : m_bullets) {
+		b->draw(projection);
+	}
 }
 
 float Fighter::get_rotation() const
@@ -353,14 +463,42 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 		}
 		break;
+	case SHOOTING_BULLET:
+		m_is_shooting_bullet = true;
+		m_is_idle = false;
+		break;
+	case SHOOTING_PROJECTILE:
+		m_is_shooting_projectile = true;
+		m_is_idle = false;
+		break;
+	case HOLDING_PROJECTILE:
+		m_is_holding_projectile = true;
+		m_is_shooting_projectile = false;
+		m_is_idle = false;
+		break;
+	case SHOOTING_CHARGED_PROJECTILE:
+		m_is_holding_projectile = false;
+		m_is_shooting_charged_projectile = true;
+		m_is_idle = false;
+		break;
+	case HOLDING_POWER_PUNCH:
+		m_is_holding_power_punch = true;
+		m_is_punching = false;
+		m_is_idle = false;
+		break;
+	case POWER_PUNCHING:
+		m_is_holding_power_punch = false;
+		m_is_power_punching = true;
+		m_is_idle = true;
+		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		if (m_moving_backward == false)
+		if (m_moving_backward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		if (m_moving_forward == false)
+		if (m_moving_forward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
@@ -369,6 +507,11 @@ void Fighter::set_movement(int mov)
 		break;
 	case STOP_PUNCHING:
 		m_is_punching = false;
+		m_is_idle = true;
+		break;
+	case STOP_SHOOTING:
+		m_is_shooting_bullet = false;
+		m_is_shooting_projectile = false;
 		m_is_idle = true;
 		break;
 	case BLOCKING:
@@ -387,11 +530,11 @@ void Fighter::set_hurt(bool hurt) {
 	m_is_hurt = hurt;
 }
 
-void Fighter::apply_damage(DamageEffect damage_effect) {
-	if (damage_effect.m_damage <= m_health) {
-		m_health -= damage_effect.m_damage;
+void Fighter::apply_damage(DamageEffect * damage_effect) {
+	if (damage_effect->m_damage <= m_health) {
+		m_health -= damage_effect->m_damage;
 
-		if (damage_effect.m_bounding_box.xpos + (damage_effect.m_bounding_box.width/2) > m_position.x) {
+		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width/2) > m_position.x) {
 			m_force.x -= 1.f;
 		} else {
 			m_force.x += 1.f;
@@ -447,6 +590,12 @@ void Fighter::apply_friction() {
 }
 
 void Fighter::x_position_update(float added_speed) {
+
+	//!!! need to include this before merge
+	//if (m_is_holding_power_punch)
+	//	MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
+
+
 	if (m_moving_forward)
 	{
 		if (!m_facing_front)
@@ -535,7 +684,8 @@ void Fighter::check_respawn(float ms) {
 			m_health = MAX_HEALTH;
 			//unrotate the potate
 			m_rotation = 0;
-			m_position = m_intial_pos;
+			m_position = m_initial_pos;
+			m_blocking_tank = full_Block_Tank;
 		}
 	}
 }
@@ -553,6 +703,24 @@ bool Fighter::is_jumping() const
 bool Fighter::is_punching() const
 {
 	return m_is_punching;
+}
+
+bool Fighter::is_punching_on_cooldown() const {
+	return m_punch_on_cooldown;
+}
+
+
+bool Fighter::is_holding_power_punch() const {
+	return m_is_holding_power_punch;
+}
+
+
+bool Fighter::is_holding_projectile() const {
+	return m_is_holding_projectile;
+}
+
+bool Fighter::change_power_punch_sprite() const {
+	return m_power_punch_sprite;
 }
 
 bool Fighter::is_crouching() const
@@ -597,6 +765,7 @@ unsigned int Fighter::get_id() const
 	return m_id;
 }
 
+//void Fighter::reset(int init_position)
 void Fighter::reset()
 {
 	m_health = MAX_HEALTH;
@@ -604,37 +773,69 @@ void Fighter::reset()
 	m_is_alive = true;
 	m_rotation = 0;
 	m_is_jumping = false;
+	m_is_punching = false;
+	m_is_shooting_bullet = false;
+	m_is_holding_projectile = false;
+	m_is_shooting_projectile = false;
+	m_is_holding_projectile = false;
+	m_is_holding_power_punch = false;
+	m_is_power_punching = false;
+	m_bullets.clear();
+	m_projectiles.clear();
+	m_is_shooting = false;
 	m_velocity_y = 0.0;
 	m_moving_forward = false;
 	m_moving_backward = false;
-	m_position = m_intial_pos;
+	m_position = m_initial_pos;
 
-	
+
 	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
-	
-	
 }
 
-DamageEffect * Fighter::punch() {
+Punch * Fighter::punch() {
 	//create the bounding box based on fighter position
 	float sizeMultiplier = 1.75;
 	BoundingBox* b = get_bounding_box();
-	DamageEffect* d;
+	Punch* punch;
 	if (get_facing_front()) {
 		//right facing
-		d = new DamageEffect(b->xpos + (b->width / 2.0), b->ypos, sizeMultiplier * (b->width / 2.0), b->height, m_strength, get_id(), AFTER_UPDATE);
+		float xpos = b->xpos + (b->width / 2.0);
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, true);
 	}
 	else {
 		//left facing
-		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
-			b->height, m_strength, get_id(), AFTER_UPDATE);
+		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, false);
+	}
+	delete b;
+	return punch;
+}
+
+Punch * Fighter::powerPunch() {
+	//create the bounding box based on fighter position
+	float sizeMultiplier = 1.75;
+	BoundingBox* b = get_bounding_box();
+	Punch* punch;
+	if (get_facing_front()) {
+		//right facing
+		float xpos = b->xpos + (b->width / 2.0);
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, true);
+	}
+	else {
+		//left facing
+		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, false);
 	}
 
 	delete b;
-	return d;
+	return punch;
 }
 
 //revert to old position if new position causes a collision with platforms
@@ -649,18 +850,18 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 			}
 			else if (platforms[i].check_collision_outer_right(*b)) {
 				m_position = oldPosition;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 			}
 
 			if (platforms[i].check_collision_outer_top(*b)) {
 				m_position.y = oldPosition.y;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 			}
 			else if (platforms[i].check_collision_outer_bottom(*b)) {
 				m_position.y = oldPosition.y;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 			}
 
 			if (!platforms[i].check_collision_outer_left(*b) && !platforms[i].check_collision_outer_right(*b) &&

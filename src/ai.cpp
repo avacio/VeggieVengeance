@@ -25,9 +25,9 @@ void AI::set_in_play(bool value)
     in_play = value;
 }
 
-DamageEffect * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Position)
+Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Position)
 {
-	DamageEffect * punchInfo = NULL;
+	Attack * attack = NULL;
     if (aitype == CHASE)
     {
 
@@ -40,7 +40,7 @@ DamageEffect * AI::update(float ms, std::vector<Platform> platforms, vec2 player
             this->set_movement(MOVING_BACKWARD);
         }
 
-        Fighter::update(ms, platforms);
+        attack = Fighter::update(ms, platforms);
         this->set_movement(STOP_MOVING_FORWARD);
         this->set_movement(STOP_MOVING_BACKWARD);
     }
@@ -89,7 +89,7 @@ DamageEffect * AI::update(float ms, std::vector<Platform> platforms, vec2 player
 			}
 		}
 
-        punchInfo = Fighter::update(ms, platforms);
+        attack = Fighter::update(ms, platforms);
         this->set_movement(STOP_MOVING_FORWARD);
         this->set_movement(STOP_MOVING_BACKWARD);
     }
@@ -124,14 +124,14 @@ DamageEffect * AI::update(float ms, std::vector<Platform> platforms, vec2 player
 		else
 			this->set_movement(randNum);
 
-		Fighter::update(ms, platforms);
+		attack = Fighter::update(ms, platforms);
 		this->set_movement(STOP_MOVING_FORWARD);
 		this->set_movement(STOP_MOVING_BACKWARD);
 	}
 
 
 	//may return either NULL or the punch collision object depending if the character was punching
-	return punchInfo;
+	return attack;
 }
 
 float distance(vec2 pos1, vec2 pos2)
