@@ -52,6 +52,10 @@ class World
 	void play_grunt_audio();
 	void draw_rectangle();
 
+	void set_heat_wave(bool on);
+	float get_heat_wave_time();
+	void apply_stage_fx_dmg();
+
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
@@ -65,9 +69,6 @@ class World
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
 	bool check_collision(BoundingBox b1, BoundingBox b2);
-
-
-  private:
 	bool check_collision_world(BoundingBox b1);
 
 	void spawn_char_select_AI(FighterCharacter fc);
@@ -104,8 +105,9 @@ class World
 	bool m_paused;
 	bool m_over;
 	bool m_game_over = false;
-	std::string m_winner_name; // TODO
-	//Fighter *m_winner;
+	std::string m_winner_name;
+	bool m_heat_wave_on = false;
+	float m_heat_wave_time = -1;
 
 	/////////
 	std::map<FighterCharacter, FighterInfo> fighterInfoMap;

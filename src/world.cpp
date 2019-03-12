@@ -7,6 +7,9 @@
 #include <cassert>
 #include <sstream>
 
+#define HEAT_WAVE_RATE 19
+#define HEAT_WAVE_LENGTH 4 
+
 // Same as static in c, local to compilation unit
 namespace
 {
@@ -183,7 +186,7 @@ bool World::update(float elapsed_ms)
 	// faster based on current
 
 	//if (m_paused) {
-	if (m_paused || m_game_over) {
+	if (m_paused || m_game_over) { // TODO || m_mode == MENU || m_mode == CHARSELECT
 		return true;
 	}
 
@@ -275,9 +278,16 @@ bool World::update(float elapsed_ms)
 				}
 			}
 		}
+		if (m_mode != MENU && m_mode != CHARSELECT) {
+			if (get_heat_wave_time() > HEAT_WAVE_LENGTH) {
+				set_heat_wave(false);
+			} else if (m_heat_wave_on) {
+				apply_stage_fx_dmg();
+			} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) {
+				set_heat_wave(true);
+			}
+		}
 	}
-	
-
 	return true;
 }
 
@@ -540,7 +550,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			}
 		}
 
-
 	if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
 	{
 		if (action == GLFW_PRESS && key == GLFW_KEY_L)
@@ -551,20 +560,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(START_JUMPING);
 		if (action == GLFW_PRESS && key == GLFW_KEY_K)
 			m_player2.set_movement(CROUCHING);
-		/*if (action == GLFW_PRESS && key == GLFW_KEY_O) {
-			m_player2.set_movement(PUNCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_U)
-				m_player2.set_movement(SHOOTING);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_O)
-				m_player2.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player2.is_holding_power_punch()) {
-				m_player2.set_movement(POWER_PUNCHING);
-				play_grunt_audio();
-			}
-		}
-		if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
-			m_player2.set_movement(BLOCKING);
-		}*/
 		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
 			m_player2.set_movement(PUNCHING);
 		}
@@ -599,7 +594,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_BLOCKING);
 		}
 	}
-
 		//if (m_paused) {
 		if (m_paused || m_game_over) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
@@ -636,16 +630,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				}
 			}
 		}
-		
-		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
-		{
-			m_water.set_is_wavy(true); // STUB ENVIRONMENT EFFECT
-		}
-		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && !m_paused)
-		{
-			m_water.set_is_wavy(false); // STUB ENVIRONMENT EFFECT
-		}
-		
 
 		// Pausing and resuming game
 		if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
@@ -897,3 +881,51 @@ bool World::is_game_over() {
 	}
 	return false;
 }
+
+void World::set_heat_wave(bool on) {
+	if (m_heat_wave_on == on) { return; }
+	if (on) {
+		m_heat_wave_time = glfwGetTime();
+		m_water.set_is_wavy(true);
+		int dmg = 20;
+		//for (int i = 0; i < m_ais.size(); i++) { // fighters does not work for some reason
+		//	m_fighters[i].apply_damage(dmg);
+		//	m_fighters[i].set_hurt(true);
+		//	//std::cout << "HURT fighter: " << i << std::endl;
+		//}
+	} else {
+		m_heat_wave_time = -1.f;
+		m_water.set_is_wavy(false);
+		for (int i = 0; i < m_ais.size(); i++) {
+			m_fighters[i].set_hurt(false);
+		}
+		if (m_player1.get_in_play()) { m_player1.set_hurt(false); }
+		if (m_player2.get_in_play()) { m_player2.set_hurt(false); }
+	}
+	m_heat_wave_on = on;
+	std::cout << "HEAT WAVE: " << on << std::endl;
+}
+
+float World::get_heat_wave_time() {
+	if (!m_heat_wave_on) { return -1; }
+	return glfwGetTime() - m_heat_wave_time;
+}
+
+void World::apply_stage_fx_dmg() {
+	bool cond = (int)glfwGetTime() % 2 == 0;
+	if (m_player1.get_in_play()) {
+		m_player1.set_hurt(true);
+		if (cond && !m_player1.is_blocking())
+			m_player1.apply_damage(1);
+	}
+	if (m_player2.get_in_play()) {
+		m_player2.set_hurt(true);
+		if (cond == 0 && !m_player2.is_blocking())
+			m_player2.apply_damage(1);
+	}
+	for (int i = 0; i < m_ais.size(); i++) { // fighters does not work for some reason
+		m_fighters[i].apply_damage(1);
+		m_fighters[i].set_hurt(true);
+	}
+}
+
