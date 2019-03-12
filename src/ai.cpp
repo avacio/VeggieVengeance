@@ -25,7 +25,7 @@ void AI::set_in_play(bool value)
     in_play = value;
 }
 
-Attack * AI::update(float ms, vec2 player1Position)
+Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Position)
 {
 	Attack * attack = NULL;
     if (aitype == CHASE)
@@ -40,7 +40,7 @@ Attack * AI::update(float ms, vec2 player1Position)
             this->set_movement(MOVING_BACKWARD);
         }
 
-        Fighter::update(ms);
+        attack = Fighter::update(ms, platforms);
         this->set_movement(STOP_MOVING_FORWARD);
         this->set_movement(STOP_MOVING_BACKWARD);
     }
@@ -89,7 +89,7 @@ Attack * AI::update(float ms, vec2 player1Position)
 			}
 		}
 
-        attack = Fighter::update(ms);
+        attack = Fighter::update(ms, platforms);
         this->set_movement(STOP_MOVING_FORWARD);
         this->set_movement(STOP_MOVING_BACKWARD);
     }
@@ -124,7 +124,7 @@ Attack * AI::update(float ms, vec2 player1Position)
 		else
 			this->set_movement(randNum);
 
-		Fighter::update(ms);
+		attack = Fighter::update(ms, platforms);
 		this->set_movement(STOP_MOVING_FORWARD);
 		this->set_movement(STOP_MOVING_BACKWARD);
 	}

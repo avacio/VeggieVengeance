@@ -2,6 +2,7 @@
 // internal
 #include "common.hpp"
 #include "fighter.hpp"
+#include "damageEffect.hpp"
 
 class AI : public Fighter
 {
@@ -10,7 +11,7 @@ class AI : public Fighter
 
     bool get_in_play() const;
     void set_in_play(bool value);
-    Attack * update(float ms, vec2 player1Position);
+    Attack * update(float ms, std::vector<Platform> platforms, vec2 player1Position);
     float distance(vec2 pos1, vec2 pos2);
 
   private:

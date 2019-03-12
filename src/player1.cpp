@@ -32,6 +32,7 @@ void Player1::draw(const mat3 &projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
+	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -80,6 +81,7 @@ void Player1::draw(const mat3 &projection)
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, is_hurt());
+	glUniform1i(is_blocking_uloc, is_blocking());
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!

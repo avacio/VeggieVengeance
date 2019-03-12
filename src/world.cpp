@@ -117,7 +117,7 @@ bool World::init(vec2 screen, GameMode mode)
 	Mix_PlayMusic(m_background_music, -1);
 
 	fprintf(stderr, "Loaded music\n");
-	
+
 	m_screen = screen; // to pass on screen size to renderables
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) && 
 				  	   POTATO_IDLE_TEXTURE .load_from_file(textures_path("potato_idle.png")) && 
@@ -128,6 +128,8 @@ bool World::init(vec2 screen, GameMode mode)
 				  	   BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
 					   MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 					   set_mode(mode);
+
+	spawn_platform(200, 600, 800, 50);
 
 	return m_water.init() && initSuccess;
 }
@@ -150,12 +152,23 @@ void World::destroy()
 	{
 		m_player2.destroy();
 	}
+
 	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
 	m_fighters.clear();
-	m_bg.destroy();
-	m_menu.destroy();
+
+	for (auto &platform : m_platforms) {
+		platform.destroy();
+	}
+	m_platforms.clear();
+
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	glfwDestroyWindow(m_window);
 }
 
@@ -186,7 +199,6 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-		
 		attack_collision();
 		//damage effect removal loop
 		attack_deletion();
@@ -197,7 +209,7 @@ bool World::update(float elapsed_ms)
 		Attack * attack = NULL;
 		if (m_player1.get_in_play())
 		{
-			attack = m_player1.update(elapsed_ms);
+			attack = m_player1.update(elapsed_ms, m_platforms);
 			if (attack != NULL) {
 				attack->init();
 				m_attacks.push_back(attack);
@@ -205,7 +217,7 @@ bool World::update(float elapsed_ms)
 		}
 		if (m_player2.get_in_play())
 		{
-			attack = m_player2.update(elapsed_ms);
+			attack = m_player2.update(elapsed_ms, m_platforms);
 			if (attack != NULL) {
 				attack->init();
 				m_attacks.push_back(attack);
@@ -215,7 +227,7 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				attack = ai.update(elapsed_ms, m_player1.get_position());
+				attack = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
 				if (attack != NULL) {
 					attack->init();
 					m_attacks.push_back(attack);
@@ -297,6 +309,9 @@ void World::draw()
 			fighter.draw(projection_2D);
 		for (auto &attack : m_attacks)
 			attack->draw(projection_2D);
+		for (auto &platform : m_platforms)
+			platform.draw(projection_2D);
+
 	}
 	/////////////////////
 	// Truly render to the screen
@@ -316,6 +331,10 @@ void World::draw()
 	////////////////////////////
 
 
+
+
+
+
 	m_water.draw(projection_2D);
 	//text->renderString(mat3{}, "Health: 100");
 	//text->renderString(projection_2D, "Health: 100");
@@ -328,7 +347,7 @@ void World::draw()
 // Should the game be over ?
 bool World::is_over() const
 {
-	return glfwWindowShouldClose(m_window);
+	return glfwWindowShouldClose(m_window) || m_over;
 }
 
 // Creates a ai and if successful, adds it to the list of ai
@@ -345,6 +364,19 @@ bool World::spawn_ai(AIType type)
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn fighter");
+	return false;
+}
+
+// Creates a platform and if successful, adds it to the list of platform
+bool World::spawn_platform(float xpos, float ypos, float width, float height)
+{
+	Platform platform(xpos, ypos, width, height);
+	if (platform.init())
+	{
+		m_platforms.emplace_back(platform);
+		return true;
+	}
+	fprintf(stderr, "Failed to spawn platform");
 	return false;
 }
 
@@ -420,6 +452,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
 				m_player1.set_movement(POWER_PUNCHING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(BLOCKING);
+			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
@@ -430,6 +465,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(STOP_PUNCHING);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && !m_player1.is_holding_projectile())
 				m_player1.set_movement(STOP_SHOOTING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
+				m_player1.set_movement(STOP_BLOCKING);
+			}
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -460,6 +498,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(BLOCKING);
+			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
@@ -468,6 +509,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_PUNCHING);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3) && !m_player2.is_holding_projectile())
 				m_player2.set_movement(STOP_SHOOTING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(STOP_BLOCKING);
+			}
 		}
 
 		if (m_paused) {
@@ -479,6 +523,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
 			m_player2.set_movement(STOP_SHOOTING);
+
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
+			{
+				m_bg.change_selection(false);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+			{
+				m_bg.change_selection(true);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
+			{
+				PauseMenuOption selectedOption = m_bg.get_selected();
+				if (selectedOption == RESUME) {
+					set_paused(!m_paused);
+				} else if (selectedOption == MAINMENU) {
+					set_mode(MENU);
+				} else if (selectedOption == QUIT) {
+					m_over = true;
+				}
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && !m_paused)
@@ -522,37 +586,37 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_ResumeMusic();
 }
 
+
 void World::reset()
 {
 	m_attacks.clear();
 	switch (m_mode) {
 	case DEV:
-		m_player1.reset(1);
-		m_player2.reset(2);
-
-		for (AI ai : m_ais)
+		m_player1.reset();
+		m_player2.reset();
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case PVP:
-		m_player1.reset(1);
-		m_player2.reset(2);
+		m_player1.reset();
+		m_player2.reset();
 		break;
 	case PVC:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case TUTORIAL:
-		m_player1.reset(1);
+		m_player1.reset();
 
-		for (AI ai : m_ais)
+		for (auto &ai : m_ais)
 		{
-			ai.reset(3);
+			ai.reset();
 		}
 		break;
 	case MENU:	// TESTING TRANSITIONS, REDUNDANT NOW
@@ -577,7 +641,13 @@ bool World::set_mode(GameMode mode) {
 		fighter.destroy();
 	}
 	m_fighters.clear();
-	m_bg.destroy();
+	if (m_bg.m_initialized) {
+		m_bg.destroy();
+	}
+
+	if (m_menu.m_initialized) {
+		m_menu.destroy();
+	}
 	
 	m_mode = mode;
 	bool initSuccess = true;
@@ -587,6 +657,7 @@ bool World::set_mode(GameMode mode) {
 		case MENU:
 			m_player1.set_in_play(true); // needed to make AI respond
 			spawn_ai(RANDOM);
+			set_paused(false);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
 			initSuccess = initSuccess && m_menu.init(m_screen);
 			break;
@@ -653,18 +724,10 @@ void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
 
-
-bool World::check_collision(BoundingBox b1, BoundingBox b2) {
-	return (b1.xpos < b2.xpos + b2.width &&
-		b1.xpos + b1.width > b2.xpos &&
-		b1.ypos < b2.ypos + b2.height &&
-		b1.ypos + b1.height > b2.ypos);
-}
-
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers
 	BoundingBox* b3 = new BoundingBox(0, 0, 1200, 800);
-	bool collision = check_collision(b1, *b3);
+	bool collision = b1.check_collision(*b3);
 	delete b3;
 	return collision;
 }
@@ -686,20 +749,20 @@ void World::attack_collision() {
 	//damage effect collision loop
 	for (int i = 0; i < m_attacks.size(); i++) {
 		if (m_player1.get_in_play() && m_player1.get_alive()) {
-			BoundingBox* b1 = new BoundingBox(m_player1.get_position().x, m_player1.get_position().y, m_player1.get_bounding_box().x, m_player1.get_bounding_box().y);
-			if (m_attacks[i]->m_fighter_id != m_player1.get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b1)) {
+			BoundingBox* b1 = m_player1.get_bounding_box();
+			if (m_attacks[i]->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b1)) {
 				//incur damage
-				m_player1.decrease_health(m_attacks[i]->m_damage);
+				m_player1.apply_damage(m_attacks[i]->m_damageEffect);
 				m_player1.set_hurt(true);
 				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
 			}
 			delete b1;
 		}
 		if (m_player2.get_in_play() && m_player2.get_alive()) {
-			BoundingBox* b2 = new BoundingBox(m_player2.get_position().x, m_player2.get_position().y, m_player2.get_bounding_box().x, m_player2.get_bounding_box().y);
-			if (m_attacks[i]->m_fighter_id != m_player2.get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b2)) {
+			BoundingBox* b2 = m_player2.get_bounding_box();
+			if (m_attacks[i]->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b2)) {
 				//incur damage
-				m_player2.decrease_health(m_attacks[i]->m_damage);
+				m_player2.apply_damage(m_attacks[i]->m_damageEffect);
 				m_player2.set_hurt(true);
 				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
 			}
@@ -707,10 +770,10 @@ void World::attack_collision() {
 		}
 		for (int j = 0; j < m_ais.size(); j++) {
 			if (m_ais[j].get_alive()) {
-				BoundingBox* b3 = new BoundingBox(m_ais[j].get_position().x, m_ais[j].get_position().y, m_ais[j].get_bounding_box().x, m_ais[j].get_bounding_box().y);
-				if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && check_collision(m_attacks[i]->m_damageEffect->m_bounding_box, *b3)) {
+				BoundingBox* b3 = m_ais[j].get_bounding_box();
+				if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b3)) {
 					//incur damage
-					m_ais[j].decrease_health(m_attacks[i]->m_damage);
+					m_ais[j].apply_damage(m_attacks[i]->m_damageEffect);
 					m_ais[j].set_hurt(true);
 					m_attacks[i]->m_damageEffect->m_hit_fighter = true;
 				}
@@ -735,4 +798,12 @@ void World::attack_deletion() {
 void World::attack_update() {
 	for (auto &attack : m_attacks)
 		attack->update();
+}
+
+void World::draw_rectangle() {
+	float vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
+	};
 }

@@ -10,6 +10,8 @@ out vec2 texcoord;
 uniform mat3 transform;
 uniform mat3 projection;
 uniform bool is_hurt;
+uniform bool is_blocking;
+
 
 void main()
 {
