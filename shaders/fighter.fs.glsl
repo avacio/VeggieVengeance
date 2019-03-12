@@ -10,6 +10,7 @@ uniform sampler2D sampler0;
 uniform bool is_hurt;
 uniform bool is_blocking;
 uniform float time;
+uniform float blocking_tank;
 
 //uniform vec3 fcolor;
 
@@ -17,9 +18,14 @@ uniform float time;
 layout(location = 0) out  vec4 color;
 
 void main()
-{
+{	
+	float b = blocking_tank/4000;
+	
 	if (is_blocking) {
-		color = vec4(0.5, 0.5, 1.0, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
+		if (blocking_tank < 1800) 
+			color = vec4(0.7, 0.7, 1.0, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
+		else
+			color = vec4(1-b/1.5, 1-b/1.5, 1.0, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
 	}
 
     else if (is_hurt) {

@@ -302,6 +302,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
+	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -375,6 +376,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, m_is_hurt);
 	glUniform1i(is_blocking_uloc, m_is_blocking);
+	glUniform1f(blocking_tank_uloc, (float)  m_blocking_tank);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!
@@ -734,6 +736,10 @@ bool Fighter::is_idle() const
 bool Fighter::is_blocking() const
 {
 	return m_is_blocking;
+}
+
+int Fighter::get_blocking_tank() {
+	return m_blocking_tank;
 }
 
 int Fighter::get_crouch_state() {
