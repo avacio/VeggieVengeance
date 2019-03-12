@@ -9,7 +9,7 @@ Projectile::Projectile(int id, vec2 pos, float add_velo, unsigned int damage, bo
 	m_damage = damage;
 
 	//inherent projectile attributes
-	m_scale = vec2({ 0.07, 0.07 });
+	m_scale = vec2({ 0.07f, 0.07f });
 	m_velocity = vec2({ (float) 7.0 + add_velo, (float) -10.0 });
 	//if facing left, change direction of velocity to move left
 	if (!direction) {

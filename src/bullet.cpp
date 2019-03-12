@@ -9,8 +9,8 @@ Bullet::Bullet(int id, vec2 pos, unsigned int damage, bool direction) {
 	this->m_damage = damage;
 
 	//pre-determined bullet attributes
-	this->m_scale = vec2({ 0.1, 0.15 });
-	this->m_velocity = vec2({ 7.0, 0.0 });
+	this->m_scale = vec2({ 0.1f, 0.15f });
+	this->m_velocity = vec2({ 7.0f, 0.0f });
 	//flip velocity if moving left
 	if (!direction) {
 		this->m_velocity.x *= -1.0;

@@ -519,21 +519,21 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(START_JUMPING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN)
 				m_player2.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_KP_1) {
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_KP_2)
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD))
 				m_player2.set_movement(SHOOTING_BULLET);
-			if (action == GLFW_PRESS && key == GLFW_KEY_KP_3)
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
 				m_player2.set_movement(SHOOTING_PROJECTILE);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_KP_3)
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
 				m_player2.set_movement(HOLDING_PROJECTILE);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_KP_3 && m_player2.is_holding_projectile())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.is_holding_projectile())
 				m_player2.set_movement(SHOOTING_CHARGED_PROJECTILE);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_KP_1)
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH))
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_KP_1 && m_player2.is_holding_power_punch())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch())
 				m_player2.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -544,16 +544,15 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_KP_1 && !m_player2.is_holding_power_punch())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && !m_player2.is_holding_power_punch())
 				m_player2.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3) && !m_player2.is_holding_projectile())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && !m_player2.is_holding_projectile())
 				m_player2.set_movement(STOP_SHOOTING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
 				m_player2.set_movement(STOP_BLOCKING);
 			}
 
 		}
-	
 
 		//if (m_paused) {
 		if (m_paused || m_game_over) {
