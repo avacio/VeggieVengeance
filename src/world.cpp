@@ -478,6 +478,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_C) {
 				m_player1.set_movement(PUNCHING);
+				play_grunt_audio();
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_V)
 				m_player1.set_movement(SHOOTING_BULLET);
