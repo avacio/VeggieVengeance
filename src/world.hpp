@@ -67,6 +67,9 @@ class World
 	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
+	void attack_collision();
+	void attack_deletion();
+	void attack_update();
 
 	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
@@ -93,7 +96,7 @@ class World
 	Player1 m_player1;
 	Player2 m_player2;
 	std::vector<AI> m_ais;
-	std::vector<DamageEffect> m_damageEffects;
+	std::vector<Attack*> m_attacks;
 	std::vector<Platform> m_platforms;
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs

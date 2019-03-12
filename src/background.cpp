@@ -67,7 +67,6 @@ bool Background::init(vec2 screen, GameMode mode)
 	int width = health1->get_width_of_string("HP: 100"); // TODO
 	health1->setPosition({ 50.f, 100.f });
 	health2->setPosition({ screen.x-(width*1.15f), 100.f });
-
 	block1 = new TextRenderer(mainFont, 44);
 	block2 = new TextRenderer(mainFont, 44);
 	int width1 = block1->get_width_of_string("BLOCK: 100"); // TODO
@@ -266,12 +265,12 @@ void Background::drawPlayerInfo(const mat3& projection) {
 	health1->renderString(projection, ss1.str());
 	health2->renderString(projection, ss2.str());
 
-	std::stringstream blss1, blss2;
+	/*std::stringstream blss1, blss2;
 	blss1 << "BLOCK: " << p1BL;
 	blss2 << "BLOCK: " << p2BL;
 
 	block1->renderString(projection, blss1.str());
-	block2->renderString(projection, blss2.str());
+	block2->renderString(projection, blss2.str());*/
 
 	switch (p1Lives) {
 	case 3:

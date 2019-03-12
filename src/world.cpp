@@ -130,8 +130,8 @@ bool World::init(vec2 screen, GameMode mode)
 	fprintf(stderr, "Loaded fighter templates\n");
 
 	m_screen = screen; // to pass on screen size to renderables
-	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
 
+	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
 	spawn_platform(200, 600, 800, 50);
 
 	//return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
@@ -156,11 +156,12 @@ void World::destroy()
 	{
 		m_player2.destroy();
 	}
+
 	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
 	m_fighters.clear();
-	m_damageEffects.clear();
+
 	for (auto &platform : m_platforms) {
 		platform.destroy();
 	}
@@ -210,71 +211,36 @@ bool World::update(float elapsed_ms)
 			}
 		}
 
-		//damage effect collision loop
-		for (int i = 0; i < m_damageEffects.size(); i++) {
-			if (m_player1.get_in_play()) {
-				BoundingBox* b1 = m_player1.get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b1)) {
-					//incur damage
-					m_player1.apply_damage(m_damageEffects[i]);
-					m_player1.set_hurt(true);
-				}
-				delete b1;
-			}
-			if (m_player2.get_in_play()) {
-				BoundingBox* b2 = m_player2.get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b2)) {
-					//incur damage
-					m_player2.apply_damage(m_damageEffects[i]);
-					m_player2.set_hurt(true);
-				}
-				delete b2;
-			}
-			for (int j = 0; j < m_ais.size(); j++) {
-				BoundingBox* b3 = m_ais[j].get_bounding_box();
-				if (m_damageEffects[i].m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_damageEffects[i].m_bounding_box.check_collision(*b3)) {
-					//incur damage
-					m_ais[j].apply_damage(m_damageEffects[i]);
-					m_ais[j].set_hurt(true);
-				}
-				delete b3;
-			}
-		}
-
+		attack_collision();
 		//damage effect removal loop
-		for (int i = 0; i < m_damageEffects.size(); i++) {
-			if (m_damageEffects[i].m_delete_when == AFTER_UPDATE ||
-				(m_damageEffects[i].m_delete_when == AFTER_HIT && m_damageEffects[i].m_hit_fighter) ||
-				!check_collision_world(m_damageEffects[i].m_bounding_box)) {
-				//remove from list
-				m_damageEffects.erase(m_damageEffects.begin() + i);
-				i--;
-			}
-		}
+		attack_deletion();
 		
 		//update players + ai
-		DamageEffect * d = NULL;
+		Attack * attack = NULL;
 		if (m_player1.get_in_play())
 		{
-			d = m_player1.update(elapsed_ms, m_platforms);
-			if (d != NULL) {
-				m_damageEffects.push_back(*d);
+			attack = m_player1.update(elapsed_ms, m_platforms);
+			if (attack != NULL) {
+				attack->init();
+				m_attacks.push_back(attack);
 			}
 		}
 		if (m_player2.get_in_play())
 		{
-			d = m_player2.update(elapsed_ms, m_platforms);
-			if (d != NULL) {
-				m_damageEffects.push_back(*d);
+			attack = m_player2.update(elapsed_ms, m_platforms);
+			if (attack != NULL) {
+				attack->init();
+				m_attacks.push_back(attack);
 			}
 		}
 
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				d = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
-				if (d != NULL) {
-					m_damageEffects.push_back(*d);
+				attack = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
+				if (attack != NULL) {
+					attack->init();
+					m_attacks.push_back(attack);
 				}
 			}
 		}
@@ -288,6 +254,7 @@ bool World::update(float elapsed_ms)
 			}
 		}
 	}
+	attack_update();
 	return true;
 }
 
@@ -359,8 +326,12 @@ void World::draw()
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
 
+		for (auto &attack : m_attacks)
+			attack->draw(projection_2D);
+
 		for (auto &platform : m_platforms)
 			platform.draw(projection_2D);
+
 	}
 	/////////////////////
 	// Truly render to the screen
@@ -514,86 +485,83 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(START_JUMPING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_E) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_C) {
 				m_player1.set_movement(PUNCHING);
-			}
-			else if (action == GLFW_REPEAT && key == GLFW_KEY_E)
-				m_player1.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E && m_player1.is_holding_power_punch()) {
-				m_player1.set_movement(POWER_PUNCHING);
 				play_grunt_audio();
-			} if (action == GLFW_PRESS && key == GLFW_KEY_Q)
-				m_player1.set_movement(SHOOTING);
+			}
+			if (action == GLFW_PRESS && key == GLFW_KEY_V)
+				m_player1.set_movement(SHOOTING_BULLET);
+			if (action == GLFW_PRESS && key == GLFW_KEY_B)
+				m_player1.set_movement(SHOOTING_PROJECTILE);
+			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
+				m_player1.set_movement(HOLDING_PROJECTILE);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.is_holding_projectile())
+				m_player1.set_movement(SHOOTING_CHARGED_PROJECTILE);
+			if (action == GLFW_REPEAT && key == GLFW_KEY_C)
+				m_player1.set_movement(HOLDING_POWER_PUNCH);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
+				m_player1.set_movement(POWER_PUNCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
 				m_player1.set_movement(BLOCKING);
 			}
-
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
 				m_player1.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
 				m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E && !m_player1.is_holding_power_punch()) {
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && !m_player1.is_holding_power_punch())
 				m_player1.set_movement(STOP_PUNCHING);
-				play_grunt_audio();
-			}
-			if (action == GLFW_RELEASE && key == GLFW_KEY_Q)
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && !m_player1.is_holding_projectile())
 				m_player1.set_movement(STOP_SHOOTING);
-			//if (action == GLFW_RELEASE && key == GLFW_KEY_S && (m_player1.get_crouch_state() == CROUCH_PRESSED || m_player1.get_crouch_state() == IS_CROUCHING))
-			//	m_player1.set_movement(RELEASE_CROUCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
-				m_player1.set_movement(STOP_PUNCHING);
-			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
 				m_player1.set_movement(STOP_BLOCKING);
 			}
 		}
 
-	if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
-	{
-		if (action == GLFW_PRESS && key == GLFW_KEY_L)
-			m_player2.set_movement(MOVING_FORWARD);
-		if (action == GLFW_PRESS && key == GLFW_KEY_J)
-			m_player2.set_movement(MOVING_BACKWARD);
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_I)
-			m_player2.set_movement(START_JUMPING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_K)
-			m_player2.set_movement(CROUCHING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_O) {
-			m_player2.set_movement(PUNCHING);
+		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
+		{
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT)
+				m_player2.set_movement(MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT)
+				m_player2.set_movement(MOVING_BACKWARD);
+			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP)
+				m_player2.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN)
+				m_player2.set_movement(CROUCHING);
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
+				m_player2.set_movement(PUNCHING);
+				play_grunt_audio();
+			}
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD))
+				m_player2.set_movement(SHOOTING_BULLET);
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
+				m_player2.set_movement(SHOOTING_PROJECTILE);
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
+				m_player2.set_movement(HOLDING_PROJECTILE);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.is_holding_projectile())
+				m_player2.set_movement(SHOOTING_CHARGED_PROJECTILE);
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH))
+				m_player2.set_movement(HOLDING_POWER_PUNCH);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch())
+				m_player2.set_movement(POWER_PUNCHING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
+				m_player2.set_movement(STOP_MOVING_FORWARD);
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(BLOCKING);
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
+				m_player2.set_movement(STOP_MOVING_BACKWARD);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
+				m_player2.set_movement(RELEASE_CROUCH);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && !m_player2.is_holding_power_punch())
+				m_player2.set_movement(STOP_PUNCHING);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && !m_player2.is_holding_projectile())
+				m_player2.set_movement(STOP_SHOOTING);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+				m_player2.set_movement(STOP_BLOCKING);
+			}
 		}
-		else if (action == GLFW_REPEAT && key == GLFW_KEY_O)
-			m_player2.set_movement(HOLDING_POWER_PUNCH);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_O && m_player1.is_holding_power_punch()) {
-			m_player2.set_movement(POWER_PUNCHING);
-			play_grunt_audio();
-		} if (action == GLFW_PRESS && key == GLFW_KEY_U)
-			m_player2.set_movement(SHOOTING);
-		if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
-			m_player2.set_movement(BLOCKING);
-		}
-
-		if (action == GLFW_RELEASE && key == GLFW_KEY_L)
-			m_player2.set_movement(STOP_MOVING_FORWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_J)
-			m_player2.set_movement(STOP_MOVING_BACKWARD);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
-			m_player2.set_movement(RELEASE_CROUCH);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
-			m_player2.set_movement(STOP_PUNCHING);
-		}
-		if (action == GLFW_RELEASE && key == GLFW_KEY_U)
-			m_player2.set_movement(STOP_SHOOTING);
-		//if (action == GLFW_RELEASE && key == GLFW_KEY_K && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
-		//	m_player2.set_movement(RELEASE_CROUCH);
-		if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
-			m_player2.set_movement(STOP_PUNCHING);
-		}
-		if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
-			m_player2.set_movement(STOP_BLOCKING);
-		}
-	}
 		//if (m_paused) {
 		if (m_paused || m_game_over) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
@@ -645,7 +613,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		}
 
 		// Resetting game
-		if (action == GLFW_RELEASE && key == GLFW_KEY_B)
+		if (action == GLFW_RELEASE && key == GLFW_KEY_F5)
 		{
 			reset();
 		}
@@ -665,9 +633,11 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
+
+	m_attacks.clear();
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
-	m_damageEffects.clear();
+
 	switch (m_mode) {
 	case DEV:
 		m_player1.reset();
@@ -797,17 +767,7 @@ void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
 
-bool World::check_collision(BoundingBox b1, BoundingBox b2) {
-	if (b1.xpos < b2.xpos + b2.width &&
-		b1.xpos + b1.width > b2.xpos &&
-		b1.ypos < b2.ypos + b2.height &&
-		b1.ypos + b1.height > b2.ypos) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers
 	BoundingBox* b3 = new BoundingBox(0, 0, 1200, 800);
@@ -847,6 +807,61 @@ void World::clear_all_fighters() {
 	{
 		it->second.clearTaken();
 	}
+}
+
+void World::attack_collision() {
+	//damage effect collision loop
+	for (int i = 0; i < m_attacks.size(); i++) {
+		if (m_player1.get_in_play() && m_player1.get_alive()) {
+			BoundingBox* b1 = m_player1.get_bounding_box();
+			if (m_attacks[i]->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b1)) {
+				//incur damage
+				m_player1.apply_damage(m_attacks[i]->m_damageEffect);
+				m_player1.set_hurt(true);
+				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+			}
+			delete b1;
+		}
+		if (m_player2.get_in_play() && m_player2.get_alive()) {
+			BoundingBox* b2 = m_player2.get_bounding_box();
+			if (m_attacks[i]->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b2)) {
+				//incur damage
+				m_player2.apply_damage(m_attacks[i]->m_damageEffect);
+				m_player2.set_hurt(true);
+				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+			}
+			delete b2;
+		}
+		for (int j = 0; j < m_ais.size(); j++) {
+			if (m_ais[j].get_alive()) {
+				BoundingBox* b3 = m_ais[j].get_bounding_box();
+				if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b3)) {
+					//incur damage
+					m_ais[j].apply_damage(m_attacks[i]->m_damageEffect);
+					m_ais[j].set_hurt(true);
+					m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+				}
+				delete b3;
+			}
+		}
+	}
+}
+
+void World::attack_deletion() {
+	for (int i = 0; i < m_attacks.size(); i++) {
+		if (m_attacks[i]->m_damageEffect->m_delete_when == AFTER_UPDATE ||
+			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
+			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
+			//remove from list
+			m_attacks.erase(m_attacks.begin() + i);
+			i--;
+		}
+	}
+}
+
+void World::attack_update() {
+	for (auto &attack : m_attacks)
+		attack->update();
 }
 
 void World::draw_rectangle() {

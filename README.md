@@ -20,6 +20,7 @@ Overview: For this milestone, we focused on improving the gameplay by introducin
  		- Bullet (linear projectile)
 		- Projectile (parabolic projectile)
  		- Power punching (charging up a punch that deals more damage)
+	- platform + enviornmental death (falling)
 
 - Implement time stepping based physical animation: A subset of the game entities (main or background) should now possess non-trivial physics properties such as linear momentum or angular momentum, and acceleration and 
   act based on those. Specifically, you should implement some form of physical simulation, which can be either background effects (e.g. water, smoke implemented using particles) or active game elements (throwing a ball,
@@ -50,11 +51,16 @@ Creative: You should implement one or more additional creative elements. These c
 		- Potato holding power punches + release
 		- replaces all crouches with actual texture instead of changing position
 		- Broccoli punches, crouching
-	- Blocking: effects using shaders
+	- fighting moves:
+    	- Bullet (linear projectile)
+		- Projectile (parabolic projectile)
+	- platform + enviornmental death (falling)
 	- new background music
     
 - Unplanned Work
 	- polished paused menu (resume, main menu, quit)
+	- power punching
+    - Blocking: effects using shaders
 	- improving main menu
 	- fixed grunting sounds
 

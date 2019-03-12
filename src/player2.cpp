@@ -32,6 +32,7 @@ void Player2::draw(const mat3 &projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
+	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -49,6 +50,20 @@ void Player2::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
+	// ####
+/*<<<<<<< HEAD
+	if (get_alive() && is_punching() && !is_punching_on_cooldown()) {
+		player2_texture = POTATO_PUNCH_TEXTURE;
+	}
+	else if (get_alive() && is_holding_power_punch() && !is_punching_on_cooldown()) {
+		player2_texture = POTATO_CHARGING_TEXTURE;
+	}
+	else {
+		if (get_alive() && is_idle()) {
+			m_idle_counter++;
+			if (m_idle_counter < 25) {
+				player2_texture = POTATO_IDLE_TEXTURE;
+=======*/
 	if (get_alive() && is_punching()) {
 		if (!is_crouching()) {
 			if (m_fc == POTATO) { p_texture = POTATO_PUNCH_TEXTURE; }
@@ -87,6 +102,7 @@ void Player2::draw(const mat3 &projection)
 
 				else if (m_idle_counter >= 50)
 					m_idle_counter = 0;
+//>>>>>>> master
 			}
 			else if (!get_alive()) {
 				if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
@@ -103,6 +119,7 @@ void Player2::draw(const mat3 &projection)
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, is_hurt());
 	glUniform1i(is_blocking_uloc, is_blocking());
+	glUniform1f(blocking_tank_uloc, (float)get_blocking_tank());
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!
