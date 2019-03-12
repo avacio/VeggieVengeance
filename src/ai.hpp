@@ -2,7 +2,7 @@
 // internal
 #include "common.hpp"
 #include "fighter.hpp"
-#include "damageEffect.hpp"
+#include "attack.hpp"
 
 class AI : public Fighter
 {

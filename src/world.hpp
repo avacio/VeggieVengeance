@@ -14,7 +14,6 @@
 #include "mainMenu.hpp"
 #include "platform.hpp"
 
-
 // stlib
 #include <vector>
 #include <random>
@@ -45,6 +44,7 @@ class World
 
 	// Should the game be over ?
 	bool is_over() const;
+	bool is_game_over(); // only for fight levels
 
 	bool set_mode(GameMode mode);
 	void set_paused(bool isPaused);
@@ -55,6 +55,7 @@ class World
   private:
 	// Generates a new fighter
 	bool spawn_ai(AIType type);
+	bool spawn_ai(AIType type, FighterCharacter fc);
 	bool spawn_platform(float xpos, float ypos, float width, float height);
 
 	void reset();
@@ -62,15 +63,18 @@ class World
 	//INPUT CALLBACK FUNCTIONS
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
-
 	void attack_collision();
 	void attack_deletion();
 	void attack_update();
 
-	bool check_collision_world(BoundingBox b1);
 
 
   private:
+	bool check_collision_world(BoundingBox b1);
+
+	void spawn_char_select_AI(FighterCharacter fc);
+	void clear_all_fighters();
+
 	// Window handle
 	GLFWwindow *m_window;
 
@@ -101,6 +105,14 @@ class World
 	GameMode m_mode;
 	bool m_paused;
 	bool m_over;
+	bool m_game_over = false;
+	std::string m_winner_name; // TODO
+	//Fighter *m_winner;
+
+	/////////
+	std::map<FighterCharacter, FighterInfo> fighterInfoMap;
+	FighterCharacter selectedP1 = POTATO; // POTATO
+	FighterCharacter selectedP2 = POTATO; // POTATO
 
 	// C++ rng
 	std::default_random_engine m_rng;

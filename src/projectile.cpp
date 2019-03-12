@@ -142,5 +142,4 @@ void Projectile::draw(const mat3 &projection) {
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-	
 }

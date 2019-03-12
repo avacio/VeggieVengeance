@@ -2,9 +2,10 @@
 
 #include "common.hpp"
 #include "textRenderer.hpp"
+#include "mainMenu.hpp"
 
 // Background
-class Background : public Renderable
+class Background : public Renderable, public Screen
 {
 	// Background texture
 	static Texture bg_texture;
@@ -12,6 +13,8 @@ class Background : public Renderable
 	// GUI text renderer
 	TextRenderer* health1;
 	TextRenderer* health2;
+	TextRenderer* block1;
+	TextRenderer* block2;
 	TextRenderer* lives1;
 	TextRenderer* lives2;
 	TextRenderer* isPausedText;
@@ -28,6 +31,8 @@ class Background : public Renderable
 	TextRenderer* resumeMusic;
 	TextRenderer* increaseVolume;
 	TextRenderer* decreaseVolume;
+
+	TextRenderer* winnerText;
 
 public:
 	// Creates all the associated render resources and default transform
@@ -46,16 +51,15 @@ public:
 	void set_position(vec2 position);
 
 	void setPaused(bool isPaused);
-	void setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP); // set to -1 if player is not initialized
+	void setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL); // set to -1 if player is not initialized
 	void drawPlayerInfo(const mat3& projection);
 	void drawTutorialText(const mat3& projection);
 
 	void addNameplate(TextRenderer* td, std::string name);
 	void drawNameplates(const mat3& projection);
-	void clearNameplates();
 	void init_buttons();
-	void change_selection(bool goDown);
 	PauseMenuOption get_selected();
+	void set_game_over(bool go, std::string wn);
 
 	bool m_initialized = false;
 
@@ -66,16 +70,15 @@ private:
 	float m_rotation; // in radians
 	GameMode m_mode;
 	bool m_paused = false;
+	bool m_is_game_over = false;
 
 	int p1Lives = -1;
 	int p1HP = -1;
+	int p1BL = -1;
 	int p2Lives = -1;
 	int p2HP = -1;
-
-	int selectedButtonIndex = -1;
-	std::vector<TextRenderer*> buttons;
-	const vec3 selectedColor = { 0.7f,0.2f,0.2f };
-	const vec3 defaultColor = { 0.4f,0.4f,0.4f };
+	std::string winnerName = "";
+	int p2BL = -1;
 
 	std::map<TextRenderer*, std::string> nameplates;
 };

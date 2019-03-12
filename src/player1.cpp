@@ -1,10 +1,9 @@
-// Header
 #include "player1.hpp"
 #include "fighter.hpp"
 
 //implement player specific functions here
 
-Texture Player1::player1_texture;
+Texture Player1::p_texture;
 
 Player1::Player1(unsigned int id) : Fighter(id) {
 }
@@ -50,6 +49,9 @@ void Player1::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
+
+	///####
+/*<<<<<<< HEAD
 	if (get_alive() && is_punching() && !is_punching_on_cooldown()) {
 		player1_texture = POTATO_PUNCH_TEXTURE;
 	} 
@@ -61,19 +63,54 @@ void Player1::draw(const mat3 &projection)
 			m_idle_counter++;
 			if (m_idle_counter < 25) {
 				player1_texture = POTATO_IDLE_TEXTURE;
-			}
-
-			else if (m_idle_counter > 25 && m_idle_counter < 50) {
-				player1_texture = POTATO_TEXTURE;
-			}
-
-			else if (m_idle_counter >= 50)
-				m_idle_counter = 0;
-		} else if(!get_alive()) {
-			player1_texture = POTATO_TEXTURE;
+=======*/
+	if (get_alive() && is_punching()) {
+		if (!is_crouching()) {
+			if (m_fc == POTATO) { p_texture = POTATO_PUNCH_TEXTURE; }
+			else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
+		}
+		else if (is_crouching()) {
+			if (m_fc == POTATO) { p_texture = POTATO_CROUCH_PUNCH_TEXTURE; }
+			else { p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; }
 		}
 	}
-	glBindTexture(GL_TEXTURE_2D, player1_texture.id);
+	else if (get_alive() && is_crouching()) {
+		if (m_fc == POTATO) { p_texture = POTATO_CROUCH_TEXTURE; }
+		else { p_texture = BROCCOLI_CROUCH_TEXTURE; }
+	}
+	else if (get_alive() && is_holding_power_punch()) {
+		if (m_fc == POTATO) { p_texture = POTATO_CHARGING_TEXTURE; }
+		else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
+	}
+	if (!is_punching()) {
+		if (get_alive() && is_idle() && !is_crouching()) {
+			if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
+			else { p_texture = BROCCOLI_IDLE_TEXTURE; }
+		}
+		else {
+			if (get_alive() && is_idle()) {
+				m_idle_counter++;
+				if (m_idle_counter < 25) {
+					if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
+					else { p_texture = BROCCOLI_IDLE_TEXTURE; }
+				}
+
+				else if (m_idle_counter > 25 && m_idle_counter < 50) {
+					if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
+					else { p_texture = BROCCOLI_TEXTURE; }
+				}
+
+				else if (m_idle_counter >= 50)
+					m_idle_counter = 0;
+//>>>>>>> master
+			}
+			else if (!get_alive()) {
+				if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
+				else { p_texture = BROCCOLI_TEXTURE; }
+			}
+		}
+	}
+	glBindTexture(GL_TEXTURE_2D, p_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);

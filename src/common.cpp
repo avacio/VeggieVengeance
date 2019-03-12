@@ -52,9 +52,17 @@ bool gl_has_errors()
 Texture POTATO_TEXTURE;
 Texture POTATO_IDLE_TEXTURE;
 Texture POTATO_PUNCH_TEXTURE;
-Texture POTATO_CHARGING_TEXTURE;
 Texture POTATO_POWER_PUNCH_TEXTURE;
+Texture POTATO_CROUCH_PUNCH_TEXTURE;
+Texture POTATO_CROUCH_TEXTURE;
+Texture POTATO_CHARGING_TEXTURE;
+
 Texture BROCCOLI_TEXTURE;
+Texture BROCCOLI_IDLE_TEXTURE;
+Texture BROCCOLI_PUNCH_TEXTURE;
+Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
+Texture BROCCOLI_CROUCH_TEXTURE;
+
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
 
@@ -93,6 +101,13 @@ vec2 normalize(vec2 v)
 {
 	float m = sqrtf(dot(v, v));
 	return { v.x / m, v.y / m };
+}
+
+int get_random_number(int max) {
+	std::random_device rd; // non-deterministic generator
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist(0, max);
+	return dist(gen);
 }
 
 Texture::Texture()
@@ -303,3 +318,60 @@ void Renderable::transform_end()
 {
 	//
 }
+
+//FighterInfo::FighterInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names) {
+void FighterInfo::setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names)
+{
+	this->fc = fc;
+	this->strength = strength;
+	this->sciName = sciName;
+	this->speed = speed;
+	this->names = names;
+}
+
+std::string FighterInfo::getFCName() {
+	int r = get_random_number(names.size()-1);
+	//std::cout << "NAMES SIZE: " << names.size() << std::endl;
+	//std::cout << "rand: " << r << std::endl;
+	std::string p = names.at(r);
+
+	if (std::find(takenNames.begin(), takenNames.end(), p) != takenNames.end()) {
+		std::string newP = p + "Jr";
+		names.emplace_back(newP);
+		takenNames.emplace_back(newP);
+		return newP;
+	}
+	else {
+		takenNames.emplace_back(p);
+		return p;
+	}
+}
+
+void FighterInfo::clearTaken() {
+	takenNames.clear();
+}
+
+
+bool load_all_sprites_from_file() {
+	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) &&
+		POTATO_IDLE_TEXTURE.load_from_file(textures_path("potato_idle.png")) &&
+		POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) &&
+		POTATO_POWER_PUNCH_TEXTURE.load_from_file(textures_path("potato_power_punch.png")) &&
+		POTATO_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("potato_crouch_punch.png")) &&
+		POTATO_CROUCH_TEXTURE.load_from_file(textures_path("potato_crouch.png")) &&
+		POTATO_CHARGING_TEXTURE.load_from_file(textures_path("potato_charging.png")) &&
+
+		BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) &&
+		BROCCOLI_IDLE_TEXTURE.load_from_file(textures_path("broccoli_idle.png")) &&
+		BROCCOLI_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_punch.png")) &&
+		BROCCOLI_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_crouch_punch.png")) &&
+		BROCCOLI_CROUCH_TEXTURE.load_from_file(textures_path("broccoli_crouch.png")) &&
+
+		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
+		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));
+
+	if (!initSuccess) { fprintf(stderr, "Failed to load sprites from file!\n");
+	}
+	return initSuccess;
+}
+

@@ -68,6 +68,12 @@ bool Background::init(vec2 screen, GameMode mode)
 	health1->setPosition({ 50.f, 100.f });
 	health2->setPosition({ screen.x-(width*1.15f), 100.f });
 
+	block1 = new TextRenderer(mainFont, 44);
+	block2 = new TextRenderer(mainFont, 44);
+	int width1 = block1->get_width_of_string("BLOCK: 100"); // TODO
+	block1->setPosition({ 50.f, 250.f });
+	block2->setPosition({ screen.x - (width1*1.15f), 250.f });
+
 	lives1 = new TextRenderer(mainFont, 70);
 	lives2 = new TextRenderer(mainFont, 70);
 	width = lives2->get_width_of_string("XXX");
@@ -76,7 +82,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	isPausedText = new TextRenderer(mainFontBold, 60);
 	width = isPausedText->get_width_of_string("PAUSED");
-	isPausedText->setPosition({ screen.x/2.f - width*0.4f, 150.f });
+	isPausedText->setPosition({ screen.x/2.f - width / 2.f, 150.f }); // screen.x/2.f - width*0.4f
 	isPausedText->setColor({ 0.f,0.f,0.f });
 
 	jump = new TextRenderer(mainFont, 44);
@@ -113,6 +119,11 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
 	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
 
+	winnerText = new TextRenderer(mainFontBold, 42);
+	winnerText->setColor({ 0.4f,0.1f,0.1f });
+	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaa");
+	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 150.f });
+
 	init_buttons();
 
 	return true;
@@ -136,15 +147,13 @@ void Background::destroy()
 		delete nameplate;
 	}
 	nameplates.clear();
-
-	for (int i = 0; i < buttons.size(); i++) {
-		TextRenderer* button = buttons[i];
-		delete button;
-	}
-	buttons.clear();
+	destroyButtons();
+	winnerName = "";
 
 	delete health1;
 	delete health2;
+	delete block1;
+	delete block2;
 	delete lives1;
 	delete lives2;
 	delete isPausedText;
@@ -161,6 +170,7 @@ void Background::destroy()
 	delete resumeMusic;
 	delete increaseVolume;
 	delete decreaseVolume;
+	delete winnerText;
 	effect.release();
 }
 
@@ -217,7 +227,7 @@ void Background::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	drawPlayerInfo(projection);
 
-	if (m_mode == TUTORIAL || m_paused) {
+	if (m_mode == TUTORIAL || m_paused || m_is_game_over) {
 		drawTutorialText(projection);
 	}
 	drawNameplates(projection);
@@ -239,11 +249,13 @@ void Background::setPaused(bool isPaused) {
 }
 
 
-void Background::setPlayerInfo(int p1Lives, int p1HP, int p2Lives, int p2HP) {
+void Background::setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL) {
 	this->p1Lives = p1Lives;
 	this->p1HP = p1HP;
+	this->p1BL = p1BL;
 	this->p2Lives = p2Lives;
 	this->p2HP = p2HP;
+	this->p2BL = p2BL;
 }
 
 void Background::drawPlayerInfo(const mat3& projection) {
@@ -253,6 +265,13 @@ void Background::drawPlayerInfo(const mat3& projection) {
 
 	health1->renderString(projection, ss1.str());
 	health2->renderString(projection, ss2.str());
+
+	std::stringstream blss1, blss2;
+	blss1 << "BLOCK: " << p1BL;
+	blss2 << "BLOCK: " << p2BL;
+
+	block1->renderString(projection, blss1.str());
+	block2->renderString(projection, blss2.str());
 
 	switch (p1Lives) {
 	case 3:
@@ -279,7 +298,12 @@ void Background::drawPlayerInfo(const mat3& projection) {
 }
 
 void Background::drawTutorialText(const mat3& projection) {
-	if (m_paused) {
+	if (m_is_game_over) {
+		winnerText->renderString(projection, "CREAM OF THE CROP: " + winnerName);
+		buttons[0]->renderString(projection, "RESTART");
+		buttons[1]->renderString(projection, "MAIN MENU");
+		buttons[2]->renderString(projection, "QUIT");
+	} else if (m_paused) {
 		isPausedText->renderString(projection, "PAUSED");
 		buttons[0]->renderString(projection, "RESUME");
 		buttons[1]->renderString(projection, "MAIN MENU");
@@ -301,25 +325,19 @@ void Background::drawTutorialText(const mat3& projection) {
 	}
 }
 void Background::addNameplate(TextRenderer* td, std::string name) {
-	nameplates.insert(std::make_pair(td, name));
+	nameplates[td] = name;
 }
 void Background::drawNameplates(const mat3& projection) {
 	std::map<TextRenderer*, std::string>::iterator it = nameplates.begin();
 	while (it != nameplates.end())
 	{
-		//std::cout << it->first << " :: " << it->second << std::endl;
 		it->first->renderString(projection, it->second);
 		it++;
 	}
 }
 
-void Background::clearNameplates() {
-	nameplates.clear();
-}
-
 void Background::init_buttons()
 {
-	selectedButtonIndex = 0; // default: first button selected
 	TextRenderer* resume = new TextRenderer(mainFont, 60);
 	TextRenderer* mainMenu = new TextRenderer(mainFont, 60);
 	TextRenderer* quit = new TextRenderer(mainFont, 60);
@@ -329,69 +347,33 @@ void Background::init_buttons()
 	quit->setColor(defaultColor);
 
 	int width = resume->get_width_of_string("RESUME");
-	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
+	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-150.f });
 	width = mainMenu->get_width_of_string("MAIN-MENU");
-	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
+	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) -75.f});
 	width = quit->get_width_of_string("QUIT");
-	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
+	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f)});
 	buttons.emplace_back(resume);
 	buttons.emplace_back(mainMenu);
 	buttons.emplace_back(quit);
+
+	reset_selection();
 }
 
-void Background::change_selection(bool goDown)
-{
-	switch (selectedButtonIndex) {
-	case 0:
-		if (goDown) {
-			selectedButtonIndex = 1;
-			buttons[0]->setColor(defaultColor);
-			buttons[1]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 2;
-			buttons[0]->setColor(defaultColor);
-			buttons[2]->setColor(selectedColor);
-		}
-		break;
-	case 1:
-		if (goDown) {
-			selectedButtonIndex = 2;
-			buttons[1]->setColor(defaultColor);
-			buttons[2]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 0;
-			buttons[1]->setColor(defaultColor);
-			buttons[0]->setColor(selectedColor);
-		}
-		break;
-	case 2:
-		if (goDown) {
-			selectedButtonIndex = 0;
-			buttons[2]->setColor(defaultColor);
-			buttons[0]->setColor(selectedColor);
-		}
-		else {
-			selectedButtonIndex = 1;
-			buttons[2]->setColor(defaultColor);
-			buttons[1]->setColor(selectedColor);
-		}
-		break;
-	}
+void Background::set_game_over(bool go, std::string wn) {
+	m_is_game_over = go;
+	winnerName = wn;
 }
+
 
 PauseMenuOption Background::get_selected()
 {
 	switch (selectedButtonIndex) {
 	case 0:
-		return RESUME;
-		break;
+		if (m_is_game_over) { return RESTART; }
+		else { return RESUME; }
 	case 1:
 		return MAINMENU;
-		break;
 	case 2:
 		return QUIT;
-		break;
 	}
 }
