@@ -49,10 +49,10 @@ void Player1::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	if (get_alive() && is_punching()) {
+	if (get_alive() && is_punching() && !is_punching_on_cooldown()) {
 		player1_texture = POTATO_PUNCH_TEXTURE;
 	} 
-	else if (get_alive() && is_holding_power_punch()) {
+	else if (get_alive() && is_holding_power_punch() && !is_punching_on_cooldown()) {
 		player1_texture = POTATO_CHARGING_TEXTURE;
 	}
 	else {

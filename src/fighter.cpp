@@ -8,6 +8,9 @@
 #define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
 #define POWER_PUNCH_CHARGE_RATE 0.5
 #define POWER_PUNCHING_MOVING_SPEED 1
+#define MAX_PUNCH_COOLDOWN 20
+#define MAX_BULLET_COOLDOWN 200
+#define MAX_PROJECTILE_COOLDOWN 200
 #include <math.h>
 #include <cmath>
 
@@ -217,44 +220,74 @@ Attack * Fighter::update(float ms)
 			m_crouch_state = NOT_CROUCHING;
 		}
 
-		if (m_is_punching)
+		if (m_is_punching && !m_punch_on_cooldown)
 		{
 			//save collision object from punch
 			attack = punch();
+			m_punch_on_cooldown = true;
 		}
 
 		// Power punch
-		if (m_is_holding_power_punch) {
+		else if (m_is_holding_power_punch) {
 			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
 				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
 		}
-		if (m_is_power_punching) {
+		else if (m_is_power_punching) {
 			attack = powerPunch();
 			m_holding_power_punch_timer = 0;
 			m_is_power_punching = false;
 		}
 
 		// charging projectile
-		if (m_is_holding_projectile) {
+		else if (m_is_holding_projectile) {
 			if (m_holding_projectile_timer < MAX_PROJECTILE_VELOCITY)
 				m_holding_projectile_timer += PROJECTILE_CHARGE_RATE;
 		}
-		if (m_is_shooting_charged_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
-			attack = new Projectile(get_id(), m_position, 7 + m_holding_projectile_timer, m_facing_front);
+		else if (m_is_shooting_charged_projectile && !m_projectile_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, m_holding_projectile_timer, 10 + m_holding_projectile_timer, m_facing_front);
+			m_projectile_on_cooldown = true;
 			m_holding_projectile_timer = 0;
 			m_is_shooting_charged_projectile = false;
 		}
 
-
-		if (m_is_shooting_bullet && m_bullets.size() < MAX_PROJECTILE_ON_SCREEN) {
+		else if (m_is_shooting_bullet && !m_bullet_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, 5, m_facing_front);
+			m_bullet_on_cooldown = true;
+			//m_bullets.insert(attack);
 			printf("shot bullet\n");
 		}
 
-		if (m_is_shooting_projectile && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
-			attack = new Projectile(get_id(), m_position, 7, m_facing_front);
+		else if (m_is_shooting_projectile && !m_projectile_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
+			m_bullet_on_cooldown = true;
+			//m_projectiles.insert(attack);
 			printf("shot projectile\n");
 		}
+		if (m_punch_on_cooldown) {
+			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
+				m_punch_on_cooldown = false;
+				punching_cooldown = 0;
+			}
+			else
+				punching_cooldown++;
+		}
+		if (m_bullet_on_cooldown) {
+			if (bullet_cooldown >= MAX_BULLET_COOLDOWN) {
+				m_bullet_on_cooldown = false;
+				bullet_cooldown = 0;
+			}
+			else
+				bullet_cooldown++;
+		}
+		if (m_projectile_on_cooldown) {
+			if (projectile_cooldown >= MAX_PROJECTILE_COOLDOWN) {
+				m_projectile_on_cooldown = false;
+				projectile_cooldown = 0;
+			}
+			else
+				projectile_cooldown++;
+		}
+			
 	}
 	else
 	{
@@ -263,6 +296,7 @@ Attack * Fighter::update(float ms)
 		else
 			m_rotation = M_PI / 2;
 	}
+
 
 	//return null if not attacking, or the collision object if attacking
 	return attack;
@@ -518,6 +552,10 @@ bool Fighter::is_punching() const
 	return m_is_punching;
 }
 
+bool Fighter::is_punching_on_cooldown() const {
+	return m_punch_on_cooldown;
+}
+
 bool Fighter::is_holding_power_punch() const {
 	return m_is_holding_power_punch;
 }
@@ -568,10 +606,14 @@ void Fighter::reset(int init_position)
 	m_is_jumping = false;
 	m_is_punching = false;
 	m_is_shooting_bullet = false;
+	m_is_holding_projectile = false;
 	m_is_shooting_projectile = false;
+	m_is_holding_projectile = false;
 	m_is_holding_power_punch = false;
 	m_is_power_punching = false;
 	m_vertical_velocity = 0;
+	m_bullets.clear();
+	m_projectiles.clear();
 
 	switch (init_position) {
 	case 1:

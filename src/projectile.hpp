@@ -7,7 +7,7 @@
 class Projectile : public Attack {
 	static Texture projectile_texture;
 public:
-	Projectile(int id, vec2 pos, unsigned int damage, bool direction);
+	Projectile(int id, vec2 pos, float velo, unsigned int damage, bool direction);
 	~Projectile();
 	bool init();
 	void update();

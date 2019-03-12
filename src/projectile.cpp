@@ -2,7 +2,7 @@
 
 Texture Projectile::projectile_texture;
 
-Projectile::Projectile(int id, vec2 pos, unsigned int damage, bool direction) {
+Projectile::Projectile(int id, vec2 pos, float add_velo, unsigned int damage, bool direction) {
 	//variable projectile attributes
 	m_fighter_id = id;
 	m_position = pos;
@@ -10,7 +10,7 @@ Projectile::Projectile(int id, vec2 pos, unsigned int damage, bool direction) {
 
 	//inherent projectile attributes
 	m_scale = vec2({ 0.07, 0.07 });
-	m_velocity = { 7.0, 5.0 };
+	m_velocity = vec2({ (float) 7.0 + add_velo, (float) -10.0 });
 	//if facing left, change direction of velocity to move left
 	if (!direction) {
 		m_velocity.x *= -1.0;
