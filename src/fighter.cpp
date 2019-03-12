@@ -127,7 +127,6 @@ DamageEffect * Fighter::update(float ms)
 	if (m_is_blocking) MOVING_SPEED = 3.0;
 	else MOVING_SPEED = 5.0;
 
-
 	
 	//BLOCKING 
 	//Deplete blocking tank if blocking

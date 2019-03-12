@@ -253,12 +253,12 @@ void Background::drawPlayerInfo(const mat3& projection) {
 	health1->renderString(projection, ss1.str());
 	health2->renderString(projection, ss2.str());
 
-	std::stringstream blss1, blss2;
+	/*std::stringstream blss1, blss2;
 	blss1 << "BLOCK: " << p1BL;
 	blss2 << "BLOCK: " << p2BL;
 
 	block1->renderString(projection, blss1.str());
-	block2->renderString(projection, blss2.str());
+	block2->renderString(projection, blss2.str());*/
 
 	switch (p1Lives) {
 	case 3:
