@@ -30,9 +30,9 @@ Overview: For this milestone, we focused on improving the gameplay by introducin
  		- projectile (parabolic projectile using gravity)
         
 - Incorporate one or more polygonal geometric assets 
-
+	- creating mesh on Blender (chef hat), still in progress
 - Implement smooth non-linear motion of one or more assets or characters 
-	- jumping for all characters are gravity-based
+	- jumping for all characters are gravity-based (force)
     
 - Implement an accurate and efficient collision detection method (include multiple moving assets that necessitate collision checks)
 	- fighters/projectiles/bullets/platforms all require collision checks
@@ -43,6 +43,7 @@ Overview: For this milestone, we focused on improving the gameplay by introducin
 		- resume: supporting continuing execution
 		- going back to main menu: allow players to switch modes without closing the game
 		- quit: graceful termination
+        - restart: resets game after game over
 
 Creative: You should implement one or more additional creative elements. These can include additional integrated assets or rendering effects or pre-emptive implementation of one or more features from subsequent milestones.
 	
@@ -63,6 +64,9 @@ Creative: You should implement one or more additional creative elements. These c
     - Blocking: effects using shaders
 	- improving main menu
 	- fixed grunting sounds
+    - cooldown to punches, special abilities, and blocking
+    - heatwave stage effect (cycles every 19 seconds currently)
+    	- does damage to players onscreen, but can be blocked
 
 
 # MINIMAL PLAYABILITY MILESTONE PROGRESS - Feb. 22
