@@ -54,6 +54,7 @@ class Fighter : public Renderable
 	void set_hurt(bool hurt);
 
 	void apply_damage(DamageEffect * damage_effect);
+	void apply_damage(int damage); // for stage effects
 
 	void set_blocking(bool blocking);
 
@@ -108,7 +109,6 @@ class Fighter : public Renderable
 
 
 	bool change_power_punch_sprite() const;
-
 
 	bool is_crouching() const;
 

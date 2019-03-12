@@ -534,16 +534,20 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 	if (damage_effect->m_damage <= m_health) {
 		m_health -= damage_effect->m_damage;
 
-		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width/2) > m_position.x) {
+		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
 			m_force.x -= 1.f;
-		} else {
+		}
+		else {
 			m_force.x += 1.f;
 		}
-		
-	}
-	else {
+	} else {
 		m_health = 0;
 	}
+}
+
+void Fighter::apply_damage(int effect) { // for stage effects
+	if (effect <= m_health) { m_health -= effect; }
+	else { m_health = 0; }
 }
 
 void Fighter::set_blocking(bool blocking) {
