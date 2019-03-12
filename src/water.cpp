@@ -33,6 +33,13 @@ bool Water::init() {
 	if (!effect.load_from_file(shader_path("water.vs.glsl"), shader_path("water.fs.glsl")))
 		return false;
 
+	////// TEXT
+	//title = new TextRenderer(mainFontBold, 80);
+	//title->setColor({ 1.f,0.7f,0.7f });
+	////int width = title->get_width_of_string("WINNER!");
+	////title->setPosition({ screen.x/2.f - width/2.f, 180.f });
+	//title->setPosition({ 80.f, 200.f });
+
 	return true;
 }
 
@@ -42,6 +49,7 @@ void Water::destroy() {
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	effect.release();
 }
 
 void Water::set_is_wavy(bool is_wavy) {
@@ -65,6 +73,7 @@ void Water::draw(const mat3& projection) {
 
 	glUniform1i(screen_text_uloc, 0);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(dead_timer_uloc, (m_game_over_time > 0) ? (float)((glfwGetTime() - m_game_over_time) * 10.0f) : -1);
 	glUniform1i(is_wavy_uloc, m_is_wavy);
 
 
@@ -79,4 +88,16 @@ void Water::draw(const mat3& projection) {
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 	glDisableVertexAttribArray(0);
+
+	//title->renderString(projection, "VEGGIES BOW DOWN TO " + m_winner_name);
+}
+
+void Water::set_game_over(std::string winnerName) {
+	//m_game_over_time = glfwGetTime();
+	m_winner_name = winnerName;
+}
+
+void Water::reset_game_over() {
+	m_game_over_time = -1;
+	m_is_game_over = false;
 }

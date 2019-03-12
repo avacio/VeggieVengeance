@@ -1,10 +1,9 @@
-// Header
 #include "player2.hpp"
 #include "fighter.hpp"
 
 //implement player specific functions here
 
-Texture Player2::player2_texture;
+Texture Player2::p_texture;
 
 Player2::Player2(unsigned int id) : Fighter(id) {
 }
@@ -32,6 +31,7 @@ void Player2::draw(const mat3 &projection)
 	GLint color_uloc = glGetUniformLocation(effect.program, "fcolor");
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
+	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -51,52 +51,50 @@ void Player2::draw(const mat3 &projection)
 	glActiveTexture(GL_TEXTURE0);
 	if (get_alive() && is_punching()) {
 		if (!is_crouching()) {
-			if (!player2_texture.load_from_file(textures_path("potato_punch.png")))
-			{
-				fprintf(stderr, "Failed to load fighter texture!");
-			}
+			if (m_fc == POTATO) { p_texture = POTATO_PUNCH_TEXTURE; }
+			else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
 		}
 		else if (is_crouching()) {
-			if (!player2_texture.load_from_file(textures_path("potato_crouch_punch.png")))
-			{
-				fprintf(stderr, "Failed to load fighter texture!");
-			}
+			if (m_fc == POTATO) { p_texture = POTATO_CROUCH_PUNCH_TEXTURE; }
+			else { p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; }
 		}
 	}
 	else if (get_alive() && is_crouching()) {
-		if (!player2_texture.load_from_file(textures_path("potato_crouch.png")))
-		{
-			fprintf(stderr, "Failed to load fighter texture!");
-		}
+		if (m_fc == POTATO) { p_texture = POTATO_CROUCH_TEXTURE; }
+		else { p_texture = BROCCOLI_CROUCH_TEXTURE; }
 	}
 	else if (get_alive() && is_holding_power_punch()) {
-		if (!player2_texture.load_from_file(textures_path("potato_charging.png")))
-		{
-			fprintf(stderr, "Failed to load fighter texture!");
-		}
+		if (m_fc == POTATO) { p_texture = POTATO_CHARGING_TEXTURE; }
+		else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
 	}
 	if (!is_punching()) {
 		if (get_alive() && is_idle() && !is_crouching()) {
-			m_idle_counter++;
-			if (m_idle_counter < 25) {
-				if (!player2_texture.load_from_file(textures_path("potato_idle.png")))
-				{
-					fprintf(stderr, "Failed to load fighter texture!");
+			if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
+			else { p_texture = BROCCOLI_IDLE_TEXTURE; }
+		}
+		else {
+			if (get_alive() && is_idle()) {
+				m_idle_counter++;
+				if (m_idle_counter < 25) {
+					if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
+					else { p_texture = BROCCOLI_TEXTURE; }
 				}
-			}
 
-			else if (m_idle_counter > 25 && m_idle_counter < 50) {
-				if (!player2_texture.load_from_file(textures_path("potato.png")))
-				{
-					fprintf(stderr, "Failed to load fighter texture!");
+				else if (m_idle_counter > 25 && m_idle_counter < 50) {
+					if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
+					else { p_texture = BROCCOLI_TEXTURE; }
 				}
-			}
 
-			else if (m_idle_counter >= 50)
-				m_idle_counter = 0;
+				else if (m_idle_counter >= 50)
+					m_idle_counter = 0;
+			}
+			else if (!get_alive()) {
+				if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
+				else { p_texture = BROCCOLI_TEXTURE; }
+			}
 		}
 	}
-	glBindTexture(GL_TEXTURE_2D, player2_texture.id);
+	glBindTexture(GL_TEXTURE_2D, p_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -104,6 +102,7 @@ void Player2::draw(const mat3 &projection)
 	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float *)&projection);
 	glUniform1i(is_hurt_uloc, is_hurt());
+	glUniform1i(is_blocking_uloc, is_blocking());
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 
 	// Drawing!

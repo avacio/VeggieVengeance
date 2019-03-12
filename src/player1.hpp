@@ -6,7 +6,7 @@
 class Player1 : public Fighter
 {
 	// Shared between all fighters, no need to load one for each instance
-	static Texture player1_texture;
+	static Texture p_texture;
 
   public:
 	Player1(unsigned int id);

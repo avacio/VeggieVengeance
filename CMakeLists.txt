@@ -45,8 +45,9 @@ set(SOURCE_FILES
 	src/textRenderer.cpp
 	src/mainMenu.cpp
 	src/projectile.cpp
+	src/platform.cpp
 
-    	src/project_path.hpp
+    src/project_path.hpp
 	src/common.hpp
 	src/fighter.hpp
 	src/player1.hpp
@@ -60,6 +61,7 @@ set(SOURCE_FILES
 	src/textRenderer.hpp
 	src/mainMenu.hpp
 	src/projectile.hpp
+	src/platform.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

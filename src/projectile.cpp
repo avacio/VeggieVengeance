@@ -67,7 +67,7 @@ void Projectile::moveProjectile() {
 void Projectile::draw(const mat3 &projection) {
 	transform_begin();
 	transform_translate(position);
-	transform_scale(vec2({ 0.1, 0.1 }));
+	transform_scale(vec2({ 0.1f, 0.1f }));
 	transform_end();
 	
 	// Setting shaders
