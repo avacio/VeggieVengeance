@@ -30,10 +30,6 @@ class Fighter : public Renderable
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
-	void drawProjectile(const mat3 &projection);
-
-	void drawBullet(const mat3 &projection);
-
 	//get collision object for punch
 	Punch * punch();
 
@@ -168,7 +164,6 @@ class Fighter : public Renderable
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
 	
-	std::set<Attack*> m_bullets;
 	std::set<Attack*> m_projectiles;
 	float punching_cooldown = 0;
 	float bullet_cooldown = 0;

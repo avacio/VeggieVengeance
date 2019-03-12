@@ -9,6 +9,8 @@ int d;
 int engagingDistance = 75;
 int randNum;
 long t = time(0); //initialize time
+float stageLowerXBound = 200;
+float stageUpperXBound = 800;
 
 AI::AI(unsigned int id, AIType type) : Fighter(id)
 {
@@ -63,11 +65,11 @@ Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Posit
 				t = time(0);
 			}
 
-			if (this->get_position().x < 0)
+			if (this->get_position().x < stageLowerXBound)
 			{ //Left boundary detector
 				randNum = 0;
 			}
-			if (this->get_position().x > 1200)
+			if (this->get_position().x > stageUpperXBound)
 			{ //Right boundary detector
 				randNum = 1;
 			}
@@ -107,11 +109,11 @@ Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Posit
 			t = time(0);
 		}
 
-		if (this->get_position().x < 0)
+		if (this->get_position().x < stageLowerXBound)
 		{ //Left boundary detector
 			randNum = 0;
 		}
-		if (this->get_position().x > 1200)
+		if (this->get_position().x > stageUpperXBound)
 		{ //Right boundary detector
 			randNum = 1;
 		}

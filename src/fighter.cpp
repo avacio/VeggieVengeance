@@ -156,34 +156,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	die();	
 	check_respawn(ms);
 
-	/*if (m_is_alive)
-	{
-		if (m_moving_forward)
-		{
-			if (!m_facing_front)
-			{
-				m_scale.x = -m_scale.x;
-				m_facing_front = true;
-			}
-			if (m_position.x < 1150.f) {
-				if (m_is_holding_power_punch)
-					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
-				move({MOVING_SPEED, 0.0});
-			}
-		}
-		if (m_moving_backward)
-		{
-			if (m_facing_front)
-			{
-				m_scale.x = -m_scale.x;
-				m_facing_front = false;
-			}
-			if (m_position.x > 50.f) {
-				if (m_is_holding_power_punch)
-					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
-				move({-MOVING_SPEED, 0.0});
-			}
-		}*/
 	if(m_is_alive){
 		if (m_crouch_state == CROUCH_PRESSED)
 		{
@@ -386,17 +358,6 @@ void Fighter::draw(const mat3 &projection)
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
 }
 
-void Fighter::drawProjectile(const mat3 &projection) {
-	for (auto p : m_projectiles) {
-		p->draw(projection);
-	}
-}
-
-void Fighter::drawBullet(const mat3 & projection) {
-	for (auto b : m_bullets) {
-		b->draw(projection);
-	}
-}
 
 float Fighter::get_rotation() const
 {
@@ -784,8 +745,6 @@ void Fighter::reset()
 	m_is_holding_projectile = false;
 	m_is_holding_power_punch = false;
 	m_is_power_punching = false;
-	m_bullets.clear();
-	m_projectiles.clear();
 	m_is_shooting = false;
 	m_velocity_y = 0.0;
 	m_moving_forward = false;

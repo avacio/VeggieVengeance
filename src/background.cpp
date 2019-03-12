@@ -313,10 +313,10 @@ void Background::drawTutorialText(const mat3& projection) {
 		right->renderString(projection, "D/L: Move right");
 		crouch->renderString(projection, "S/K: Crouch");
 		pause->renderString(projection, "Esc: Pause");
-		reset->renderString(projection, "B: Reset");
-		ability1->renderString(projection, "Q/U: Special Ability");
-		ability2->renderString(projection, "R/P: Special Ability");
-		punch->renderString(projection, "E/O: Punch");
+		reset->renderString(projection, "F5: Reset");
+		ability1->renderString(projection, "V/U: Special Ability");
+		ability2->renderString(projection, "B/P: Special Ability");
+		punch->renderString(projection, "C/O: Punch");
 		pauseMusic->renderString(projection, "End: Pause music");
 		resumeMusic->renderString(projection, "Home: Resume music");
 		increaseVolume->renderString(projection, "Page Up: Inc. volume");

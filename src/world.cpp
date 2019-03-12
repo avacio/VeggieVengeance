@@ -316,12 +316,10 @@ void World::draw()
 		if (m_player1.get_in_play())
 		{
 			m_player1.draw(projection_2D);
-			m_player1.drawProjectile(projection_2D);
 		}
 		if (m_player2.get_in_play())
 		{
 			m_player2.draw(projection_2D);
-			m_player2.drawProjectile(projection_2D);
 		}
 		for (auto &fighter : m_ais)
 			fighter.draw(projection_2D);
