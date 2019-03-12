@@ -52,7 +52,17 @@ bool gl_has_errors()
 Texture POTATO_TEXTURE;
 Texture POTATO_IDLE_TEXTURE;
 Texture POTATO_PUNCH_TEXTURE;
+Texture POTATO_POWER_PUNCH_TEXTURE;
+Texture POTATO_CROUCH_PUNCH_TEXTURE;
+Texture POTATO_CROUCH_TEXTURE;
+Texture POTATO_CHARGING_TEXTURE;
+
 Texture BROCCOLI_TEXTURE;
+Texture BROCCOLI_IDLE_TEXTURE;
+Texture BROCCOLI_PUNCH_TEXTURE;
+Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
+Texture BROCCOLI_CROUCH_TEXTURE;
+
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
 
@@ -339,5 +349,29 @@ std::string FighterInfo::getFCName() {
 
 void FighterInfo::clearTaken() {
 	takenNames.clear();
+}
+
+
+bool load_all_sprites_from_file() {
+	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) &&
+		POTATO_IDLE_TEXTURE.load_from_file(textures_path("potato_idle.png")) &&
+		POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) &&
+		POTATO_POWER_PUNCH_TEXTURE.load_from_file(textures_path("potato_power_punch.png")) &&
+		POTATO_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("potato_crouch_punch.png")) &&
+		POTATO_CROUCH_TEXTURE.load_from_file(textures_path("potato_crouch.png")) &&
+		POTATO_CHARGING_TEXTURE.load_from_file(textures_path("potato_charging.png")) &&
+
+		BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) &&
+		BROCCOLI_IDLE_TEXTURE.load_from_file(textures_path("broccoli_idle.png")) &&
+		BROCCOLI_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_punch.png")) &&
+		BROCCOLI_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_crouch_punch.png")) &&
+		BROCCOLI_CROUCH_TEXTURE.load_from_file(textures_path("broccoli_crouch.png")) &&
+
+		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
+		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));
+
+	if (!initSuccess) { fprintf(stderr, "Failed to load sprites from file!\n");
+	}
+	return initSuccess;
 }
 

@@ -25,6 +25,7 @@ void AI::set_in_play(bool value)
     in_play = value;
 }
 
+//DamageEffect * AI::update(float ms, vec2 player1Position)
 DamageEffect * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Position)
 {
 	DamageEffect * punchInfo = NULL;

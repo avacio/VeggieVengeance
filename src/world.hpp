@@ -64,6 +64,10 @@ class World
 	void on_key(GLFWwindow *, int key, int, int action, int mod);
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 
+	bool check_collision(BoundingBox b1, BoundingBox b2);
+
+
+  private:
 	bool check_collision_world(BoundingBox b1);
 
 	void spawn_char_select_AI(FighterCharacter fc);

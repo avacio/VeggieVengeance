@@ -47,6 +47,8 @@ float dot(vec3 l, vec3 r);
 mat3 mul(const mat3 &l, const mat3 &r);
 vec2 normalize(vec2 v);
 int get_random_number(int max);
+bool load_all_sprites_from_file();
+
 
 // OpenGL utilities
 // cleans error buffer
@@ -89,7 +91,16 @@ struct Texture
 extern Texture POTATO_TEXTURE;
 extern Texture POTATO_IDLE_TEXTURE;
 extern Texture POTATO_PUNCH_TEXTURE;
+extern Texture POTATO_POWER_PUNCH_TEXTURE;
+extern Texture POTATO_CROUCH_PUNCH_TEXTURE;
+extern Texture POTATO_CROUCH_TEXTURE;
+extern Texture POTATO_CHARGING_TEXTURE;
+
 extern Texture BROCCOLI_TEXTURE;
+extern Texture BROCCOLI_IDLE_TEXTURE;
+extern Texture BROCCOLI_PUNCH_TEXTURE;
+extern Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
+extern Texture BROCCOLI_CROUCH_TEXTURE;
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
 
@@ -159,12 +170,18 @@ enum FighterMovementState
 	START_JUMPING = 2,
 	CROUCHING = 3,
 	PUNCHING = 4,
-	STOP_MOVING_FORWARD = 5,
-	STOP_MOVING_BACKWARD = 6,
-	RELEASE_CROUCH = 7,
-	STOP_PUNCHING = 8,
-	BLOCKING = 9,
-	STOP_BLOCKING = 10
+	SHOOTING = 5,
+	HOLDING_POWER_PUNCH = 6,
+	POWER_PUNCHING = 7,
+	STOP_MOVING_FORWARD = 8,
+	STOP_MOVING_BACKWARD = 9,
+	RELEASE_CROUCH = 10,
+	STOP_PUNCHING = 11,
+	STOP_SHOOTING = 12,
+	PAUSED = 13,
+	UNPAUSED = 14,
+	BLOCKING = 15,
+	STOP_BLOCKING = 16
 };
 
 

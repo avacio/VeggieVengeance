@@ -11,6 +11,7 @@ class AI : public Fighter
 
     bool get_in_play() const;
     void set_in_play(bool value);
+    //DamageEffect * update(float ms, vec2 player1Position);
     DamageEffect * update(float ms, std::vector<Platform> platforms, vec2 player1Position);
     float distance(vec2 pos1, vec2 pos2);
 

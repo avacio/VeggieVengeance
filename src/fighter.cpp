@@ -2,29 +2,32 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
+#define MAX_PROJECTILE_ON_SCREEN 5
+#define MAX_POWER_PUNCH_DMG 29		// +1 (original strength)
+#define POWER_PUNCH_CHARGE_RATE 0.2
+#define POWER_PUNCHING_MOVING_SPEED 1
 #include <math.h>
 #include <cmath>
 
-Texture Fighter::fighter_texture;
+Texture Fighter::f_texture;
 int full_Block_Tank;
 
 
 Fighter::Fighter(unsigned int id) : m_id(id) {
-
 }
 
 bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 {
 	// Load shared texture
 	m_fc = fc;
-	if (fc == BROCCOLI) { fighter_texture = BROCCOLI_TEXTURE; }
-	else { fighter_texture = POTATO_TEXTURE; }
+	if (fc == BROCCOLI) { f_texture = BROCCOLI_TEXTURE; }
+	else { f_texture = POTATO_TEXTURE; }
 
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
 	//float hr = fighter_texture.height * 3.5f;
-	float wr = fighter_texture.width * 0.5f;
-	float hr = fighter_texture.height * 0.5f;
+	float wr = f_texture.width * 0.5f;
+	float hr = f_texture.height * 0.5f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = {-wr, +hr, -0.02f};
@@ -78,7 +81,7 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 
 	m_scale.x = 1.2f;
 	m_scale.y = 1.2f;
-	m_sprite_appearance_size = {fighter_texture.width /2.0f, fighter_texture.height / 1.4f };
+	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
 	m_speed = 5.f;
@@ -106,7 +109,7 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 		break;
 	}
 
-	m_intial_pos = m_position;
+	m_initial_pos = m_position;
 
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
@@ -157,7 +160,14 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		m_is_alive = false;
 		m_lives--;
 		m_is_punching = false;
-		m_blocking_tank = full_Block_Tank;
+
+		//uncrouch in death
+		if (m_crouch_state == IS_CROUCHING) {
+			m_crouch_state = NOT_CROUCHING;
+		}
+		else if (m_crouch_state == CROUCH_PRESSED) {
+			m_crouch_state == NOT_CROUCHING;
+		}
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {
@@ -168,6 +178,8 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 		else if (m_crouch_state == CROUCH_PRESSED) {
 			m_crouch_state = NOT_CROUCHING;
 		}
+
+		m_blocking_tank = full_Block_Tank;
 
 		if (m_lives > 0)
 		{
@@ -202,6 +214,41 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 
 	if (m_is_alive)
 	{
+		if (m_moving_forward)
+		{
+			if (!m_facing_front)
+			{
+				m_scale.x = -m_scale.x;
+				m_facing_front = true;
+			}
+			if (m_position.x < 1150.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
+				move({MOVING_SPEED, 0.0});
+			}
+		}
+		if (m_moving_backward)
+		{
+			if (m_facing_front)
+			{
+				m_scale.x = -m_scale.x;
+				m_facing_front = false;
+			}
+			if (m_position.x > 50.f) {
+				if (m_is_holding_power_punch)
+					MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
+				move({-MOVING_SPEED, 0.0});
+			}
+		}
+
+		if (m_crouch_state == CROUCH_PRESSED)
+		{
+			m_crouch_state = IS_CROUCHING;
+		}
+		if (m_crouch_state == CROUCH_RELEASED)
+		{
+			m_crouch_state = NOT_CROUCHING;
+		}
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
 		x_position_update(added_speed);
@@ -212,6 +259,25 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 			//save collision object from punch
 			d = punch();
 		}
+
+		if (m_is_holding_power_punch) {
+			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
+				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
+		}
+
+		if (m_is_power_punching) {	
+			d = powerPunch();
+			m_holding_power_punch_timer = 0;
+			m_is_power_punching = false;
+		}
+
+		if (m_is_shooting && m_projectiles.size() < MAX_PROJECTILE_ON_SCREEN) {
+			Projectile* p = new Projectile(m_position, m_facing_front);
+			p->init();
+			m_projectiles.push_back(p);
+		}
+			
+		
 	}
 	else
 	{
@@ -221,6 +287,18 @@ DamageEffect * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_rotation = M_PI / 2;
 	}
 
+	// move projectiles and delete out-of-bound ones
+	
+	auto p = std::begin(m_projectiles);
+	while (p != std::end(m_projectiles)) {
+		(*p)->moveProjectile();
+		if ((*p)->getPosition().x < 0 || (*p)->getPosition().x > 1200) {
+			p = m_projectiles.erase(p);
+		}
+		else
+			p++;
+	}
+	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
 
@@ -269,7 +347,54 @@ void Fighter::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fighter_texture.id);
+
+	if (get_alive() && is_punching()) {
+		if (!is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_PUNCH_TEXTURE; }
+			else { f_texture = BROCCOLI_PUNCH_TEXTURE; }
+		}
+		else if (is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_CROUCH_PUNCH_TEXTURE; }
+			else { f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; }
+		}
+	}
+	else if (get_alive() && is_crouching()) {
+		if (m_fc == POTATO) { f_texture = POTATO_CROUCH_TEXTURE; }
+		else { f_texture = BROCCOLI_CROUCH_TEXTURE; }
+	}
+	else if (get_alive() && is_holding_power_punch()) {
+		if (m_fc == POTATO) { f_texture = POTATO_CHARGING_TEXTURE; }
+		else { f_texture = BROCCOLI_PUNCH_TEXTURE; }
+	}
+	if (!is_punching()) {
+		if (get_alive() && is_idle() && !is_crouching()) {
+			if (m_fc == POTATO) { f_texture = POTATO_IDLE_TEXTURE; }
+			else { f_texture = BROCCOLI_IDLE_TEXTURE; }
+		}
+		else {
+			if (get_alive() && is_idle()) {
+				m_idle_counter++;
+				if (m_idle_counter < 25) {
+					if (m_fc == POTATO) { f_texture = POTATO_IDLE_TEXTURE; }
+					else { f_texture = BROCCOLI_TEXTURE; }
+				}
+
+				else if (m_idle_counter > 25 && m_idle_counter < 50) {
+					if (m_fc == POTATO) { f_texture = POTATO_TEXTURE; }
+					else { f_texture = BROCCOLI_TEXTURE; }
+				}
+
+				else if (m_idle_counter >= 50)
+					m_idle_counter = 0;
+			}
+			else if (!get_alive()) {
+				if (m_fc == POTATO) { f_texture = POTATO_TEXTURE; }
+				else { f_texture = BROCCOLI_TEXTURE; }
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, f_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -285,6 +410,13 @@ void Fighter::draw(const mat3 &projection)
 	
 	int sWidth = m_nameplate->get_width_of_string(m_name);
 	m_nameplate->setPosition({ m_position.x - sWidth*.45f, m_position.y - 70.0f });
+}
+
+
+void Fighter::drawProjectile(const mat3 &projection) {
+	for (auto p : m_projectiles) {
+		p->draw(projection);
+	}
 }
 
 float Fighter::get_rotation() const
@@ -352,14 +484,28 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 		}
 		break;
+	case SHOOTING:
+		m_is_shooting = true;
+		m_is_idle = false;
+		break;
+	case HOLDING_POWER_PUNCH:
+		m_is_holding_power_punch = true;
+		m_is_punching = false;
+		m_is_idle = false;
+		break;
+	case POWER_PUNCHING:
+		m_is_holding_power_punch = false;
+		m_is_power_punching = true;
+		m_is_idle = true;
+		break;
 	case STOP_MOVING_FORWARD:
 		m_moving_forward = false;
-		if (m_moving_backward == false)
+		if (m_moving_backward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case STOP_MOVING_BACKWARD:
 		m_moving_backward = false;
-		if (m_moving_forward == false)
+		if (m_moving_forward == false && !m_is_holding_power_punch)
 			m_is_idle = true;
 		break;
 	case RELEASE_CROUCH:
@@ -370,6 +516,9 @@ void Fighter::set_movement(int mov)
 		m_is_punching = false;
 		m_is_idle = true;
 		break;
+	case STOP_SHOOTING:
+		m_is_shooting = false;
+		m_is_idle = true;
 	case BLOCKING:
 		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
 		if (!m_is_punching && m_blocking_tank >= 1000) 
@@ -534,7 +683,7 @@ void Fighter::check_respawn(float ms) {
 			m_health = MAX_HEALTH;
 			//unrotate the potate
 			m_rotation = 0;
-			m_position = m_intial_pos;
+			m_position = m_initial_pos;
 		}
 	}
 }
@@ -552,6 +701,14 @@ bool Fighter::is_jumping() const
 bool Fighter::is_punching() const
 {
 	return m_is_punching;
+}
+
+bool Fighter::is_holding_power_punch() const {
+	return m_is_holding_power_punch;
+}
+
+bool Fighter::change_power_punch_sprite() const {
+	return m_power_punch_sprite;
 }
 
 bool Fighter::is_crouching() const
@@ -592,6 +749,7 @@ unsigned int Fighter::get_id() const
 	return m_id;
 }
 
+//void Fighter::reset(int init_position)
 void Fighter::reset()
 {
 	m_health = MAX_HEALTH;
@@ -599,12 +757,16 @@ void Fighter::reset()
 	m_is_alive = true;
 	m_rotation = 0;
 	m_is_jumping = false;
+	m_is_punching = false;
+	m_is_shooting = false;
+	m_is_holding_power_punch = false;
+	m_is_power_punching = false;
 	m_velocity_y = 0.0;
 	m_moving_forward = false;
 	m_moving_backward = false;
-	m_position = m_intial_pos;
+	m_position = m_initial_pos;
 
-	
+
 	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
@@ -625,6 +787,24 @@ DamageEffect * Fighter::punch() {
 		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
 			b->height, m_strength, get_id(), AFTER_UPDATE);
 	}
+	delete b;
+	return d;
+}
+
+DamageEffect * Fighter::powerPunch() {
+	//create the bounding box based on fighter position
+	float sizeMultiplier = 1.75;
+	BoundingBox* b = get_bounding_box();
+	DamageEffect* d;
+	if (get_facing_front()) {
+		//right facing
+		d = new DamageEffect(b->xpos + (b->width / 2.0), b->ypos, sizeMultiplier * (b->width / 2.0), b->height, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+	}
+	else {
+		//left facing
+		d = new DamageEffect(b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0)), b->ypos, sizeMultiplier * (b->width / 2.0),
+			b->height, m_strength + m_holding_power_punch_timer, get_id(), AFTER_UPDATE);
+	}
 
 	delete b;
 	return d;
@@ -642,18 +822,18 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 			}
 			else if (platforms[i].check_collision_outer_right(*b)) {
 				m_position = oldPosition;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 			}
 
 			if (platforms[i].check_collision_outer_top(*b)) {
 				m_position.y = oldPosition.y;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 			}
 			else if (platforms[i].check_collision_outer_bottom(*b)) {
 				m_position.y = oldPosition.y;
-				m_velocity_y = 0.0;
+				m_velocity_y = 0.0f;
 			}
 
 			if (!platforms[i].check_collision_outer_left(*b) && !platforms[i].check_collision_outer_right(*b) &&

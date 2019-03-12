@@ -44,6 +44,7 @@ set(SOURCE_FILES
 	src/boundingBox.cpp
 	src/textRenderer.cpp
 	src/mainMenu.cpp
+	src/projectile.cpp
 	src/platform.cpp
 
     src/project_path.hpp
@@ -59,6 +60,7 @@ set(SOURCE_FILES
 	src/boundingBox.hpp
 	src/textRenderer.hpp
 	src/mainMenu.hpp
+	src/projectile.hpp
 	src/platform.hpp
 	)
 
