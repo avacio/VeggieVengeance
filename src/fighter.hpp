@@ -4,7 +4,11 @@
 #include "damageEffect.hpp"
 #include "platform.hpp"
 #include "textRenderer.hpp"
+#include "attack.hpp"
+#include "punch.hpp"
+#include "bullet.hpp"
 #include "projectile.hpp"
+#include <set>
 #include <random>
 
 class Fighter : public Renderable
@@ -20,21 +24,21 @@ class Fighter : public Renderable
 	// Releases all the associated resources
 	void destroy();
 
-	// Update bubble due to current
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	//DamageEffect * update(float ms);
-	DamageEffect * update(float ms, std::vector<Platform> platforms);
+	Attack * update(float ms, std::vector<Platform> platforms);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
 	void drawProjectile(const mat3 &projection);
 
+	void drawBullet(const mat3 &projection);
+
 	//get collision object for punch
-	DamageEffect * punch();
+	Punch * punch();
 
 	//get collision object for powerpunch
-	DamageEffect * powerPunch();
+	Punch * powerPunch();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -49,7 +53,7 @@ class Fighter : public Renderable
 
 	void set_hurt(bool hurt);
 
-	void apply_damage(DamageEffect damage_effect);
+	void apply_damage(DamageEffect * damage_effect);
 
 	void set_blocking(bool blocking);
 
@@ -96,9 +100,15 @@ class Fighter : public Renderable
 
 	bool is_punching() const;
 
+	bool is_punching_on_cooldown() const;
+
 	bool is_holding_power_punch() const;
 
+	bool is_holding_projectile() const;
+
+
 	bool change_power_punch_sprite() const;
+
 
 	bool is_crouching() const;
 
@@ -146,18 +156,30 @@ class Fighter : public Renderable
 	bool m_is_power_punching = false;
 	bool m_power_punch_sprite = false;
 	bool m_is_punching = false;
-	bool m_is_shooting = false;
+	bool m_is_shooting_projectile = false;
+	bool m_is_holding_projectile = false;
+	bool m_is_shooting_charged_projectile = false;
+	bool m_is_shooting_bullet = false;
+	bool m_punch_on_cooldown = false;
+	bool m_bullet_on_cooldown = false;
+	bool m_projectile_on_cooldown = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
+	
+	std::set<Attack*> m_bullets;
+	std::set<Attack*> m_projectiles;
+	float punching_cooldown = 0;
+	float bullet_cooldown = 0;
+	float projectile_cooldown = 0;
+	float m_holding_power_punch_timer = 0;
+	float m_holding_projectile_timer = 0;
+	bool m_is_shooting = false;
 
 	int m_idle_counter = 0;
 	
-	std::vector<Projectile*> m_projectiles;
-	float m_holding_power_punch_timer = 0;
-
-	bool m_is_blocking = false;
 	int m_blocking_tank;
 
+	bool m_is_blocking = false;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
 

@@ -49,6 +49,20 @@ void Player2::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
+	// ####
+/*<<<<<<< HEAD
+	if (get_alive() && is_punching() && !is_punching_on_cooldown()) {
+		player2_texture = POTATO_PUNCH_TEXTURE;
+	}
+	else if (get_alive() && is_holding_power_punch() && !is_punching_on_cooldown()) {
+		player2_texture = POTATO_CHARGING_TEXTURE;
+	}
+	else {
+		if (get_alive() && is_idle()) {
+			m_idle_counter++;
+			if (m_idle_counter < 25) {
+				player2_texture = POTATO_IDLE_TEXTURE;
+=======*/
 	if (get_alive() && is_punching()) {
 		if (!is_crouching()) {
 			if (m_fc == POTATO) { p_texture = POTATO_PUNCH_TEXTURE; }
@@ -87,6 +101,7 @@ void Player2::draw(const mat3 &projection)
 
 				else if (m_idle_counter >= 50)
 					m_idle_counter = 0;
+//>>>>>>> master
 			}
 			else if (!get_alive()) {
 				if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }

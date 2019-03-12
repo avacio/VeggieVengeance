@@ -1,17 +1,17 @@
 #pragma once
 
 #include "common.hpp"
+#include "damageEffect.hpp"
+#include "attack.hpp"
 
-class Projectile : public Renderable {
+class Projectile : public Attack {
 	static Texture projectile_texture;
 public:
+	Projectile(int id, vec2 pos, float velo, unsigned int damage, bool direction);
+	~Projectile();
 	bool init();
-	Projectile(vec2 pos, bool dir);
-	void moveProjectile();
+	void update();
 	void draw(const mat3 &projection) override;
-	vec2 getPosition();
-
 private:
-	vec2 position;
-	float dx;
+	float m_acceleration;
 };
