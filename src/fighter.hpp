@@ -112,9 +112,9 @@ class Fighter : public Renderable
 
 	bool is_blocking() const;
 
-	int get_blocking_tank() ;
-	
+	bool is_tired_out() const;
 
+	int get_blocking_tank() const;
 
 	int get_crouch_state();
 
@@ -147,6 +147,7 @@ class Fighter : public Renderable
 
 	bool m_is_alive = true;
 	bool m_is_idle = true;
+	bool m_tired_out = false;
 	bool m_facing_front = true;
 	bool m_moving_forward = false;
 	bool m_moving_backward = false;
@@ -168,6 +169,8 @@ class Fighter : public Renderable
 	float punching_cooldown = 0;
 	float bullet_cooldown = 0;
 	float projectile_cooldown = 0;
+	float m_tired_out_timer = 0;
+	float m_holding_too_much_timer = 0;
 	float m_holding_power_punch_timer = 0;
 	float m_holding_projectile_timer = 0;
 	bool m_is_shooting = false;
@@ -192,7 +195,7 @@ class Fighter : public Renderable
 	
 	const float INITIAL_JUMP_VELOCITY = 400.0;
 	const float TERMINAL_VELOCITY_Y = 400.0;
-	const vec2 GRAVITY = {0.0, 400.0};
+	const vec2 GRAVITY = {0.0, 800.0};
 
 	const unsigned int m_id; //unique identifier given when created
 
