@@ -7,8 +7,8 @@
 #include <cassert>
 #include <sstream>
 
-#define HEAT_WAVE_RATE 19
-#define HEAT_WAVE_LENGTH 4 
+#define HEAT_WAVE_RATE 80
+#define HEAT_WAVE_LENGTH 1
 
 // Same as static in c, local to compilation unit
 namespace

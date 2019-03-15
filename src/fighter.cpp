@@ -7,15 +7,14 @@
 #define PROJECTILE_CHARGE_RATE 0.5
 #define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
 #define POWER_PUNCH_CHARGE_RATE 0.5
-#define POWER_PUNCHING_MOVING_SPEED 1
 #define MAX_PUNCH_COOLDOWN 20
-#define MAX_BULLET_COOLDOWN 200
-#define MAX_PROJECTILE_COOLDOWN 200
+#define MAX_BULLET_COOLDOWN 100
+#define MAX_PROJECTILE_COOLDOWN 100
+#define FULL_BLOCK_TANK 4000
 #include <math.h>
 #include <cmath>
 
 Texture Fighter::f_texture;
-int full_Block_Tank;
 
 
 Fighter::Fighter(unsigned int id) : m_id(id) {
@@ -81,7 +80,7 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_is_idle = true;
 	m_is_hurt = false;
 	m_is_blocking = false;
-	m_blocking_tank = full_Block_Tank = 4000;
+	m_blocking_tank = FULL_BLOCK_TANK;
 
 	m_scale.x = 1.2f;
 	m_scale.y = 1.2f;
@@ -149,7 +148,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	//Stop blocking if blocking tank is empty
 	if (m_is_blocking && m_blocking_tank <= 0) this->set_movement(STOP_BLOCKING);
 	//Recharche blocking tank
-	if (m_is_alive && m_blocking_tank < full_Block_Tank && !m_is_blocking) {
+	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
 		m_blocking_tank += ms;
 	}
 
@@ -200,13 +199,13 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 
 		else if (m_is_shooting_bullet && !m_bullet_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, 5, m_facing_front);
+			attack = new Bullet(get_id(), m_position, 10, m_facing_front);
 			m_bullet_on_cooldown = true;
 		}
 
 		else if (m_is_shooting_projectile && !m_projectile_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
-			m_bullet_on_cooldown = true;
+			m_projectile_on_cooldown = true;
 		}
 		if (m_punch_on_cooldown) {
 			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
@@ -496,10 +495,10 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 		m_health -= damage_effect->m_damage;
 
 		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
-			m_force.x -= 1.f;
+			m_force.x -= 1.f * damage_effect->m_damage;
 		}
 		else {
-			m_force.x += 1.f;
+			m_force.x += 1.f * damage_effect->m_damage;
 		}
 	} else {
 		m_health = 0;
@@ -569,7 +568,10 @@ void Fighter::x_position_update(float added_speed) {
 			m_facing_front = true;
 		}
 		if (m_position.x < 1150.f) {
-			move({m_speed, 0.0});
+			if (m_is_holding_power_punch || m_is_holding_projectile)
+				move({ m_speed * 0.3f, 0.0 });
+			else
+				move({m_speed, 0.0});
 		}
 	}
 	if (m_moving_backward)
@@ -580,7 +582,10 @@ void Fighter::x_position_update(float added_speed) {
 			m_facing_front = false;
 		}
 		if (m_position.x > 50.f) {
-			move({-m_speed, 0.0});
+			if (m_is_holding_power_punch || m_is_holding_projectile)
+				move({ -m_speed * 0.3f, 0.0 });
+			else
+				move({ -m_speed, 0.0 });
 		}
 	}
 
@@ -650,7 +655,7 @@ void Fighter::check_respawn(float ms) {
 			//unrotate the potate
 			m_rotation = 0;
 			m_position = m_initial_pos;
-			m_blocking_tank = full_Block_Tank;
+			m_blocking_tank = FULL_BLOCK_TANK;
 		}
 	}
 }
