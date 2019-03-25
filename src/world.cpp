@@ -481,6 +481,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_W)
 				m_player1.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_W && m_player1.get_fc() == BROCCOLI && m_player1.broccoli_get_jump_left() == 1)
+				m_player1.broccoli_set_double_jump();
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && key == GLFW_KEY_C) {
@@ -488,20 +490,19 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				play_grunt_audio();
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_V)
-				m_player1.set_movement(SHOOTING_BULLET);
+				m_player1.set_movement(ABILITY_1);
 			if (action == GLFW_PRESS && key == GLFW_KEY_B)
-				m_player1.set_movement(SHOOTING_PROJECTILE);
+				m_player1.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
-				m_player1.set_movement(HOLDING_PROJECTILE);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.is_holding_projectile())
-				m_player1.set_movement(SHOOTING_CHARGED_PROJECTILE);
+				m_player1.set_movement(HOLDING_ABILITY_2);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
+				m_player1.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_C)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
 				m_player1.set_movement(POWER_PUNCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(BLOCKING);
-			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
 				m_player1.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_A)
@@ -510,11 +511,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && !m_player1.is_holding_power_punch())
 				m_player1.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && !m_player1.is_holding_projectile())
-				m_player1.set_movement(STOP_SHOOTING);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT) {
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && !m_player1.potato_is_holding_wedges())
+				m_player1.set_movement(STOP_ABILITIES);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(STOP_BLOCKING);
-			}
 		}
 
 		if (m_player2.get_in_play() && !m_paused && m_player2.get_alive())
@@ -525,6 +525,8 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(MOVING_BACKWARD);
 			if ((action == GLFW_PRESS || action == GLFW_REPEAT) && key == GLFW_KEY_UP)
 				m_player2.set_movement(START_JUMPING);
+			if (action == GLFW_PRESS && key == GLFW_KEY_UP && m_player2.get_fc() == BROCCOLI && m_player2.broccoli_get_jump_left() == 1)
+				m_player2.broccoli_set_double_jump();
 			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN)
 				m_player2.set_movement(CROUCHING);
 			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
@@ -532,44 +534,42 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				play_grunt_audio();
 			}
 			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD))
-				m_player2.set_movement(SHOOTING_BULLET);
+				m_player2.set_movement(ABILITY_1);
 			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
-				m_player2.set_movement(SHOOTING_PROJECTILE);
+				m_player2.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
-				m_player2.set_movement(HOLDING_PROJECTILE);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.is_holding_projectile())
-				m_player2.set_movement(SHOOTING_CHARGED_PROJECTILE);
+				m_player2.set_movement(HOLDING_ABILITY_2);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.potato_is_holding_wedges())
+				m_player2.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH))
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch())
 				m_player2.set_movement(POWER_PUNCHING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
-			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT)
 				m_player2.set_movement(BLOCKING);
-			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT)
 				m_player2.set_movement(STOP_MOVING_BACKWARD);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_DOWN && (m_player2.get_crouch_state() == CROUCH_PRESSED || m_player2.get_crouch_state() == IS_CROUCHING))
 				m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && !m_player2.is_holding_power_punch())
 				m_player2.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && !m_player2.is_holding_projectile())
-				m_player2.set_movement(STOP_SHOOTING);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT) {
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && !m_player2.potato_is_holding_wedges())
+				m_player2.set_movement(STOP_ABILITIES);
+			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT)
 				m_player2.set_movement(STOP_BLOCKING);
-			}
 		}
 		//if (m_paused) {
 		if (m_paused || m_game_over) {
 			m_player1.set_movement(STOP_MOVING_FORWARD);
 			m_player1.set_movement(STOP_MOVING_BACKWARD);
 			m_player1.set_movement(STOP_PUNCHING);
-			m_player1.set_movement(STOP_SHOOTING);
+			m_player1.set_movement(STOP_ABILITIES);
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
-			m_player2.set_movement(STOP_SHOOTING);
+			m_player2.set_movement(STOP_ABILITIES);
 
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 			{

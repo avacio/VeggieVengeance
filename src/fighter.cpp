@@ -2,16 +2,20 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
-#define MAX_PROJECTILE_ON_SCREEN 5
-#define MAX_PROJECTILE_VELOCITY 20
-#define PROJECTILE_CHARGE_RATE 0.5
 #define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
 #define POWER_PUNCH_CHARGE_RATE 0.5
 #define MAX_PUNCH_COOLDOWN 20
-#define MAX_BULLET_COOLDOWN 100
-#define MAX_PROJECTILE_COOLDOWN 100
 #define FULL_BLOCK_TANK 4000
 #define STATUS_TIRED_OUT_TIME 80
+// POTATO
+#define POTATO_MAX_FRIES_COOLDOWN 100
+#define POTATO_MAX_WEDGES_COOLDOWN 100
+#define POTATO_MAX_WEDGES_ON_SCREEN 5
+#define MAX_WEDGES_VELOCITY 20
+#define WEDGES_CHARGE_RATE 0.5
+// BROCCOLI
+#define BROCCOLI_MAX_UPPERCUT_COOLDOWN 200
+
 #include <math.h>
 #include <cmath>
 
@@ -178,60 +182,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		x_position_update(added_speed);
 		crouch_update();
 
+		// GENERAL
+		// Punch
 		if (m_is_punching && !m_punch_on_cooldown)
 		{
 			//save collision object from punch
 			attack = punch();
 			m_punch_on_cooldown = true;
 		}
-
-		// Power punch
-		else if (m_is_holding_power_punch) {
-			m_holding_too_much_timer += 0.5;
-			if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
-				m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
-			if (m_holding_too_much_timer >= 120) {
-				m_tired_out = true;
-				m_is_holding_power_punch = false;
-				m_holding_power_punch_timer = 0;
-				m_holding_too_much_timer = 0;
-			}
-		}
-		else if (m_is_power_punching) {
-			attack = powerPunch();
-			m_holding_power_punch_timer = 0;
-			m_is_power_punching = false;
-		}
-		// charging projectile
-		else if (m_is_holding_projectile) {
-			m_holding_too_much_timer += 0.5;
-			if (m_holding_projectile_timer < MAX_PROJECTILE_VELOCITY)
-				m_holding_projectile_timer += PROJECTILE_CHARGE_RATE;
-			if (m_holding_too_much_timer >= 120) {
-				m_tired_out = true;
-				m_is_holding_projectile = false;
-				m_holding_projectile_timer = 0;
-				m_holding_too_much_timer = 0;
-			}
-		}
-		else if (m_is_shooting_charged_projectile && !m_projectile_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, m_holding_projectile_timer, 10 + m_holding_projectile_timer, m_facing_front);
-			m_projectile_on_cooldown = true;
-			m_holding_projectile_timer = 0;
-			m_is_shooting_charged_projectile = false;
-		}
-
-		else if (m_is_shooting_bullet && !m_bullet_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, 10, m_facing_front);
-			m_bullet_on_cooldown = true;
-		}
-
-		else if (m_is_shooting_projectile && !m_projectile_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
-			m_projectile_on_cooldown = true;
-		}
-
-		// cooldowns
 		if (m_punch_on_cooldown) {
 			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
 				m_punch_on_cooldown = false;
@@ -240,23 +198,15 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			else
 				punching_cooldown++;
 		}
-		if (m_bullet_on_cooldown) {
-			if (bullet_cooldown >= MAX_BULLET_COOLDOWN) {
-				m_bullet_on_cooldown = false;
-				bullet_cooldown = 0;
-			}
-			else
-				bullet_cooldown++;
+		// Power punch
+		else if (m_is_holding_power_punch) 
+			charging_up_power_punch();
+		else if (m_is_power_punching) {
+			attack = powerPunch();
+			m_holding_power_punch_timer = 0;
+			m_is_power_punching = false;
 		}
-		if (m_projectile_on_cooldown) {
-			if (projectile_cooldown >= MAX_PROJECTILE_COOLDOWN) {
-				m_projectile_on_cooldown = false;
-				projectile_cooldown = 0;
-			}
-			else
-				projectile_cooldown++;
-		}
-		// tired out status
+		// Tired out status
 		if (m_tired_out) {
 			if (m_tired_out_timer < STATUS_TIRED_OUT_TIME)
 				m_tired_out_timer += 0.5;
@@ -265,6 +215,67 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_tired_out = false;
 			}
 		}
+
+		// POTATO
+		// ABILTIY 1: Fries  (bullet) 
+		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
+			attack = new Bullet(get_id(), m_position, 10, m_facing_front);
+			m_potato_fries_on_cooldown = true;
+		}
+		if (m_potato_fries_on_cooldown) {
+			if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
+				m_potato_fries_on_cooldown = false;
+				m_potato_fries_cooldown = 0;
+			}
+			else
+				m_potato_fries_cooldown++;
+		}
+		// ABILITY 2: Wedges (projectile)
+		else if (m_potato_is_holding_wedges)
+			potato_charging_up_wedges();
+		else if (m_potato_is_shooting_charged_wedges && !m_potato_wedges_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, m_potato_holding_wedges_timer, 10 + m_potato_holding_wedges_timer, m_facing_front);
+			m_potato_wedges_on_cooldown = true;
+			m_potato_holding_wedges_timer = 0;
+			m_potato_is_shooting_charged_wedges = false;
+		}
+		else if (m_potato_is_shooting_wedges && !m_potato_wedges_on_cooldown) {
+			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
+			m_potato_wedges_on_cooldown = true;
+		}
+		if (m_potato_wedges_on_cooldown) {
+			if (m_potato_wedges_cooldown >= POTATO_MAX_WEDGES_COOLDOWN) {
+				m_potato_wedges_on_cooldown = false;
+				m_potato_wedges_cooldown = 0;
+			}
+			else
+				m_potato_wedges_cooldown++;
+		}
+		
+		// BROCCOLI
+		// Ability 1: Uppercut
+		if (m_broccoli_is_double_jumping && m_broccoli_jump_left == 1) {
+			m_velocity_y = -INITIAL_JUMP_VELOCITY;
+			m_is_jumping = false;
+			m_broccoli_jump_left = 0;
+			m_broccoli_is_double_jumping = false;
+		}
+		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+			m_velocity_y = -INITIAL_JUMP_VELOCITY;
+			attack = punch();
+			m_broccoli_is_uppercutting = false;
+			m_broccoli_uppercut_on_cooldown = true;
+		}
+		if (m_broccoli_uppercut_on_cooldown) {
+			if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
+				m_broccoli_uppercut_on_cooldown = false;
+				m_broccoli_uppercut_cooldown = 0;
+			}
+			else
+				m_broccoli_uppercut_cooldown++;
+		}
+
+		
 			
 	}
 	else
@@ -277,7 +288,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
-
 
 	//return null if not attacking, or the collision object if attacking
 	return attack;
@@ -410,24 +420,49 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 		}
 		break;
-	case SHOOTING_BULLET:
-		m_is_shooting_bullet = true;
-		m_is_idle = false;
-		break;
-	case SHOOTING_PROJECTILE:
-		m_is_shooting_projectile = true;
-		m_is_idle = false;
-		break;
-	case HOLDING_PROJECTILE:
-		m_is_holding_projectile = true;
-		m_is_shooting_projectile = false;
-		m_is_idle = false;
-		break;
-	case SHOOTING_CHARGED_PROJECTILE:
-		m_is_holding_projectile = false;
-		m_is_shooting_charged_projectile = true;
-		m_is_idle = false;
-		break;
+	case ABILITY_1:
+		if (m_fc == POTATO) {
+			m_potato_is_shooting_fries = true;
+			m_is_idle = false;
+			break;
+		}
+		else if (m_fc == BROCCOLI) {
+			m_broccoli_is_uppercutting = true;
+			m_is_idle = false;
+			break;
+		}
+	case ABILITY_2:
+		if (m_fc == POTATO) {
+			m_potato_is_shooting_wedges = true;
+			m_is_idle = false;
+			break;
+		}
+		else if (m_fc == BROCCOLI) {
+			m_is_idle = false;
+			break;
+		}
+	case HOLDING_ABILITY_2:
+		if (m_fc == POTATO) {
+			m_potato_is_holding_wedges = true;
+			m_potato_is_shooting_wedges = false;
+			m_is_idle = false;
+			break;
+		}
+		else if (m_fc == BROCCOLI){
+			m_is_idle = false;
+			break;
+		}
+	case CHARGED_ABILITY_2:
+		if (m_fc == POTATO) {
+			m_potato_is_holding_wedges = false;
+			m_potato_is_shooting_charged_wedges = true;
+			m_is_idle = false;
+			break;
+		}
+		else if (m_fc == BROCCOLI) {
+			m_is_idle = false;
+			break;
+		}
 	case HOLDING_POWER_PUNCH:
 		m_is_holding_power_punch = true;
 		m_is_punching = false;
@@ -456,11 +491,17 @@ void Fighter::set_movement(int mov)
 		m_is_punching = false;
 		m_is_idle = true;
 		break;
-	case STOP_SHOOTING:
-		m_is_shooting_bullet = false;
-		m_is_shooting_projectile = false;
-		m_is_idle = true;
-		break;
+	case STOP_ABILITIES:
+		if (m_fc == POTATO) {
+			m_potato_is_shooting_fries = false;
+			m_potato_is_shooting_wedges = false;
+			m_is_idle = true;
+			break;
+		}
+		else if (m_fc == BROCCOLI) {
+			m_is_idle = true;
+			break;
+		}
 	case BLOCKING:
 		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
 		if (!m_is_punching && m_blocking_tank >= 1000) 
@@ -529,6 +570,8 @@ void Fighter::start_jumping()
 		m_is_jumping = true;
 		m_is_idle = false;
 		m_velocity_y = -INITIAL_JUMP_VELOCITY;
+		if (m_fc == BROCCOLI)
+			m_broccoli_jump_left--;
 	}
 }
 
@@ -555,7 +598,7 @@ void Fighter::x_position_update(float added_speed) {
 			m_facing_front = true;
 		}
 		if (m_position.x < 1150.f) {
-			if (m_is_holding_power_punch || m_is_holding_projectile)
+			if (m_is_holding_power_punch || m_potato_is_holding_wedges)
 				move({ m_speed * 0.3f, 0.0 });
 			else if (m_tired_out)
 				move({ m_speed * 0.03f, 0.0 });
@@ -571,7 +614,7 @@ void Fighter::x_position_update(float added_speed) {
 			m_facing_front = false;
 		}
 		if (m_position.x > 50.f) {
-			if (m_is_holding_power_punch || m_is_holding_projectile)
+			if (m_is_holding_power_punch || m_potato_is_holding_wedges)
 				move({ -m_speed * 0.3f, 0.0 });
 			else if (m_tired_out)
 				move({ -m_speed * 0.03f, 0.0 });
@@ -643,20 +686,17 @@ void Fighter::check_respawn(float ms) {
 			m_is_alive = true;
 			m_is_hurt = false;
 			m_health = MAX_HEALTH;
-			//unrotate the potate
 			m_rotation = 0;
 			m_position = m_initial_pos;
 			m_blocking_tank = FULL_BLOCK_TANK;
 			m_tired_out = false;
 			m_is_jumping = false;
 			m_is_punching = false;
-			m_is_shooting_bullet = false;
-			m_is_holding_projectile = false;
-			m_is_shooting_projectile = false;
-			m_is_holding_projectile = false;
+			m_potato_is_shooting_fries = false;
+			m_potato_is_holding_wedges = false;
+			m_potato_is_shooting_wedges = false;
 			m_is_holding_power_punch = false;
 			m_is_power_punching = false;
-			m_is_shooting = false;
 		}
 	}
 }
@@ -686,12 +726,8 @@ bool Fighter::is_holding_power_punch() const {
 }
 
 
-bool Fighter::is_holding_projectile() const {
-	return m_is_holding_projectile;
-}
-
-bool Fighter::change_power_punch_sprite() const {
-	return m_power_punch_sprite;
+bool Fighter::potato_is_holding_wedges() const {
+	return m_potato_is_holding_wedges;
 }
 
 bool Fighter::is_crouching() const
@@ -740,6 +776,18 @@ unsigned int Fighter::get_id() const
 	return m_id;
 }
 
+FighterCharacter Fighter::get_fc() const {
+	return m_fc;
+}
+
+void Fighter::broccoli_set_double_jump() {
+	m_broccoli_is_double_jumping = true;
+}
+
+bool Fighter::broccoli_get_jump_left() {
+	return m_broccoli_jump_left;
+}
+
 //void Fighter::reset(int init_position)
 void Fighter::reset()
 {
@@ -749,13 +797,11 @@ void Fighter::reset()
 	m_rotation = 0;
 	m_is_jumping = false;
 	m_is_punching = false;
-	m_is_shooting_bullet = false;
-	m_is_holding_projectile = false;
-	m_is_shooting_projectile = false;
-	m_is_holding_projectile = false;
+	m_potato_is_shooting_fries = false;
+	m_potato_is_holding_wedges = false;
+	m_potato_is_shooting_wedges = false;
 	m_is_holding_power_punch = false;
 	m_is_power_punching = false;
-	m_is_shooting = false;
 	m_velocity_y = 0.0;
 	m_moving_forward = false;
 	m_moving_backward = false;
@@ -831,6 +877,7 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 				m_position.y = oldPosition.y;
 				m_velocity_y = 0.0f;
 				m_is_jumping = false;
+				m_broccoli_jump_left = 2;
 			}
 			else if (platforms[i].check_collision_outer_bottom(*b)) {
 				m_position.y = oldPosition.y;
@@ -852,12 +899,34 @@ void Fighter::y_position_update(float ms) {
 	float s = ms / 1000;
 	m_position.y += m_velocity_y * s;
 	m_velocity_y += GRAVITY.y * s;
-
 	if (m_velocity_y > TERMINAL_VELOCITY_Y) {
 		m_velocity_y = TERMINAL_VELOCITY_Y;
 	}
 	else if (m_velocity_y < -TERMINAL_VELOCITY_Y) {
 		m_velocity_y = -TERMINAL_VELOCITY_Y;
 	}
+}
 
+void Fighter::charging_up_power_punch() {
+	m_holding_too_much_timer += 0.5;
+	if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
+		m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
+	if (m_holding_too_much_timer >= 120) {
+		m_tired_out = true;
+		m_is_holding_power_punch = false;
+		m_holding_power_punch_timer = 0;
+		m_holding_too_much_timer = 0;
+	}
+}
+
+void Fighter::potato_charging_up_wedges() {
+	m_holding_too_much_timer += 0.5;
+	if (m_potato_holding_wedges_timer < MAX_WEDGES_VELOCITY)
+		m_potato_holding_wedges_timer += WEDGES_CHARGE_RATE;
+	if (m_holding_too_much_timer >= 120) {
+		m_tired_out = true;
+		m_potato_is_holding_wedges = false;
+		m_potato_holding_wedges_timer = 0;
+		m_holding_too_much_timer = 0;
+	}
 }

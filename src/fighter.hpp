@@ -78,6 +78,8 @@ class Fighter : public Renderable
 
 	unsigned int get_id() const;
 
+	FighterCharacter get_fc() const;
+
 	//void jump_update();
 	void apply_friction();
 
@@ -101,11 +103,6 @@ class Fighter : public Renderable
 
 	bool is_holding_power_punch() const;
 
-	bool is_holding_projectile() const;
-
-
-	bool change_power_punch_sprite() const;
-
 	bool is_crouching() const;
 
 	bool is_idle() const;
@@ -123,6 +120,17 @@ class Fighter : public Renderable
 	void reset();
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
+
+	// Potato
+	bool potato_is_holding_wedges() const;
+
+	// Broccoli
+	bool broccoli_get_jump_left();
+	void broccoli_set_double_jump();
+
+	// Helpers 
+	void charging_up_power_punch();
+	void potato_charging_up_wedges();
 
   protected:
   	const int MAX_HEALTH = 100;
@@ -155,33 +163,36 @@ class Fighter : public Renderable
 	bool m_is_power_punching = false;
 	bool m_power_punch_sprite = false;
 	bool m_is_punching = false;
-	bool m_is_shooting_projectile = false;
-	bool m_is_holding_projectile = false;
-	bool m_is_shooting_charged_projectile = false;
-	bool m_is_shooting_bullet = false;
 	bool m_punch_on_cooldown = false;
-	bool m_bullet_on_cooldown = false;
-	bool m_projectile_on_cooldown = false;
 	bool m_is_hurt = false;
 	bool m_is_jumping = false;
-	
-	std::set<Attack*> m_projectiles;
 	float punching_cooldown = 0;
-	float bullet_cooldown = 0;
-	float projectile_cooldown = 0;
 	float m_tired_out_timer = 0;
 	float m_holding_too_much_timer = 0;
 	float m_holding_power_punch_timer = 0;
-	float m_holding_projectile_timer = 0;
-	bool m_is_shooting = false;
-
-	int m_idle_counter = 0;
-	
 	int m_blocking_tank;
-
 	bool m_is_blocking = false;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
+	int m_idle_counter = 0;
+
+	// potato states
+	bool m_potato_is_shooting_wedges = false;
+	bool m_potato_is_holding_wedges = false;
+	bool m_potato_is_shooting_charged_wedges = false;
+	bool m_potato_is_shooting_fries = false;
+	bool m_potato_fries_on_cooldown = false;
+	bool m_potato_wedges_on_cooldown = false;
+	float m_potato_holding_wedges_timer = 0;
+	float m_potato_fries_cooldown = 0;
+	float m_potato_wedges_cooldown = 0;
+
+	// broccoli states
+	bool m_broccoli_is_double_jumping = false;
+	int m_broccoli_jump_left = 2;
+	bool m_broccoli_is_uppercutting = false;
+	bool m_broccoli_uppercut_on_cooldown = false;
+	float m_broccoli_uppercut_cooldown = 0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 
