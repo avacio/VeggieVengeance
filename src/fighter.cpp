@@ -15,6 +15,7 @@
 #define WEDGES_CHARGE_RATE 0.5
 // BROCCOLI
 #define BROCCOLI_MAX_UPPERCUT_COOLDOWN 200
+#define BROCCOLI_UPPERCUT_VERT_VELO 500
 
 #include <math.h>
 #include <cmath>
@@ -261,7 +262,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_broccoli_is_double_jumping = false;
 		}
 		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
-			m_velocity_y = -INITIAL_JUMP_VELOCITY;
+			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
 			m_broccoli_is_uppercutting = false;
 			m_broccoli_uppercut_on_cooldown = true;
@@ -526,7 +527,6 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
 			if (damage_effect->m_vert_force > 0) {
 				m_force.x -= 0.3f * damage_effect->m_damage;
-				m_force.y -= damage_effect->m_vert_force;
 				m_velocity_y = -damage_effect->m_vert_force;
 			} else 
 				m_force.x -= 1.f * damage_effect->m_damage;
@@ -534,7 +534,6 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 		else {
 			if (damage_effect->m_vert_force > 0) {
 				m_force.x += 0.3f * damage_effect->m_damage;
-				m_force.y -= damage_effect->m_vert_force;
 				m_velocity_y = -damage_effect->m_vert_force;
 			}
 			else
@@ -806,6 +805,10 @@ bool Fighter::broccoli_get_jump_left() {
 	return m_broccoli_jump_left;
 }
 
+bool Fighter::broccoli_is_uppercut_on_cooldown() {
+	return m_broccoli_uppercut_on_cooldown;
+}
+
 //void Fighter::reset(int init_position)
 void Fighter::reset()
 {
@@ -889,13 +892,13 @@ Punch * Fighter::broccoliUppercut() {
 		//right facing
 		float xpos = b->xpos + (b->width / 2.0);
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, 10);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, BROCCOLI_UPPERCUT_VERT_VELO);
 	}
 	else {
 		//left facing
 		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, 10);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, BROCCOLI_UPPERCUT_VERT_VELO);
 	}
 
 	delete b;

@@ -102,13 +102,17 @@ bool World::init(vec2 screen, GameMode mode)
 		return false;
 	}
 
-	//m_background_music = Mix_LoadMUS(audio_path("Abandoned Hopes.wav"));
-	m_background_music = Mix_LoadMUS(audio_path("/bgm/Sunstrider.wav"));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Abandoned Hopes.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Sunstrider.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt0.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt1.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt2.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt3.wav")));
-
+	m_background_music = m_bgms[get_random_number(1)];
+	m_charging_up_audio = Mix_LoadWAV(audio_path("charging_up.wav"));
+	m_charging_up_audio->volume *= 0.3;
+	m_charged_punch_audio = Mix_LoadWAV(audio_path("charged_punch.wav"));
+	m_broccoli_uppercut_audio = Mix_LoadWAV(audio_path("uppercut.wav"));
 
 	if (m_background_music == nullptr)
 	{
@@ -142,7 +146,7 @@ bool World::init(vec2 screen, GameMode mode)
 void World::destroy()
 {
 	glDeleteFramebuffers(1, &m_frame_buffer);
-
+	
 	if (m_background_music != nullptr)
 		Mix_FreeMusic(m_background_music);
 
@@ -489,18 +493,25 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_V)
+			if (action == GLFW_PRESS && key == GLFW_KEY_V) {
 				m_player1.set_movement(ABILITY_1);
+				if (m_player1.get_fc() == BROCCOLI && !m_player1.broccoli_is_uppercut_on_cooldown())
+					Mix_PlayChannel(-1, m_broccoli_uppercut_audio, 0);
+			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_B)
 				m_player1.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
 				m_player1.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
 				m_player1.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_C)
+			if (action == GLFW_REPEAT && key == GLFW_KEY_C) {
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
+				Mix_PlayChannel(1, m_charging_up_audio, 0);
+			}	
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
+				Mix_PlayChannel(1, m_charged_punch_audio, 0);
+			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(BLOCKING);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_D)
@@ -533,18 +544,25 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD))
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD)) {
 				m_player2.set_movement(ABILITY_1);
+				if (m_player2.get_fc() == BROCCOLI && !m_player2.broccoli_is_uppercut_on_cooldown())
+					Mix_PlayChannel(-1, m_broccoli_uppercut_audio, 0);
+			}
 			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
 				m_player2.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
 				m_player2.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.potato_is_holding_wedges())
 				m_player2.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH))
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch())
-				m_player2.set_movement(POWER_PUNCHING);
+				Mix_PlayChannel(2, m_charging_up_audio, 0);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
+				m_player2.set_movement(POWER_PUNCHING);			
+				Mix_PlayChannel(2, m_charged_punch_audio, 0);
+			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
 			if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT_SHIFT)
@@ -871,7 +889,6 @@ void World::draw_rectangle() {
 }
 
 bool World::is_game_over() {
-	m_heat_wave_on = false;
 	if (m_mode == PVP) {
 		if (!m_player1.get_alive() && m_player1.get_lives() == 0) {
 			m_winner_name = m_player2.get_name();
