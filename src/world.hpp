@@ -102,7 +102,11 @@ class World
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
 	Mix_Music *m_background_music;
+	std::vector<Mix_Music*> m_bgms;
 	std::vector<Mix_Chunk*> m_grunt_audio;
+	Mix_Chunk *m_broccoli_uppercut_audio;
+	Mix_Chunk *m_charging_up_audio;
+	Mix_Chunk *m_charged_punch_audio;
 
 	GameMode m_mode;
 	bool m_paused;
