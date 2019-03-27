@@ -871,6 +871,7 @@ void World::draw_rectangle() {
 }
 
 bool World::is_game_over() {
+	m_heat_wave_on = false;
 	if (m_mode == PVP) {
 		if (!m_player1.get_alive() && m_player1.get_lives() == 0) {
 			m_winner_name = m_player2.get_name();

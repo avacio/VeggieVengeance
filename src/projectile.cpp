@@ -18,7 +18,7 @@ Projectile::Projectile(int id, vec2 pos, float add_velo, unsigned int damage, bo
 	m_width = std::fabs(m_scale.x) * projectile_texture.width;
 	m_height = std::fabs(m_scale.y) * projectile_texture.height;
 	m_delete_when = AFTER_HIT;
-	m_damageEffect = new DamageEffect(m_position.x, m_position.y, m_width, m_height, m_damage, m_fighter_id, m_delete_when);
+	m_damageEffect = new DamageEffect(m_position.x, m_position.y, m_width, m_height, m_damage, m_fighter_id, m_delete_when, 0);
 
 	m_acceleration = 0.5;
 

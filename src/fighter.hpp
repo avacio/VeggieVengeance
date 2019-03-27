@@ -36,6 +36,9 @@ class Fighter : public Renderable
 	//get collision object for powerpunch
 	Punch * powerPunch();
 
+	//get collision object for Broccoli's uppercut ability
+	Punch * broccoliUppercut();
+
 	// Returns the current bubble position
 	vec2 get_position() const;
 
