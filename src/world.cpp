@@ -103,18 +103,24 @@ bool World::init(vec2 screen, GameMode mode)
 	}
 
 	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Abandoned Hopes.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Crimson Drive.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Fields of Ice.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Mecha Collection.wav")));
 	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Sunstrider.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/The Monarch's Rule.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/The Way You Love.wav")));
+	m_bgms.emplace_back(Mix_LoadMUS(audio_path("/bgm/Zero Respect.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt0.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt1.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt2.wav")));
 	m_grunt_audio.emplace_back(Mix_LoadWAV(audio_path("grunt3.wav")));
-	m_background_music = m_bgms[get_random_number(1)];
+	m_background_track = get_random_number(m_bgms.size() - 1);
 	m_charging_up_audio = Mix_LoadWAV(audio_path("charging_up.wav"));
 	m_charging_up_audio->volume *= 0.3;
 	m_charged_punch_audio = Mix_LoadWAV(audio_path("charged_punch.wav"));
 	m_broccoli_uppercut_audio = Mix_LoadWAV(audio_path("uppercut.wav"));
 
-	if (m_background_music == nullptr)
+	if (m_bgms[m_background_track] == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
 				audio_path("/bgm/Sunstrider.wav"));
@@ -122,7 +128,7 @@ bool World::init(vec2 screen, GameMode mode)
 	}
 
 	// Playing background music undefinitely
-	Mix_PlayMusic(m_background_music, -1);
+	Mix_PlayMusic(m_bgms[m_background_track], -1);
 
 	fprintf(stderr, "Loaded music\n");
 
@@ -147,8 +153,10 @@ void World::destroy()
 {
 	glDeleteFramebuffers(1, &m_frame_buffer);
 	
-	if (m_background_music != nullptr)
-		Mix_FreeMusic(m_background_music);
+	if (m_bgms.size() > 0) {
+		for (auto &music : m_bgms)
+			Mix_FreeMusic(music);
+	}
 
 	Mix_CloseAudio();
 
@@ -640,10 +648,30 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_VolumeMusic(Mix_VolumeMusic(-1) + 20);
 	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_DOWN)
 		Mix_VolumeMusic(Mix_VolumeMusic(-1) - 20);
-	if (action == GLFW_PRESS && key == GLFW_KEY_END && !Mix_PausedMusic())
+	if (action == GLFW_PRESS && key == GLFW_KEY_INSERT && !Mix_PausedMusic()) {
 		Mix_PauseMusic();
-	if (action == GLFW_PRESS && key == GLFW_KEY_HOME && Mix_PausedMusic())
+	} else if (action == GLFW_PRESS && key == GLFW_KEY_INSERT && Mix_PausedMusic()) {
 		Mix_ResumeMusic();
+	}
+	if (action == GLFW_PRESS && key == GLFW_KEY_END) {
+		// next song
+		m_background_track++;
+		if (m_background_track >= m_bgms.size() - 1) {
+			m_background_track = 0;
+		}
+		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
+	 } else if (action == GLFW_PRESS && key == GLFW_KEY_DELETE) {
+		 // previous song
+		if (m_background_track == 0) {
+			m_background_track = m_bgms.size();
+		}
+		m_background_track--;
+		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
+	} else if (action == GLFW_PRESS && key == GLFW_KEY_HOME) {
+		// random song
+		m_background_track = get_random_number(m_bgms.size() - 1);
+		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
+	}
 }
 
 

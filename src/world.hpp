@@ -101,7 +101,7 @@ class World
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 
-	Mix_Music *m_background_music;
+	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;
 	std::vector<Mix_Chunk*> m_grunt_audio;
 	Mix_Chunk *m_broccoli_uppercut_audio;

@@ -83,40 +83,44 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = isPausedText->get_width_of_string("PAUSED");
 	isPausedText->setPosition({ screen.x/2.f - width / 2.f, 150.f }); // screen.x/2.f - width*0.4f
 	isPausedText->setColor({ 0.f,0.f,0.f });
-
-	jump = new TextRenderer(mainFont, 44);
+	
+	unsigned int tutorialTextSize = 30;
+	jump = new TextRenderer(mainFont, tutorialTextSize);
 	jump->setPosition({50.f, 230.f});
-	left = new TextRenderer(mainFont, 44);
+	left = new TextRenderer(mainFont, tutorialTextSize);
 	left->setPosition({50.f, 280.f});
-	right = new TextRenderer(mainFont, 44);
+	right = new TextRenderer(mainFont, tutorialTextSize);
 	right->setPosition({50.f, 330.f});
-	crouch = new TextRenderer(mainFont, 44);
+	crouch = new TextRenderer(mainFont, tutorialTextSize);
 	crouch->setPosition({50.f, 380.f});
-	reset = new TextRenderer(mainFont, 44);
+	reset = new TextRenderer(mainFont, tutorialTextSize);
 	reset->setPosition({50.f, 430.f});
-	pause = new TextRenderer(mainFont, 44);
+	pause = new TextRenderer(mainFont, tutorialTextSize);
 	pause->setPosition({50.f, 480.f});
-	ability1 = new TextRenderer(mainFont, 44);
-	width = ability1->get_width_of_string("Q/U:SpecialAbility");
+	ability1 = new TextRenderer(mainFont, tutorialTextSize);
+	width = ability1->get_width_of_string("VNUM2:SpecialAbility");
 	ability1->setPosition({screen.x-(width*1.15f), 230.f});
-	ability2 = new TextRenderer(mainFont, 44);
-	width = ability2->get_width_of_string("R/P:SpecialAbility");
-	ability2->setPosition({screen.x-(width*1.15f), 280.f});
-	punch = new TextRenderer(mainFont, 44);
-	width = punch->get_width_of_string("E/O: Punch");
-	punch->setPosition({screen.x-(width*1.15f), 330.f});
-	pauseMusic = new TextRenderer(mainFont, 44);
-	width = pauseMusic->get_width_of_string("End: Pausemusic");
-	pauseMusic->setPosition({screen.x-(width*1.15f), 380.f});
-	resumeMusic = new TextRenderer(mainFont, 44);
-	width = resumeMusic->get_width_of_string("Home:Resumemusic");
-	resumeMusic->setPosition({screen.x-(width*1.15f), 430.f});
-	increaseVolume = new TextRenderer(mainFont, 44);
-	width = increaseVolume->get_width_of_string("PageUp: Inc.Volume");
-	increaseVolume->setPosition({screen.x-(width*1.15f), 480.f});
-	decreaseVolume = new TextRenderer(mainFont, 44);
-	width = decreaseVolume->get_width_of_string("PageDown:Dec.Volume");
-	decreaseVolume->setPosition({screen.x-(width*1.15f), 530.f});
+	ability2 = new TextRenderer(mainFont, tutorialTextSize);
+	width = ability2->get_width_of_string("BNUM3:SpecialAbility");
+	ability2->setPosition({ screen.x - (width*1.15f), 280.f });
+	shield = new TextRenderer(mainFont, tutorialTextSize);
+	width = shield->get_width_of_string("LShift/RShift:Sheild");
+	shield->setPosition({screen.x-(width*1.15f), 330.f});
+	punch = new TextRenderer(mainFont, tutorialTextSize);
+	width = punch->get_width_of_string("C/NUM1Punch");
+	punch->setPosition({screen.x-(width*1.15f), 380.f});
+	pauseMusic = new TextRenderer(mainFont, tutorialTextSize);
+	width = pauseMusic->get_width_of_string("InsertPauseResumeSong");
+	pauseMusic->setPosition({screen.x-(width*1.15f), 430.f});
+	randomSong = new TextRenderer(mainFont, tutorialTextSize);
+	width = randomSong->get_width_of_string("HomeRandomSong");
+	randomSong->setPosition({screen.x-(width*1.15f), 480.f});
+	changeSong = new TextRenderer(mainFont, tutorialTextSize);
+	width = changeSong->get_width_of_string("Delete/EndPrevNextsong");
+	changeSong->setPosition({ screen.x - (width*1.15f), 530.f});
+	changeVolume = new TextRenderer(mainFont, tutorialTextSize);
+	width = changeVolume->get_width_of_string("PageUpDownInc./Dec.volume");
+	changeVolume->setPosition({screen.x-(width*1.15f), 580.f});
 
 	winnerText = new TextRenderer(mainFontBold, 42);
 	winnerText->setColor({ 0.4f,0.1f,0.1f });
@@ -164,11 +168,12 @@ void Background::destroy()
 	delete reset;
 	delete ability1;
 	delete ability2;
+	delete shield;
 	delete punch;
 	delete pauseMusic;
-	delete resumeMusic;
-	delete increaseVolume;
-	delete decreaseVolume;
+	delete randomSong;
+	delete changeSong;
+	delete changeVolume;
 	delete winnerText;
 	effect.release();
 }
@@ -314,13 +319,14 @@ void Background::drawTutorialText(const mat3& projection) {
 		crouch->renderString(projection, "S/K: Crouch");
 		pause->renderString(projection, "Esc: Pause");
 		reset->renderString(projection, "F5: Reset");
-		ability1->renderString(projection, "V/U: Special Ability");
-		ability2->renderString(projection, "B/P: Special Ability");
-		punch->renderString(projection, "C/O: Punch");
-		pauseMusic->renderString(projection, "End: Pause music");
-		resumeMusic->renderString(projection, "Home: Resume music");
-		increaseVolume->renderString(projection, "Page Up: Inc. volume");
-		decreaseVolume->renderString(projection, "Page Down: Dec. volume");
+		ability1->renderString(projection, "V/NUM2: Special Ability");
+		ability2->renderString(projection, "B/NUM3: Special Ability");
+		shield->renderString(projection, "L Shift/R Shift: Shield");
+		punch->renderString(projection, "C/NUM1: Punch");
+		pauseMusic->renderString(projection, "Insert: Pause/Resume song");
+		randomSong->renderString(projection, "Home: Random song");
+		changeSong->renderString(projection, "Delete/End: Prev/Next song");
+		changeVolume->renderString(projection, "Page Up/Down: Inc./Dec. volume");
 	}
 }
 void Background::addNameplate(TextRenderer* td, std::string name) {
