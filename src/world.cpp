@@ -497,7 +497,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
 				m_player1.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_C)
+			else if (action == GLFW_REPEAT && key == GLFW_KEY_C)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch())
 				m_player1.set_movement(POWER_PUNCHING);
@@ -566,10 +566,16 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player1.set_movement(STOP_MOVING_BACKWARD);
 			m_player1.set_movement(STOP_PUNCHING);
 			m_player1.set_movement(STOP_ABILITIES);
+			m_player1.set_movement(PAUSED);
 			m_player2.set_movement(STOP_MOVING_FORWARD);
 			m_player2.set_movement(STOP_MOVING_BACKWARD);
 			m_player2.set_movement(STOP_PUNCHING);
 			m_player2.set_movement(STOP_ABILITIES);
+			m_player2.set_movement(PAUSED);
+
+			for (auto &fighter : m_ais)
+				fighter.set_movement(PAUSED);
+
 
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 			{
@@ -595,6 +601,15 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 					reset();
 				}
 			}
+		}
+
+		if (!m_paused)
+		{
+			m_player1.set_movement(UNPAUSED);
+			m_player2.set_movement(UNPAUSED);
+
+			for (auto &fighter : m_ais)
+				fighter.set_movement(UNPAUSED);
 		}
 
 		// Pausing and resuming game

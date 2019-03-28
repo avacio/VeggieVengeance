@@ -5,7 +5,8 @@
 
 Texture Player1::p_texture;
 
-Player1::Player1(unsigned int id) : Fighter(id) {
+Player1::Player1(unsigned int id) : Fighter(id)
+{
 }
 
 void Player1::draw(const mat3 &projection)
@@ -51,51 +52,76 @@ void Player1::draw(const mat3 &projection)
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
 
-	if (get_alive() && is_punching()) {
-		if (!is_crouching()) {
-			if (m_fc == POTATO) { p_texture = POTATO_PUNCH_TEXTURE; }
-			else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
-		}
-		else if (is_crouching()) {
-			if (m_fc == POTATO) { p_texture = POTATO_CROUCH_PUNCH_TEXTURE; }
-			else { p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; }
-		}
-	}
-	else if (get_alive() && is_crouching()) {
-		if (m_fc == POTATO) { p_texture = POTATO_CROUCH_TEXTURE; }
-		else { p_texture = BROCCOLI_CROUCH_TEXTURE; }
-	}
-	else if (get_alive() && is_holding_power_punch()) {
-		if (m_fc == POTATO) { p_texture = POTATO_CHARGING_TEXTURE; }
-		else { p_texture = BROCCOLI_PUNCH_TEXTURE; }
-	}
-	if (!is_punching()) {
-		if (get_alive() && is_idle() && !is_crouching()) {
-			if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
-			else { p_texture = BROCCOLI_IDLE_TEXTURE; }
-		}
-		else {
-			if (get_alive() && is_idle()) {
-				m_idle_counter++;
-				if (m_idle_counter < 25) {
-					if (m_fc == POTATO) { p_texture = POTATO_IDLE_TEXTURE; }
-					else { p_texture = BROCCOLI_IDLE_TEXTURE; }
-				}
+	if (get_alive())
+	{
+		if (is_paused()) {
 
-				else if (m_idle_counter > 25 && m_idle_counter < 50) {
-					if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
-					else { p_texture = BROCCOLI_TEXTURE; }
-				}
+		}
 
-				else if (m_idle_counter >= 50)
-					m_idle_counter = 0;
+		else if (is_punching())
+		{
+			if (!is_crouching()) {
+				if (m_fc == POTATO) p_texture = POTATO_PUNCH_TEXTURE;
+				else p_texture = BROCCOLI_PUNCH_TEXTURE;
 			}
-			else if (!get_alive()) {
-				if (m_fc == POTATO) { p_texture = POTATO_TEXTURE; }
-				else { p_texture = BROCCOLI_TEXTURE; }
+			else if (is_crouching()) {
+				if (m_fc == POTATO) p_texture = POTATO_CROUCH_PUNCH_TEXTURE;
+				else p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
 			}
 		}
+
+		else if (!is_punching() && is_crouching())
+		{
+			if (m_fc == POTATO) p_texture = POTATO_CROUCH_TEXTURE;
+			else p_texture = BROCCOLI_CROUCH_TEXTURE;
+		}
+
+		else if (is_holding_power_punch())
+		{
+			if (m_fc == POTATO) p_texture = POTATO_CHARGING_TEXTURE;
+		}
+
+		else if (is_power_punching())
+		{
+			m_punch_counter++;
+			if (m_fc == POTATO) p_texture = POTATO_POWER_PUNCH_TEXTURE;
+
+			if (m_punch_counter > 20)
+			{
+				m_punch_counter = 0;
+				set_power_punch(false);
+			}
+		}
+
+		else if (!is_punching())
+		{
+			if (get_alive() && !is_crouching())
+			{
+				m_anim_counter++;
+				if (m_anim_counter < 25)
+				{
+					if (m_fc == POTATO) p_texture = POTATO_IDLE_TEXTURE;
+					else p_texture = BROCCOLI_IDLE_TEXTURE;
+				}
+
+				else if (m_anim_counter > 25 && m_anim_counter < 50)
+				{
+					if (m_fc == POTATO) p_texture = POTATO_TEXTURE;
+					else p_texture = BROCCOLI_TEXTURE;
+				}
+
+				else if (m_anim_counter >= 50)
+					m_anim_counter = 0;
+			}
+		}
 	}
+
+	else if (!get_alive())
+	{
+		if (m_fc == POTATO) p_texture = POTATO_DEATH_TEXTURE;
+		else p_texture = BROCCOLI_DEATH_TEXTURE;
+	}
+
 	glBindTexture(GL_TEXTURE_2D, p_texture.id);
 
 	// Setting uniform values to the currently bound program
