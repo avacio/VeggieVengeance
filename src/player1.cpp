@@ -60,6 +60,7 @@ void Player1::draw(const mat3 &projection)
 
 		else if (is_tired_out()) 
 		{
+			set_power_punch(false);
 			m_anim_counter++;
 			if (m_anim_counter < 15)
 			{
