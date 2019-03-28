@@ -97,7 +97,8 @@ extern Texture POTATO_CROUCH_PUNCH_TEXTURE;
 extern Texture POTATO_CROUCH_TEXTURE;
 extern Texture POTATO_CHARGING_TEXTURE;
 extern Texture POTATO_DEATH_TEXTURE;
-//extern Texture POTATO_TIRED_TEXTURE;
+extern Texture POTATO_TIRED_1_TEXTURE;
+extern Texture POTATO_TIRED_2_TEXTURE;
 
 extern Texture BROCCOLI_TEXTURE;
 extern Texture BROCCOLI_IDLE_TEXTURE;

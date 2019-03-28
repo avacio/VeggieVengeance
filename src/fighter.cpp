@@ -1004,6 +1004,7 @@ void Fighter::charging_up_power_punch() {
 		m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
 	if (m_holding_too_much_timer >= 120) {
 		m_tired_out = true;
+		printf("tired");
 		m_is_holding_power_punch = false;
 		m_holding_power_punch_timer = 0;
 		m_holding_too_much_timer = 0;
