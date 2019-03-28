@@ -648,26 +648,26 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_VolumeMusic(Mix_VolumeMusic(-1) + 20);
 	if (action == GLFW_PRESS && key == GLFW_KEY_PAGE_DOWN)
 		Mix_VolumeMusic(Mix_VolumeMusic(-1) - 20);
-	if (action == GLFW_PRESS && key == GLFW_KEY_END && !Mix_PausedMusic()) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_INSERT && !Mix_PausedMusic()) {
 		Mix_PauseMusic();
-	} else if (action == GLFW_PRESS && key == GLFW_KEY_END && Mix_PausedMusic()) {
+	} else if (action == GLFW_PRESS && key == GLFW_KEY_INSERT && Mix_PausedMusic()) {
 		Mix_ResumeMusic();
 	}
-	if (action == GLFW_PRESS && key == GLFW_KEY_HOME) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_END) {
 		// next song
 		m_background_track++;
 		if (m_background_track >= m_bgms.size() - 1) {
 			m_background_track = 0;
 		}
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
-	 } else if (action == GLFW_PRESS && key == GLFW_KEY_INSERT) {
+	 } else if (action == GLFW_PRESS && key == GLFW_KEY_DELETE) {
 		 // previous song
 		if (m_background_track == 0) {
 			m_background_track = m_bgms.size();
 		}
 		m_background_track--;
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
-	} else if (action == GLFW_PRESS && key == GLFW_KEY_BACKSPACE) {
+	} else if (action == GLFW_PRESS && key == GLFW_KEY_HOME) {
 		// random song
 		m_background_track = get_random_number(m_bgms.size() - 1);
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
