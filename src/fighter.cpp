@@ -485,7 +485,7 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case PUNCHING:
-		if (!m_is_blocking) {
+		if (!m_is_blocking && !m_tired_out) {
 			m_is_punching = true;
 			m_is_idle = false;
 		}
@@ -773,6 +773,8 @@ void Fighter::check_respawn(float ms) {
 			m_potato_is_shooting_wedges = false;
 			m_is_holding_power_punch = false;
 			m_is_power_punching = false;
+			m_force.x = 0;
+			m_force.y = 0;
 		}
 	}
 }
@@ -1021,3 +1023,4 @@ void Fighter::potato_charging_up_wedges() {
 		m_holding_too_much_timer = 0;
 	}
 }
+

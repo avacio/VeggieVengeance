@@ -132,7 +132,12 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	spawn_platform(200, 600, 800, 50);
+	spawn_platform(0, 650, 1200, 10);
+	spawn_platform(-2, 551, 100, 10);
+	spawn_platform(1117, 551, 115, 10);
+	spawn_platform(137, 440, 220, 10);
+	spawn_platform(847, 440, 220, 10);
+	spawn_platform(375, 308, 453, 10);
 
 	//return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
 	return m_water.init() && initSuccess;
