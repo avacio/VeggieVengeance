@@ -898,6 +898,7 @@ void World::attack_deletion() {
 			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
 			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
 			//remove from list
+			delete m_attacks[i];
 			m_attacks.erase(m_attacks.begin() + i);
 			i--;
 		}
