@@ -85,7 +85,7 @@ bool Bullet::init() {
 		return false;
 }
 
-void Bullet::update() {
+void Bullet::update(float ms) {
 	m_position.x += m_velocity.x;
 	m_damageEffect->m_bounding_box.xpos = m_position.x;
 	m_damageEffect->m_bounding_box.ypos = m_position.y;

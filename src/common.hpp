@@ -193,6 +193,7 @@ enum DeletionTime
 {
 	AFTER_UPDATE,
 	AFTER_HIT,
+	AFTER_TIME,
 	AFTER_OUT_OF_BOUNDS
 };
 

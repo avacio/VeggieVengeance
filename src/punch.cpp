@@ -23,7 +23,7 @@ Punch::~Punch() {
 bool Punch::init() {
 	return true;
 }
-void Punch::update() {
+void Punch::update(float ms) {
 	return;
 }
 
