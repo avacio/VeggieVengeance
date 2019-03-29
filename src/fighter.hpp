@@ -86,7 +86,7 @@ class Fighter : public Renderable
 	//void jump_update();
 	void apply_friction();
 
-	void x_position_update(float added_speed);
+	void x_position_update(float added_speed, float ms);
 
 	void y_position_update(float ms);
 	
@@ -102,6 +102,8 @@ class Fighter : public Renderable
 
 	bool is_punching() const;
 
+	bool is_power_punching() const;
+
 	bool is_punching_on_cooldown() const;
 
 	bool is_holding_power_punch() const;
@@ -114,11 +116,15 @@ class Fighter : public Renderable
 
 	bool is_tired_out() const;
 
+	bool is_paused() const;
+
 	int get_blocking_tank() const;
 
 	int get_crouch_state();
 
 	void set_crouch_state(CrouchState cs);
+
+	void set_power_punch(bool punch);
 
 	void reset();
 
@@ -178,7 +184,9 @@ class Fighter : public Renderable
 	bool m_is_blocking = false;
 	int m_respawn_timer = 0;
 	bool m_respawn_flag = false;
-	int m_idle_counter = 0;
+	int m_anim_counter = 0;
+	int m_punch_counter = 0;
+	bool m_is_paused = false;
 
 	// potato states
 	bool m_potato_is_shooting_wedges = false;

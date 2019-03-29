@@ -12,8 +12,8 @@ bool Background::init(vec2 screen, GameMode mode)
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
-	float wr = bg_texture.width * 3.5f;
-	float hr = bg_texture.height * 3.5f;
+	float wr = bg_texture.width * 1.f;
+	float hr = bg_texture.height * 1.f;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -53,10 +53,10 @@ bool Background::init(vec2 screen, GameMode mode)
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 
-	m_scale.x = 0.1725f;
-	m_scale.y = 0.1725f;
+	m_scale.x = 0.4f;
+	m_scale.y = 0.4f;
 	m_rotation = 0.f;
-	m_position = { 595.f, 455.f };
+	m_position = { 600.f, 400.f };
 
 	m_initialized = true;
 
