@@ -36,6 +36,9 @@ class Fighter : public Renderable
 	//get collision object for powerpunch
 	Punch * powerPunch();
 
+	//get collision object for Broccoli's uppercut ability
+	Punch * broccoliUppercut();
+
 	// Returns the current bubble position
 	vec2 get_position() const;
 
@@ -133,6 +136,7 @@ class Fighter : public Renderable
 	// Broccoli
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
+	bool broccoli_is_uppercut_on_cooldown();
 
 	// Helpers 
 	void charging_up_power_punch();

@@ -10,7 +10,7 @@ int engagingDistance = 75;
 int randNum;
 long t = time(0); //initialize time
 float stageLowerXBound = 200;
-float stageUpperXBound = 800;
+float stageUpperXBound = 1000;
 
 AI::AI(unsigned int id, AIType type) : Fighter(id)
 {
