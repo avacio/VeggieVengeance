@@ -10,7 +10,7 @@ public:
 	Bullet(int id, vec2 pos, unsigned int damage, bool direction);
 	~Bullet();
 	bool init();
-	void update();
+	void update(float ms);
 	void draw(const mat3 &projection) override;
 private:
 	

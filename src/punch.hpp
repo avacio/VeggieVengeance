@@ -10,7 +10,7 @@ public:
 	Punch(int id, vec2 pos, vec2 size, unsigned int damage, bool direction, float vert_force);
 	~Punch();
 	bool init();
-	void update();
+	void update(float ms);
 	void draw(const mat3 &projection) override;
 private:
 };

@@ -271,7 +271,7 @@ bool World::update(float elapsed_ms)
 			}
 		}
 	}
-	attack_update();
+	attack_update(elapsed_ms);
 	return true;
 }
 
@@ -915,6 +915,7 @@ void World::attack_deletion() {
 	for (int i = 0; i < m_attacks.size(); i++) {
 		if (m_attacks[i]->m_damageEffect->m_delete_when == AFTER_UPDATE ||
 			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
+			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
 			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
 			//remove from list
 			delete m_attacks[i];
@@ -924,9 +925,9 @@ void World::attack_deletion() {
 	}
 }
 
-void World::attack_update() {
+void World::attack_update(float ms) {
 	for (auto &attack : m_attacks)
-		attack->update();
+		attack->update(ms);
 }
 
 void World::draw_rectangle() {

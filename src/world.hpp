@@ -69,7 +69,7 @@ class World
 	void on_mouse_move(GLFWwindow *window, double xpos, double ypos);
 	void attack_collision();
 	void attack_deletion();
-	void attack_update();
+	void attack_update(float ms);
 
 	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);

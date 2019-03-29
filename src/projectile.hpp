@@ -10,7 +10,7 @@ public:
 	Projectile(int id, vec2 pos, float velo, unsigned int damage, bool direction);
 	~Projectile();
 	bool init();
-	void update();
+	void update(float ms);
 	void draw(const mat3 &projection) override;
 private:
 	float m_acceleration;

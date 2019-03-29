@@ -87,7 +87,7 @@ bool Projectile::init() {
 		return false;
 }
 
-void Projectile::update() {
+void Projectile::update(float ms) {
 	m_position.x += m_velocity.x;
 	m_position.y += m_velocity.y;
 	m_damageEffect->m_bounding_box.xpos = m_position.x;
