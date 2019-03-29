@@ -180,7 +180,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
-		x_position_update(added_speed);
+		x_position_update(added_speed, ms);
 		crouch_update();
 
 		// GENERAL
@@ -670,12 +670,14 @@ void Fighter::apply_friction() {
 	}
 }
 
-void Fighter::x_position_update(float added_speed) {
+void Fighter::x_position_update(float added_speed, float ms) {
 
 	//!!! need to include this before merge
 	//if (m_is_holding_power_punch)
 	//	MOVING_SPEED = POWER_PUNCHING_MOVING_SPEED;
 
+	float target_ms_per_frame = 1000.f / 60.f;
+	float speed_scale = ms / target_ms_per_frame;
 
 	if (m_moving_forward)
 	{
@@ -686,11 +688,11 @@ void Fighter::x_position_update(float added_speed) {
 		}
 		if (m_position.x < 1150.f) {
 			if (m_is_holding_power_punch || m_potato_is_holding_wedges)
-				move({ m_speed * 0.3f, 0.0 });
+				move({ m_speed * 0.3f * speed_scale, 0.0 });
 			else if (m_tired_out)
-				move({ m_speed * 0.03f, 0.0 });
+				move({ m_speed * 0.03f * speed_scale, 0.0 });
 			else
-				move({m_speed, 0.0});
+				move({ m_speed * speed_scale, 0.0});
 		}
 	}
 	if (m_moving_backward)
@@ -702,15 +704,15 @@ void Fighter::x_position_update(float added_speed) {
 		}
 		if (m_position.x > 50.f) {
 			if (m_is_holding_power_punch || m_potato_is_holding_wedges)
-				move({ -m_speed * 0.3f, 0.0 });
+				move({ -m_speed * 0.3f * speed_scale, 0.0 });
 			else if (m_tired_out)
-				move({ -m_speed * 0.03f, 0.0 });
+				move({ -m_speed * 0.03f * speed_scale, 0.0 });
 			else
-				move({ -m_speed, 0.0 });
+				move({ -m_speed * speed_scale, 0.0 });
 		}
 	}
 
-	move({ added_speed, 0.f });
+	move({ added_speed * speed_scale, 0.f });
 }
 
 void Fighter::crouch_update() {
