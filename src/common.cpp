@@ -56,12 +56,16 @@ Texture POTATO_POWER_PUNCH_TEXTURE;
 Texture POTATO_CROUCH_PUNCH_TEXTURE;
 Texture POTATO_CROUCH_TEXTURE;
 Texture POTATO_CHARGING_TEXTURE;
+Texture POTATO_DEATH_TEXTURE;
+Texture POTATO_TIRED_1_TEXTURE;
+Texture POTATO_TIRED_2_TEXTURE;
 
 Texture BROCCOLI_TEXTURE;
 Texture BROCCOLI_IDLE_TEXTURE;
 Texture BROCCOLI_PUNCH_TEXTURE;
 Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
 Texture BROCCOLI_CROUCH_TEXTURE;
+Texture BROCCOLI_DEATH_TEXTURE;
 
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
@@ -360,12 +364,16 @@ bool load_all_sprites_from_file() {
 		POTATO_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("potato_crouch_punch.png")) &&
 		POTATO_CROUCH_TEXTURE.load_from_file(textures_path("potato_crouch.png")) &&
 		POTATO_CHARGING_TEXTURE.load_from_file(textures_path("potato_charging.png")) &&
+		POTATO_DEATH_TEXTURE.load_from_file(textures_path("potato_death.png")) &&
+		POTATO_TIRED_1_TEXTURE.load_from_file(textures_path("potato_tired_1.png")) &&
+		POTATO_TIRED_2_TEXTURE.load_from_file(textures_path("potato_tired_2.png")) &&
 
 		BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) &&
 		BROCCOLI_IDLE_TEXTURE.load_from_file(textures_path("broccoli_idle.png")) &&
 		BROCCOLI_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_punch.png")) &&
 		BROCCOLI_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_crouch_punch.png")) &&
 		BROCCOLI_CROUCH_TEXTURE.load_from_file(textures_path("broccoli_crouch.png")) &&
+		BROCCOLI_DEATH_TEXTURE.load_from_file(textures_path("broccoli_death.png")) &&
 
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));

@@ -205,7 +205,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		else if (m_is_power_punching) {
 			attack = powerPunch();
 			m_holding_power_punch_timer = 0;
-			m_is_power_punching = false;
 		}
 		// Tired out status
 		if (m_tired_out) {
@@ -336,6 +335,77 @@ void Fighter::draw(const mat3 &projection)
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
+
+	if (get_alive())
+	{
+		if (is_paused()) {
+
+		}
+
+		else if (is_punching())
+		{
+			if (!is_crouching()) {
+				if (m_fc == POTATO) f_texture = POTATO_PUNCH_TEXTURE;
+				else f_texture = BROCCOLI_PUNCH_TEXTURE;
+			}
+			else if (is_crouching()) {
+				if (m_fc == POTATO) f_texture = POTATO_CROUCH_PUNCH_TEXTURE;
+				else f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
+			}
+		}
+
+		else if (!is_punching() && is_crouching())
+		{
+			if (m_fc == POTATO) f_texture = POTATO_CROUCH_TEXTURE;
+			else f_texture = BROCCOLI_CROUCH_TEXTURE;
+		}
+
+		else if (is_holding_power_punch())
+		{
+			if (m_fc == POTATO) f_texture = POTATO_CHARGING_TEXTURE;
+		}
+
+		else if (is_power_punching())
+		{
+			m_punch_counter++;
+			if (m_fc == POTATO) f_texture = POTATO_POWER_PUNCH_TEXTURE;
+
+			if (m_punch_counter > 20)
+			{
+				m_punch_counter = 0;
+				set_power_punch(false);
+			}
+		}
+
+		else if (!is_punching())
+		{
+			if (get_alive() && !is_crouching())
+			{
+				m_anim_counter++;
+				if (m_anim_counter < 25)
+				{
+					if (m_fc == POTATO) f_texture = POTATO_IDLE_TEXTURE;
+					else f_texture = BROCCOLI_IDLE_TEXTURE;
+				}
+
+				else if (m_anim_counter > 25 && m_anim_counter < 50)
+				{
+					if (m_fc == POTATO) f_texture = POTATO_TEXTURE;
+					else f_texture = BROCCOLI_TEXTURE;
+				}
+
+				else if (m_anim_counter >= 50)
+					m_anim_counter = 0;
+			}
+		}
+	}
+
+	else if (!get_alive())
+	{
+		if (m_fc == POTATO) f_texture = POTATO_DEATH_TEXTURE;
+		else f_texture = BROCCOLI_DEATH_TEXTURE;
+	}
+
 	glBindTexture(GL_TEXTURE_2D, f_texture.id);
 
 	// Setting uniform values to the currently bound program
@@ -416,7 +486,7 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case PUNCHING:
-		if (!m_is_blocking) {
+		if (!m_is_blocking && !m_tired_out) {
 			m_is_punching = true;
 			m_is_idle = false;
 		}
@@ -449,7 +519,7 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 			break;
 		}
-		else if (m_fc == BROCCOLI){
+		else if (m_fc == BROCCOLI) {
 			m_is_idle = false;
 			break;
 		}
@@ -506,11 +576,17 @@ void Fighter::set_movement(int mov)
 		}
 	case BLOCKING:
 		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
-		if (!m_is_punching && m_blocking_tank >= 1000) 
+		if (!m_is_punching && m_blocking_tank >= 1000)
 			m_is_blocking = true;
 		break;
 	case STOP_BLOCKING:
 		m_is_blocking = false;
+		break;
+	case PAUSED:
+		m_is_paused = true;
+		break;
+	case UNPAUSED:
+		m_is_paused = false;
 		break;
 	}
 }
@@ -714,8 +790,15 @@ void Fighter::check_respawn(float ms) {
 			m_broccoli_uppercut_cooldown = 0;
 			m_is_holding_power_punch = false;
 			m_is_power_punching = false;
+			m_force.x = 0;
+			m_force.y = 0;
 		}
 	}
+}
+
+bool Fighter::is_paused() const
+{
+	return m_is_paused;
 }
 
 bool Fighter::is_hurt() const
@@ -731,6 +814,11 @@ bool Fighter::is_jumping() const
 bool Fighter::is_punching() const
 {
 	return m_is_punching;
+}
+
+bool Fighter::is_power_punching() const
+{
+	return m_is_power_punching;
 }
 
 bool Fighter::is_punching_on_cooldown() const {
@@ -776,6 +864,11 @@ int Fighter::get_crouch_state() {
 
 void Fighter::set_crouch_state(CrouchState cs) {
 	m_crouch_state = cs;
+}
+
+void Fighter::set_power_punch(bool punch)
+{
+	m_is_power_punching = punch;
 }
 
 int Fighter::get_alive() const
@@ -978,3 +1071,4 @@ void Fighter::potato_charging_up_wedges() {
 		m_holding_too_much_timer = 0;
 	}
 }
+
