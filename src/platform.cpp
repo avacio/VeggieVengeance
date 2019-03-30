@@ -1,7 +1,7 @@
 
 #include "platform.hpp"
 
-Texture Platform::fighter_texture;
+Texture Platform::platform_texture;
 
 Platform::Platform(float xpos, float ypos, float width, float height) : m_bounding_box(xpos, ypos, width, height) {
 	m_position = { xpos, ypos };
@@ -102,9 +102,9 @@ bool Platform::check_collision_outer_right(BoundingBox b) {
 
 bool Platform::init() {
 	// Load shared texture
-	if (!fighter_texture.is_valid())
+	if (!platform_texture.is_valid())
 	{
-		if (!fighter_texture.load_from_file(textures_path("grey.png")))
+		if (!platform_texture.load_from_file(textures_path("grey.png")))
 		{
 			fprintf(stderr, "Failed to load bubble texture!");
 			return false;
@@ -112,8 +112,8 @@ bool Platform::init() {
 	}
 
 	// The position corresponds to the center of the texture
-	//float wr = fighter_texture.width * 3.5f;
-	//float hr = fighter_texture.height * 3.5f;
+	//float wr = platform_texture.width * 3.5f;
+	//float hr = platform_texture.height * 3.5f;
 	//float wr = m_size.x / 2;
 	//float hr = m_size.y / 2;
 	float width = m_size.x;
@@ -219,7 +219,7 @@ void Platform::draw(const mat3 &projection) {
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fighter_texture.id);
+	glBindTexture(GL_TEXTURE_2D, platform_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
