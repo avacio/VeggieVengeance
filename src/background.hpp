@@ -26,11 +26,12 @@ class Background : public Renderable, public Screen
 	TextRenderer* reset;
 	TextRenderer* ability1;
 	TextRenderer* ability2;
+	TextRenderer* shield;
 	TextRenderer* punch;
 	TextRenderer* pauseMusic;
-	TextRenderer* resumeMusic;
-	TextRenderer* increaseVolume;
-	TextRenderer* decreaseVolume;
+	TextRenderer* randomSong;
+	TextRenderer* changeSong;
+	TextRenderer* changeVolume;
 
 	TextRenderer* winnerText;
 

@@ -15,6 +15,7 @@
 #define WEDGES_CHARGE_RATE 0.5
 // BROCCOLI
 #define BROCCOLI_MAX_UPPERCUT_COOLDOWN 200
+#define BROCCOLI_UPPERCUT_VERT_VELO 500
 
 #include <math.h>
 #include <cmath>
@@ -260,8 +261,8 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_broccoli_is_double_jumping = false;
 		}
 		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
-			m_velocity_y = -INITIAL_JUMP_VELOCITY;
-			attack = punch();
+			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
+			attack = broccoliUppercut();
 			m_broccoli_is_uppercutting = false;
 			m_broccoli_uppercut_on_cooldown = true;
 		}
@@ -569,6 +570,7 @@ void Fighter::set_movement(int mov)
 			break;
 		}
 		else if (m_fc == BROCCOLI) {
+			m_broccoli_is_uppercutting = false;
 			m_is_idle = true;
 			break;
 		}
@@ -599,10 +601,19 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 		m_health -= damage_effect->m_damage;
 
 		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
-			m_force.x -= 1.f * damage_effect->m_damage;
+			if (damage_effect->m_vert_force > 0) {
+				m_force.x -= 0.3f * damage_effect->m_damage;
+				m_velocity_y = -damage_effect->m_vert_force;
+			} else 
+				m_force.x -= 1.f * damage_effect->m_damage;
 		}
 		else {
-			m_force.x += 1.f * damage_effect->m_damage;
+			if (damage_effect->m_vert_force > 0) {
+				m_force.x += 0.3f * damage_effect->m_damage;
+				m_velocity_y = -damage_effect->m_vert_force;
+			}
+			else
+				m_force.x += 1.f * damage_effect->m_damage;
 		}
 	} else {
 		m_health = 0;
@@ -771,6 +782,12 @@ void Fighter::check_respawn(float ms) {
 			m_potato_is_shooting_fries = false;
 			m_potato_is_holding_wedges = false;
 			m_potato_is_shooting_wedges = false;
+			m_potato_wedges_on_cooldown = false;
+			m_broccoli_is_double_jumping = false;
+			m_broccoli_jump_left = 2;
+			m_broccoli_is_uppercutting = false;
+			m_broccoli_uppercut_on_cooldown = false;
+			m_broccoli_uppercut_cooldown = 0;
 			m_is_holding_power_punch = false;
 			m_is_power_punching = false;
 			m_force.x = 0;
@@ -881,6 +898,10 @@ bool Fighter::broccoli_get_jump_left() {
 	return m_broccoli_jump_left;
 }
 
+bool Fighter::broccoli_is_uppercut_on_cooldown() {
+	return m_broccoli_uppercut_on_cooldown;
+}
+
 //void Fighter::reset(int init_position)
 void Fighter::reset()
 {
@@ -893,6 +914,11 @@ void Fighter::reset()
 	m_potato_is_shooting_fries = false;
 	m_potato_is_holding_wedges = false;
 	m_potato_is_shooting_wedges = false;
+	m_broccoli_is_double_jumping = false;
+	m_broccoli_jump_left = 2;
+	m_broccoli_is_uppercutting = false;
+	m_broccoli_uppercut_on_cooldown = false;
+	m_broccoli_uppercut_cooldown = 0;
 	m_is_holding_power_punch = false;
 	m_is_power_punching = false;
 	m_velocity_y = 0.0;
@@ -916,13 +942,13 @@ Punch * Fighter::punch() {
 		//right facing
 		float xpos = b->xpos + (b->width / 2.0);
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, true);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, true, 0);
 	}
 	else {
 		//left facing
 		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, false);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, false, 0);
 	}
 	delete b;
 	return punch;
@@ -937,13 +963,35 @@ Punch * Fighter::powerPunch() {
 		//right facing
 		float xpos = b->xpos + (b->width / 2.0);
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, true);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, true, 0);
 	}
 	else {
 		//left facing
 		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
 		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, false);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, false, 0);
+	}
+
+	delete b;
+	return punch;
+}
+
+Punch * Fighter::broccoliUppercut() {
+	//create the bounding box based on fighter position
+	float sizeMultiplier = 1.75;
+	BoundingBox* b = get_bounding_box();
+	Punch* punch;
+	if (get_facing_front()) {
+		//right facing
+		float xpos = b->xpos + (b->width / 2.0);
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, BROCCOLI_UPPERCUT_VERT_VELO);
+	}
+	else {
+		//left facing
+		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
+		float width = sizeMultiplier * (b->width / 2.0);
+		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, BROCCOLI_UPPERCUT_VERT_VELO);
 	}
 
 	delete b;
