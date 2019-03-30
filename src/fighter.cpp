@@ -145,7 +145,6 @@ void Fighter::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-	// delete m_nameplate;
 	effect.release();
 }
 

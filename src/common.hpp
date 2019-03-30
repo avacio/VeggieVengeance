@@ -108,6 +108,8 @@ extern Texture BROCCOLI_CROUCH_TEXTURE;
 extern Texture BROCCOLI_DEATH_TEXTURE;
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
+extern Texture PLATFORM_TEXTURE;
+extern Texture BULLET_TEXTURE;
 
 // A Mesh is a collection of a VertexBuffer and an IndexBuffer. A VAO
 // represents a Vertex Array Object and is the container for 1 or more Vertex Buffers and

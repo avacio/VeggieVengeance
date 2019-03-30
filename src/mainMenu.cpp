@@ -69,7 +69,6 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
 	//title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 	title->setPosition({ 80.f, 180.f });
-	set_mode(MENU);
 
 	return true;
 }
@@ -273,17 +272,19 @@ std::string MainMenu::int_to_stat_string(int in) {
 bool MainMenu::set_mode(GameMode mode)
 {
 	m_mode = mode;
+	
 	switch (mode) {
-	case MENU: {
-		reset();
-		init_menu_buttons();
-	}
-	case CHARSELECT:
-		init_select_char_buttons();
-		break;
-	default:
-		break;
-	}
+		case MENU: {
+			reset();
+			init_menu_buttons();
+		}
+		case CHARSELECT:
+			init_menu_buttons();
+			init_select_char_buttons();
+			break;
+		default:
+			break;
+		}
 	return true;
 }
 

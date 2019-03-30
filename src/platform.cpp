@@ -101,15 +101,7 @@ bool Platform::check_collision_outer_right(BoundingBox b) {
 
 
 bool Platform::init() {
-	// Load shared texture
-	if (!platform_texture.is_valid())
-	{
-		if (!platform_texture.load_from_file(textures_path("grey.png")))
-		{
-			fprintf(stderr, "Failed to load bubble texture!");
-			return false;
-		}
-	}
+	platform_texture = PLATFORM_TEXTURE;
 
 	// The position corresponds to the center of the texture
 	//float wr = platform_texture.width * 3.5f;

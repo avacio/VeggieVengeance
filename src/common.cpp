@@ -69,6 +69,8 @@ Texture BROCCOLI_DEATH_TEXTURE;
 
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
+Texture PLATFORM_TEXTURE;
+Texture BULLET_TEXTURE;
 
 float dot(vec2 l, vec2 r)
 {
@@ -376,7 +378,9 @@ bool load_all_sprites_from_file() {
 		BROCCOLI_DEATH_TEXTURE.load_from_file(textures_path("broccoli_death.png")) &&
 
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
-		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));
+		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
+		PLATFORM_TEXTURE.load_from_file(textures_path("grey.png")) &&
+		BULLET_TEXTURE.load_from_file(textures_path("french_fry.png"));
 
 	if (!initSuccess) { fprintf(stderr, "Failed to load sprites from file!\n");
 	}
