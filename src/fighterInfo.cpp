@@ -55,7 +55,7 @@ bool load_all_sprites_from_file() {
 		BROCCOLI_DEATH_TEXTURE.load_from_file(textures_path("broccoli_death.png")) &&
 
 		YAM_TEXTURE.load_from_file(textures_path("yam.png")) &&
-		YAM_IDLE_TEXTURE.load_from_file(textures_path("yam.png")) &&
+		YAM_IDLE_TEXTURE.load_from_file(textures_path("yam_idle.png")) &&
 		YAM_PUNCH_TEXTURE.load_from_file(textures_path("yam_punch.png")) &&
 		YAM_POWER_PUNCH_TEXTURE.load_from_file(textures_path("yam_power_punch.png")) &&
 		YAM_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("yam_crouch_punch.png")) &&
