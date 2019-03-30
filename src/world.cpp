@@ -162,6 +162,8 @@ void World::destroy()
 		m_player2.destroy();
 	}
 
+	m_knife.destroy();
+
 	for (auto &ai : m_ais)
 		ai.destroy();
 	m_ais.clear();
@@ -219,6 +221,8 @@ bool World::update(float elapsed_ms)
 		attack_collision();
 		//damage effect removal loop
 		attack_deletion();
+
+		m_knife.update(elapsed_ms);
 		
 		//update players + ai
 		Attack * attack = NULL;
@@ -317,6 +321,8 @@ void World::draw()
 			fighter.draw(projection_2D);
 	} else {
 		m_bg.draw(projection_2D);
+
+		m_knife.draw(projection_2D);
 
 		if (m_player1.get_in_play())
 		{
@@ -646,6 +652,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_PauseMusic();
 	if (action == GLFW_PRESS && key == GLFW_KEY_HOME && Mix_PausedMusic())
 		Mix_ResumeMusic();
+
+	// Spawn mesh for testing purposes
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB)
+		m_knife.init();
 }
 
 

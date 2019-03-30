@@ -13,6 +13,7 @@
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
 #include "platform.hpp"
+#include "knife.hpp"
 
 // stlib
 #include <vector>
@@ -95,6 +96,7 @@ class World
 	Background m_bg;
 	Player1 m_player1;
 	Player2 m_player2;
+	Knife m_knife;
 	std::vector<AI> m_ais;
 	std::vector<Attack*> m_attacks;
 	std::vector<Platform> m_platforms;
