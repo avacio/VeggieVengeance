@@ -49,6 +49,7 @@ set(SOURCE_FILES
 	src/attack.cpp
 	src/punch.cpp
 	src/platform.cpp
+	src/dash.cpp
 
 
     src/project_path.hpp
@@ -69,6 +70,7 @@ set(SOURCE_FILES
 	src/attack.hpp
 	src/punch.hpp
 	src/platform.hpp
+	src/dash.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

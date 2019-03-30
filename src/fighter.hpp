@@ -8,6 +8,7 @@
 #include "punch.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
+#include "dash.hpp"
 #include <set>
 #include <random>
 
@@ -38,6 +39,9 @@ class Fighter : public Renderable
 
 	//get collision object for Broccoli's uppercut ability
 	Punch * broccoliUppercut();
+
+	//get collision object for dash
+	Dash * dash();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -215,7 +219,11 @@ class Fighter : public Renderable
 	const float MAX_HEAL_COOLDOWN = 1000.0;
 	const float MAX_HEAL_ANIMATION = 200.0;
 	const int RECOVERY_POINTS = 5;
-
+	bool m_yam_start_dashing = false;
+	float m_yam_dash_cooldown_ms = 0.0;
+	float m_yam_dash_timer_ms = 0.0;
+	const float MAX_DASH_TIMER = 500.0;
+	const float MAX_DASH_COOLDOWN = 1000.0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

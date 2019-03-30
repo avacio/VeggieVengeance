@@ -275,7 +275,36 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_broccoli_uppercut_cooldown++;
 		}
 
-		//EGGPLANT
+		//YAM
+		//Ability 1: Dash
+		if (m_yam_start_dashing) {
+			if (m_yam_dash_cooldown_ms <= 0.0) {
+				m_yam_dash_timer_ms = MAX_DASH_TIMER;
+			}
+			m_yam_start_dashing = false;
+		}
+		if (m_yam_dash_cooldown_ms > 0.0) {
+			m_yam_dash_cooldown_ms -= ms;
+		}
+		if (m_yam_dash_timer_ms > 0.0) {
+			float target_ms_per_frame = 1000.f / 60.f;
+			float speed_scale = ms / target_ms_per_frame;
+			if (!m_moving_backward && !m_moving_forward)
+				speed_scale *= 2.0;
+			if (m_facing_front && m_position.x < 1150.f) {
+				move({ m_speed * speed_scale, 0.0 });
+			}
+			else if (!m_facing_front && m_position.x > 50.f) {
+				move({ -m_speed * speed_scale, 0.0 });
+			}
+			m_yam_dash_timer_ms -= ms;
+			if (m_yam_dash_timer_ms <= 0.0) {
+				m_yam_dash_cooldown_ms = MAX_DASH_COOLDOWN;
+				attack = dash();
+			}
+		}
+
+		//YAM
 		//Ability 2: Heal
 		if (m_yam_is_healing) {
 			if (m_yam_heal_cooldown_ms <= 0.0) {
@@ -285,8 +314,8 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				//reset cooldown and state
 				m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
 				m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
-				m_yam_is_healing = false;
 			}
+			m_yam_is_healing = false;
 		}
 		if (m_yam_heal_cooldown_ms > 0.0) {
 			m_yam_heal_cooldown_ms -= ms;
@@ -611,6 +640,9 @@ void Fighter::set_movement(int mov)
 		break;
 	case HEAL:
 		m_yam_is_healing = true;
+		break;
+	case DASH:
+		m_yam_start_dashing = true;
 		break;
 	}
 }
@@ -1100,4 +1132,11 @@ void Fighter::potato_charging_up_wedges() {
 
 float Fighter::get_heal_animation() {
 	return m_yam_heal_animation_ms;
+}
+
+Dash * Fighter::dash() {
+	BoundingBox* b = get_bounding_box();
+	Dash* dash = new Dash(get_id(), { b->xpos, b->ypos }, { b->width, b->height }, m_strength, 0);
+	delete b;
+	return dash;
 }

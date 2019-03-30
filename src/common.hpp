@@ -190,7 +190,8 @@ enum FighterMovementState
 	STOP_ABILITIES = 17,
 	PAUSED = 18,
 	UNPAUSED = 19,
-	HEAL = 20
+	HEAL = 20,
+	DASH = 21
 };
 
 
