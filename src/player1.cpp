@@ -65,45 +65,31 @@ void Player1::draw(const mat3 &projection)
 			m_anim_counter++;
 			if (m_anim_counter < 15)
 			{
-				if (m_fc == POTATO) p_texture = POTATO_TIRED_1_TEXTURE;
+				set_sprite(TIRED_1);
 			}
 
 			else if (m_anim_counter > 15 && m_anim_counter < 75)
 			{
-				if (m_fc == POTATO) p_texture = POTATO_TIRED_2_TEXTURE;
+				set_sprite(TIRED_2);
 			}
 
 			else if (m_anim_counter >= 75)
 				m_anim_counter = 0;
 		}
 
-		else if (is_punching())
-		{
-			if (!is_crouching()) {
-				if (m_fc == POTATO) p_texture = POTATO_PUNCH_TEXTURE;
-				else p_texture = BROCCOLI_PUNCH_TEXTURE;
-			}
-			else if (is_crouching()) {
-				if (m_fc == POTATO) p_texture = POTATO_CROUCH_PUNCH_TEXTURE;
-				else p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
-			}
+		else if (is_punching()) {
+			if (!is_crouching()) { set_sprite(PUNCH); }
+			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
 		}
 
-		else if (!is_punching() && is_crouching())
-		{
-			if (m_fc == POTATO) p_texture = POTATO_CROUCH_TEXTURE;
-			else p_texture = BROCCOLI_CROUCH_TEXTURE;
-		}
+		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
-		else if (is_holding_power_punch())
-		{
-			if (m_fc == POTATO) p_texture = POTATO_CHARGING_TEXTURE;
-		}
+		else if (is_holding_power_punch()) { set_sprite(CHARGING); }
 
 		else if (is_power_punching())
 		{
 			m_punch_counter++;
-			if (m_fc == POTATO) p_texture = POTATO_POWER_PUNCH_TEXTURE;
+			set_sprite(POWER_PUNCH);
 
 			if (m_punch_counter > 20)
 			{
@@ -111,24 +97,13 @@ void Player1::draw(const mat3 &projection)
 				set_power_punch(false);
 			}
 		}
-
 		else if (!is_punching())
 		{
 			if (get_alive() && !is_crouching())
 			{
 				m_anim_counter++;
-				if (m_anim_counter < 25)
-				{
-					if (m_fc == POTATO) p_texture = POTATO_IDLE_TEXTURE;
-					else p_texture = BROCCOLI_IDLE_TEXTURE;
-				}
-
-				else if (m_anim_counter > 25 && m_anim_counter < 50)
-				{
-					if (m_fc == POTATO) p_texture = POTATO_TEXTURE;
-					else p_texture = BROCCOLI_TEXTURE;
-				}
-
+				if (m_anim_counter < 25) { set_sprite(IDLE); }
+				else if (m_anim_counter > 25 && m_anim_counter < 50) { set_sprite(ORIGINAL); }
 				else if (m_anim_counter >= 50)
 					m_anim_counter = 0;
 			}
@@ -136,10 +111,7 @@ void Player1::draw(const mat3 &projection)
 	}
 
 	else if (!get_alive())
-	{
-		if (m_fc == POTATO) p_texture = POTATO_DEATH_TEXTURE;
-		else p_texture = BROCCOLI_DEATH_TEXTURE;
-	}
+	{ set_sprite(DEATH); }
 
 	glBindTexture(GL_TEXTURE_2D, p_texture.id);
 
@@ -169,4 +141,60 @@ bool Player1::get_in_play() const
 void Player1::set_in_play(bool value)
 {
 	m_in_play = value;
+}
+
+void Player1::set_sprite(SpriteType st) const {
+	if (m_fc == POTATO) {
+		switch (st) {
+		default: p_texture = POTATO_TEXTURE; break;
+		case IDLE: p_texture = POTATO_IDLE_TEXTURE; break;
+		case PUNCH: p_texture = POTATO_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: p_texture = POTATO_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: p_texture = POTATO_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: p_texture = POTATO_CROUCH_TEXTURE; break;
+		case CHARGING: p_texture = POTATO_CHARGING_TEXTURE; break;
+		case DEATH: p_texture = POTATO_DEATH_TEXTURE; break;
+		case TIRED_1: p_texture = POTATO_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = POTATO_TIRED_2_TEXTURE; break;
+		}
+	}
+	else if (m_fc == BROCCOLI) {
+		switch (st) {
+		default: p_texture = BROCCOLI_TEXTURE; break;
+		case IDLE: p_texture = BROCCOLI_IDLE_TEXTURE; break;
+		case PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break; // TODO: STUB
+		case CROUCH_PUNCH: p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: p_texture = BROCCOLI_CROUCH_TEXTURE; break;
+		case DEATH: p_texture = BROCCOLI_DEATH_TEXTURE; break;
+		}
+	}
+	else if (m_fc == EGGPLANT) { // TODO: STUB
+		switch (st) {
+		default: p_texture = YAM_TEXTURE; break;
+		case IDLE: p_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: p_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: p_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: p_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: p_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: p_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: p_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: p_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = YAM_TIRED_2_TEXTURE; break;
+		}
+	}
+	else if (m_fc == YAM) {
+		switch (st) {
+		default: p_texture = YAM_TEXTURE; break;
+		case IDLE: p_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: p_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: p_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: p_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: p_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: p_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: p_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: p_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = YAM_TIRED_2_TEXTURE; break;
+		}
+	}
 }

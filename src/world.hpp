@@ -117,7 +117,6 @@ class World
 	float m_heat_wave_time = -1;
 
 	/////////
-	std::map<FighterCharacter, FighterInfo> fighterInfoMap;
 	FighterCharacter selectedP1 = POTATO; // POTATO
 	FighterCharacter selectedP2 = POTATO; // POTATO
 

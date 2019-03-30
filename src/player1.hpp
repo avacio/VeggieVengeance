@@ -2,6 +2,7 @@
 // internal
 #include "common.hpp"
 #include "fighter.hpp"
+#include "fighterInfo.hpp"
 
 class Player1 : public Fighter
 {
@@ -12,6 +13,7 @@ class Player1 : public Fighter
 	Player1(unsigned int id);
 	bool get_in_play() const;
 	void set_in_play(bool value);
+	void set_sprite(SpriteType st) const;
 
 	// Renders the salmon
 	// projection is the 2D orthographic projection matrix

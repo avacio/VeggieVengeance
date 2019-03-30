@@ -47,8 +47,6 @@ float dot(vec3 l, vec3 r);
 mat3 mul(const mat3 &l, const mat3 &r);
 vec2 normalize(vec2 v);
 int get_random_number(int max);
-bool load_all_sprites_from_file();
-
 
 // OpenGL utilities
 // cleans error buffer
@@ -87,27 +85,6 @@ struct Texture
 	bool create_from_screen(GLFWwindow const *const window);
 	bool is_valid() const; // True if texture is valid
 };
-
-extern Texture POTATO_TEXTURE;
-extern Texture POTATO_IDLE_TEXTURE;
-extern Texture POTATO_PUNCH_TEXTURE;
-extern Texture POTATO_POWER_PUNCH_TEXTURE;
-extern Texture POTATO_POWER_PUNCH_TEXTURE;
-extern Texture POTATO_CROUCH_PUNCH_TEXTURE;
-extern Texture POTATO_CROUCH_TEXTURE;
-extern Texture POTATO_CHARGING_TEXTURE;
-extern Texture POTATO_DEATH_TEXTURE;
-extern Texture POTATO_TIRED_1_TEXTURE;
-extern Texture POTATO_TIRED_2_TEXTURE;
-
-extern Texture BROCCOLI_TEXTURE;
-extern Texture BROCCOLI_IDLE_TEXTURE;
-extern Texture BROCCOLI_PUNCH_TEXTURE;
-extern Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
-extern Texture BROCCOLI_CROUCH_TEXTURE;
-extern Texture BROCCOLI_DEATH_TEXTURE;
-extern Texture MAIN_MENU_TEXTURE;
-extern Texture BACKGROUND_TEXTURE;
 
 // A Mesh is a collection of a VertexBuffer and an IndexBuffer. A VAO
 // represents a Vertex Array Object and is the container for 1 or more Vertex Buffers and
@@ -203,31 +180,6 @@ enum DeletionTime
 	AFTER_OUT_OF_BOUNDS
 };
 
-enum FighterCharacter
-{
-	BLANK = 0,
-	POTATO,
-	BROCCOLI
-};
-
-struct FighterInfo
-{
-public:
-	void setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names);
-
-	FighterCharacter fc;
-	std::string sciName;
-	int strength;
-	int speed;
-
-	std::string getFCName();
-	void clearTaken();
-
-protected:
-	std::vector<std::string> names;
-	std::vector<std::string> takenNames;
-};
-
 enum GameMode
 {
 	MENU = 0,
@@ -248,4 +200,3 @@ enum PauseMenuOption
 
 // For console log printing
 static const char* ModeMap[] = { "MENU", "CHARSELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
-

@@ -20,8 +20,8 @@ Projectile::Projectile(int id, vec2 pos, float add_velo, unsigned int damage, bo
 	m_delete_when = AFTER_HIT;
 	m_damageEffect = new DamageEffect(m_position.x, m_position.y, m_width, m_height, m_damage, m_fighter_id, m_delete_when, 0);
 
-	m_acceleration = 0.5;
-
+	m_acceleration = 0.5f;
+	m_bounce_loss = 0.75f;
 }
 
 Projectile::~Projectile() {
@@ -88,8 +88,17 @@ bool Projectile::init() {
 }
 
 void Projectile::update(float ms) {
-	m_position.x += m_velocity.x;
-	m_position.y += m_velocity.y;
+	float target_ms_per_frame = 1000.f / 60.f;
+	float speed_scale = ms / target_ms_per_frame;
+
+	m_position.x += m_velocity.x * speed_scale;
+	m_position.y += m_velocity.y * speed_scale;
+
+	if (m_position.y > 630.f) {
+		m_velocity.y = -m_velocity.y * m_bounce_loss;
+		m_position.y = 630.f;
+	}
+
 	m_damageEffect->m_bounding_box.xpos = m_position.x;
 	m_damageEffect->m_bounding_box.ypos = m_position.y;
 
