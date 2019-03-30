@@ -27,8 +27,6 @@ Fighter::Fighter(unsigned int id) : m_id(id) {
 
 bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 {	
-	std::cout << "FIGHTER INITIALIZED: " << fc << std::endl;
-
 	// Load shared texture
 	m_fc = fc;
 	set_sprite(ORIGINAL);
@@ -93,23 +91,12 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
 	m_rotation = 0.f;
 	m_health = MAX_HEALTH;
-	switch (fc) {
-	case POTATO:
-		m_speed = 3.f;
-		m_strength = 5;
-		m_mass = 1.f;
-		break;
-	case BROCCOLI:
-		m_speed = 5.f;
-		m_strength = 3;
-		m_mass = 1.f;
-		break;
-	DEFAULT:
-		m_speed = 5.f;
-		m_strength = 3;
-		m_mass = 1.f;
-		break;
-	};
+
+	// initialized in fighterInfo.cpp
+	m_speed = fighterMap[m_fc].speed * 1.5f;
+	m_strength = fighterMap[m_fc].strength;
+	m_mass = 1.f;
+	
 	m_lives = STARTING_LIVES;
 	m_velocity_y = 0.0;
 	m_name = name;
@@ -278,10 +265,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			}
 			else
 				m_broccoli_uppercut_cooldown++;
-		}
-
-		
-			
+		}	
 	}
 	else
 	{
@@ -346,27 +330,14 @@ void Fighter::draw(const mat3 &projection)
 		if (is_paused()) {
 
 		}
-
-		else if (is_punching())
-		{
-			if (!is_crouching()) {
-				set_sprite(PUNCH);
-			}
-			else if (is_crouching()) {
-				set_sprite(CROUCH_PUNCH);
-
-			}
+		else if (is_punching()) {
+			if (!is_crouching()) { set_sprite(PUNCH); }
+			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
 		}
 
-		else if (!is_punching() && is_crouching())
-		{
-			set_sprite(CROUCH);
-		}
+		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
-		else if (is_holding_power_punch())
-		{
-			set_sprite(CHARGING);
-		}
+		else if (is_holding_power_punch()) { set_sprite(CHARGING); }
 
 		else if (is_power_punching())
 		{
@@ -379,22 +350,13 @@ void Fighter::draw(const mat3 &projection)
 				set_power_punch(false);
 			}
 		}
-
 		else if (!is_punching())
 		{
 			if (get_alive() && !is_crouching())
 			{
 				m_anim_counter++;
-				if (m_anim_counter < 25)
-				{
-					set_sprite(IDLE);
-				}
-
-				else if (m_anim_counter > 25 && m_anim_counter < 50)
-				{
-					set_sprite(ORIGINAL);
-				}
-
+				if (m_anim_counter < 25) { set_sprite(IDLE); }
+				else if (m_anim_counter > 25 && m_anim_counter < 50) { set_sprite(ORIGINAL); }
 				else if (m_anim_counter >= 50)
 					m_anim_counter = 0;
 			}
@@ -403,8 +365,7 @@ void Fighter::draw(const mat3 &projection)
 
 	else if (!get_alive())
 	{
-		if (m_fc == POTATO) f_texture = POTATO_DEATH_TEXTURE;
-		else f_texture = BROCCOLI_DEATH_TEXTURE;
+		set_sprite(DEATH);
 	}
 
 	glBindTexture(GL_TEXTURE_2D, f_texture.id);
@@ -1075,52 +1036,57 @@ void Fighter::potato_charging_up_wedges() {
 	}
 }
 
-//extern Texture get_sprite(FighterCharacter fc, SpriteType st) {
-//	std::cout << "fc: " << fc << ", st: " << st << std::endl;
-//
-//	return BROCCOLI_DEATH_TEXTURE;
-//	//if (fc == POTATO) {
-//	//	switch (st) {
-//	//	case ORIGINAL: { t = POTATO_TEXTURE; break; }
-//	//	case IDLE: return POTATO_IDLE_TEXTURE;
-//	//	case PUNCH: return POTATO_PUNCH_TEXTURE;
-//	//	case POWER_PUNCH: return POTATO_POWER_PUNCH_TEXTURE;
-//	//	}
-//	//} else if (fc == BROCCOLI) {
-//	//	switch (st) {
-//	//	case ORIGINAL: return BROCCOLI_TEXTURE;
-//	//	case IDLE: return BROCCOLI_IDLE_TEXTURE;
-//	//	}
-//	//}
-//	//return t;
-//}
-
 void Fighter::set_sprite(SpriteType st) const {
 	if (m_fc == POTATO) {
-			switch (st) {
+		switch (st) {
 			default: f_texture = POTATO_TEXTURE; break;
 			case IDLE: f_texture = POTATO_IDLE_TEXTURE; break;
-			//case PUNCH: return POTATO_PUNCH_TEXTURE;
-			//case POWER_PUNCH: return POTATO_POWER_PUNCH_TEXTURE;
-			}
+			case PUNCH: f_texture = POTATO_PUNCH_TEXTURE; break;
+			case POWER_PUNCH: f_texture = POTATO_POWER_PUNCH_TEXTURE; break;
+			case CROUCH_PUNCH: f_texture = POTATO_CROUCH_PUNCH_TEXTURE; break;
+			case CROUCH: f_texture = POTATO_CROUCH_TEXTURE; break;
+			case CHARGING: f_texture = POTATO_CHARGING_TEXTURE; break;
+			case DEATH: f_texture = POTATO_DEATH_TEXTURE; break;
+			case TIRED_1: f_texture = POTATO_TIRED_1_TEXTURE; break;
+			case TIRED_2: f_texture = POTATO_TIRED_2_TEXTURE; break;
+		}
 	}
 	else if (m_fc == BROCCOLI) {
 		switch (st) {
-		default: f_texture = BROCCOLI_TEXTURE; break;
-		case IDLE: f_texture = BROCCOLI_IDLE_TEXTURE; break;
+			default: f_texture = BROCCOLI_TEXTURE; break;
+			case IDLE: f_texture = BROCCOLI_IDLE_TEXTURE; break;
+			case PUNCH: f_texture = BROCCOLI_PUNCH_TEXTURE; break;
+			case POWER_PUNCH: f_texture = BROCCOLI_PUNCH_TEXTURE; break; // TODO: STUB
+			case CROUCH_PUNCH: f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
+			case CROUCH: f_texture = BROCCOLI_CROUCH_TEXTURE; break;
+			case DEATH: f_texture = BROCCOLI_DEATH_TEXTURE; break;
 		}
 	}
-	else if (m_fc == EGGPLANT) {
+	else if (m_fc == EGGPLANT) { // TODO: STUB
 		switch (st) {
 		default: f_texture = YAM_TEXTURE; break;
 		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: f_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: f_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: f_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: f_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: f_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: f_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: f_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
 		}
-	//} else if (m_fc == YAM) {
-	}
-	else {
+	} else if (m_fc == YAM) {
 		switch (st) {
 		default: f_texture = YAM_TEXTURE; break;
 		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: f_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: f_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: f_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: f_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: f_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: f_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: f_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
 		}
 	}
 }
