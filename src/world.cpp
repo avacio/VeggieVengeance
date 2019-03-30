@@ -129,15 +129,9 @@ bool World::init(vec2 screen, GameMode mode)
 
 	// Playing background music undefinitely
 	Mix_PlayMusic(m_bgms[m_background_track], -1);
-
 	fprintf(stderr, "Loaded music\n");
-
-	FighterInfo potato, broccoli;
-	potato.setInfo(POTATO, 5, 1, "solanum tuberosum", { "Spud", "PoeTatum", "BabyTater", "TaterHater" });
-	fighterInfoMap[POTATO] = potato;
-	broccoli.setInfo(BROCCOLI, 3, 3, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" });
-	fighterInfoMap[BROCCOLI] = broccoli;
-	fprintf(stderr, "Loaded fighter templates\n");
+	
+	load_fighter_templates();
 
 	m_screen = screen; // to pass on screen size to renderables
 
@@ -149,7 +143,7 @@ bool World::init(vec2 screen, GameMode mode)
 	spawn_platform(847, 440, 220, 10);
 	spawn_platform(375, 308, 453, 10);
 
-	//return m_menu.init(m_screen, fighterInfoMap) && m_water.init() && initSuccess;
+	//return m_menu.init(m_screen, fighterMap) && m_water.init() && initSuccess;
 	return m_water.init() && initSuccess;
 }
 
@@ -766,16 +760,14 @@ bool World::set_mode(GameMode mode) {
 			spawn_ai(RANDOM, POTATO);
 			set_paused(false);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f}); // TODO
-			//m_menu.is_player_1_chosen = false;
-			m_menu.m_selected_mode = MENU;
-			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap) && m_menu.set_mode(MENU);
+			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(MENU);
 			break;
 		case CHARSELECT:
 		{
 			m_player1.set_in_play(true);
 			spawn_ai(RANDOM, POTATO);
 			m_ais[0].set_position({ 250.f, m_screen.y*.85f }); // TODO
-			initSuccess = initSuccess && m_menu.init(m_screen, fighterInfoMap) && m_menu.set_mode(CHARSELECT);
+			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(CHARSELECT);
 			break;
 		}
 		case DEV: {
@@ -801,18 +793,18 @@ bool World::set_mode(GameMode mode) {
 		case PVP: // 2 player
 			m_player1.set_in_play(true);
 			m_player2.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && m_player2.init(2, fighterInfoMap[selectedP2].getFCName(), selectedP2) && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && m_player2.init(2, fighterMap[selectedP2].getFCName(), selectedP2) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			m_fighters.emplace_back(m_player2);
 			break;
 		case PVC: // single player
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			break;
 		case TUTORIAL:
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterInfoMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
+			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode);
 			m_fighters.emplace_back(m_player1);
 			break;
 		default:
@@ -868,7 +860,7 @@ void World::clear_all_fighters() {
 	m_fighters.clear();
 
 	std::map<FighterCharacter, FighterInfo>::iterator it;
-	for (it = fighterInfoMap.begin(); it != fighterInfoMap.end(); it++)
+	for (it = fighterMap.begin(); it != fighterMap.end(); it++)
 	{
 		it->second.clearTaken();
 	}

@@ -124,7 +124,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	winnerText = new TextRenderer(mainFontBold, 38);
 	winnerText->setColor({ 0.4f,0.1f,0.1f });
-	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaa");
+	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaaaaaaa");
 	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
 
 	init_buttons();

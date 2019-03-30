@@ -64,12 +64,12 @@ void Player1::draw(const mat3 &projection)
 			m_anim_counter++;
 			if (m_anim_counter < 15)
 			{
-				if (m_fc == POTATO) p_texture = POTATO_TIRED_1_TEXTURE;
+				set_sprite(TIRED_1);
 			}
 
 			else if (m_anim_counter > 15 && m_anim_counter < 75)
 			{
-				if (m_fc == POTATO) p_texture = POTATO_TIRED_2_TEXTURE;
+				set_sprite(TIRED_2);
 			}
 
 			else if (m_anim_counter >= 75)
@@ -79,12 +79,10 @@ void Player1::draw(const mat3 &projection)
 		else if (is_punching())
 		{
 			if (!is_crouching()) {
-				if (m_fc == POTATO) p_texture = POTATO_PUNCH_TEXTURE;
-				else p_texture = BROCCOLI_PUNCH_TEXTURE;
+				set_sprite(PUNCH);
 			}
 			else if (is_crouching()) {
-				if (m_fc == POTATO) p_texture = POTATO_CROUCH_PUNCH_TEXTURE;
-				else p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
+				set_sprite(CROUCH_PUNCH);
 			}
 		}
 

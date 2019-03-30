@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "damageEffect.hpp"
 #include "platform.hpp"
 #include "textRenderer.hpp"
@@ -82,6 +83,8 @@ class Fighter : public Renderable
 	unsigned int get_id() const;
 
 	FighterCharacter get_fc() const;
+	void set_sprite(SpriteType st) const;
+
 
 	//void jump_update();
 	void apply_friction();

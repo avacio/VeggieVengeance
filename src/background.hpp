@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
 

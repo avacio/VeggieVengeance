@@ -2,6 +2,7 @@
 // internal
 #include "common.hpp"
 #include "fighter.hpp"
+#include "fighterInfo.hpp"
 
 class Player2 : public Fighter
 {

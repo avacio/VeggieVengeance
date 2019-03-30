@@ -22,16 +22,16 @@
 
 Texture Fighter::f_texture;
 
-
 Fighter::Fighter(unsigned int id) : m_id(id) {
 }
 
 bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
-{
+{	
+	std::cout << "FIGHTER INITIALIZED: " << fc << std::endl;
+
 	// Load shared texture
 	m_fc = fc;
-	if (fc == BROCCOLI) { f_texture = BROCCOLI_TEXTURE; }
-	else { f_texture = POTATO_TEXTURE; }
+	set_sprite(ORIGINAL);
 
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
@@ -100,6 +100,11 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 		m_mass = 1.f;
 		break;
 	case BROCCOLI:
+		m_speed = 5.f;
+		m_strength = 3;
+		m_mass = 1.f;
+		break;
+	DEFAULT:
 		m_speed = 5.f;
 		m_strength = 3;
 		m_mass = 1.f;
@@ -345,30 +350,28 @@ void Fighter::draw(const mat3 &projection)
 		else if (is_punching())
 		{
 			if (!is_crouching()) {
-				if (m_fc == POTATO) f_texture = POTATO_PUNCH_TEXTURE;
-				else f_texture = BROCCOLI_PUNCH_TEXTURE;
+				set_sprite(PUNCH);
 			}
 			else if (is_crouching()) {
-				if (m_fc == POTATO) f_texture = POTATO_CROUCH_PUNCH_TEXTURE;
-				else f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
+				set_sprite(CROUCH_PUNCH);
+
 			}
 		}
 
 		else if (!is_punching() && is_crouching())
 		{
-			if (m_fc == POTATO) f_texture = POTATO_CROUCH_TEXTURE;
-			else f_texture = BROCCOLI_CROUCH_TEXTURE;
+			set_sprite(CROUCH);
 		}
 
 		else if (is_holding_power_punch())
 		{
-			if (m_fc == POTATO) f_texture = POTATO_CHARGING_TEXTURE;
+			set_sprite(CHARGING);
 		}
 
 		else if (is_power_punching())
 		{
 			m_punch_counter++;
-			if (m_fc == POTATO) f_texture = POTATO_POWER_PUNCH_TEXTURE;
+			set_sprite(POWER_PUNCH);
 
 			if (m_punch_counter > 20)
 			{
@@ -384,14 +387,12 @@ void Fighter::draw(const mat3 &projection)
 				m_anim_counter++;
 				if (m_anim_counter < 25)
 				{
-					if (m_fc == POTATO) f_texture = POTATO_IDLE_TEXTURE;
-					else f_texture = BROCCOLI_IDLE_TEXTURE;
+					set_sprite(IDLE);
 				}
 
 				else if (m_anim_counter > 25 && m_anim_counter < 50)
 				{
-					if (m_fc == POTATO) f_texture = POTATO_TEXTURE;
-					else f_texture = BROCCOLI_TEXTURE;
+					set_sprite(ORIGINAL);
 				}
 
 				else if (m_anim_counter >= 50)
@@ -1073,4 +1074,55 @@ void Fighter::potato_charging_up_wedges() {
 		m_holding_too_much_timer = 0;
 	}
 }
+
+//extern Texture get_sprite(FighterCharacter fc, SpriteType st) {
+//	std::cout << "fc: " << fc << ", st: " << st << std::endl;
+//
+//	return BROCCOLI_DEATH_TEXTURE;
+//	//if (fc == POTATO) {
+//	//	switch (st) {
+//	//	case ORIGINAL: { t = POTATO_TEXTURE; break; }
+//	//	case IDLE: return POTATO_IDLE_TEXTURE;
+//	//	case PUNCH: return POTATO_PUNCH_TEXTURE;
+//	//	case POWER_PUNCH: return POTATO_POWER_PUNCH_TEXTURE;
+//	//	}
+//	//} else if (fc == BROCCOLI) {
+//	//	switch (st) {
+//	//	case ORIGINAL: return BROCCOLI_TEXTURE;
+//	//	case IDLE: return BROCCOLI_IDLE_TEXTURE;
+//	//	}
+//	//}
+//	//return t;
+//}
+
+void Fighter::set_sprite(SpriteType st) const {
+	if (m_fc == POTATO) {
+			switch (st) {
+			default: f_texture = POTATO_TEXTURE; break;
+			case IDLE: f_texture = POTATO_IDLE_TEXTURE; break;
+			//case PUNCH: return POTATO_PUNCH_TEXTURE;
+			//case POWER_PUNCH: return POTATO_POWER_PUNCH_TEXTURE;
+			}
+	}
+	else if (m_fc == BROCCOLI) {
+		switch (st) {
+		default: f_texture = BROCCOLI_TEXTURE; break;
+		case IDLE: f_texture = BROCCOLI_IDLE_TEXTURE; break;
+		}
+	}
+	else if (m_fc == EGGPLANT) {
+		switch (st) {
+		default: f_texture = YAM_TEXTURE; break;
+		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		}
+	//} else if (m_fc == YAM) {
+	}
+	else {
+		switch (st) {
+		default: f_texture = YAM_TEXTURE; break;
+		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		}
+	}
+}
+
 
