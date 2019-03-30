@@ -146,7 +146,7 @@ class Fighter : public Renderable
 	void potato_charging_up_wedges();
 
   protected:
-  	const int MAX_HEALTH = 100;
+  	int MAX_HEALTH;
 	const int STARTING_LIVES = 3;
 
 	int m_health;

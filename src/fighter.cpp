@@ -90,13 +90,14 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_scale.y = 1.2f;
 	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
 	m_rotation = 0.f;
-	m_health = MAX_HEALTH;
 
 	// initialized in fighterInfo.cpp
+	MAX_HEALTH = fighterMap[m_fc].health;
 	m_speed = fighterMap[m_fc].speed * 1.5f;
 	m_strength = fighterMap[m_fc].strength;
 	m_mass = 1.f;
 	
+	m_health = MAX_HEALTH;
 	m_lives = STARTING_LIVES;
 	m_velocity_y = 0.0;
 	m_name = name;

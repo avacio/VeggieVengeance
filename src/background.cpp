@@ -313,7 +313,7 @@ void Background::drawPlayerInfo(const mat3& projection) {
 
 void Background::handleText(const mat3& projection) {
 	if (m_is_game_over) {
-		winnerText->renderString(projection, "CREAM OF THE CROP:" + winnerName);
+		winnerText->renderString(projection, "CREAM OF THE CROP: " + winnerName);
 		buttons[0]->renderString(projection, "RESTART");
 		buttons[1]->renderString(projection, "MAIN MENU");
 		buttons[2]->renderString(projection, "QUIT");
