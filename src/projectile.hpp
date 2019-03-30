@@ -14,4 +14,5 @@ public:
 	void draw(const mat3 &projection) override;
 private:
 	float m_acceleration;
+	float m_bounce_loss;
 };
