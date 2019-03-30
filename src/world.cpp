@@ -620,6 +620,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			{
 				PauseMenuOption selectedOption = m_bg.get_selected();
 				if (selectedOption == RESUME) {
+					m_bg.setHelp(false);
 					set_paused(!m_paused);
 				}
 				else if (selectedOption == MAINMENU) {
@@ -644,7 +645,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		}
 
 		// Pausing and resuming game
-		if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) {
+		if (action == GLFW_PRESS && (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_H)) {
 			if (m_player1.get_in_play() && m_player1.get_crouch_state() == IS_CROUCHING) {
 				m_player1.set_crouch_state(CROUCH_RELEASED);
 			}
@@ -652,7 +653,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			if (m_player2.get_in_play() && m_player2.get_crouch_state() == IS_CROUCHING) {
 				m_player2.set_crouch_state(CROUCH_RELEASED);
 			}
-			//m_paused = !m_paused;
+			if (key == GLFW_KEY_H) { m_bg.setHelp(!m_bg.getHelp()); }
 			set_paused(!m_paused);
 		}
 

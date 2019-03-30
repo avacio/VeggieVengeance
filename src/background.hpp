@@ -52,8 +52,11 @@ public:
 	void set_position(vec2 position);
 
 	void setPaused(bool isPaused);
+	void setHelp(bool isHelpOn);
+	bool getHelp();
 	void setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL); // set to -1 if player is not initialized
 	void drawPlayerInfo(const mat3& projection);
+	void handleText(const mat3& projection);
 	void drawTutorialText(const mat3& projection);
 
 	void addNameplate(TextRenderer* td, std::string name);
@@ -72,6 +75,7 @@ private:
 	GameMode m_mode;
 	bool m_paused = false;
 	bool m_is_game_over = false;
+	bool m_help_on = false;
 
 	int p1Lives = -1;
 	int p1HP = -1;
