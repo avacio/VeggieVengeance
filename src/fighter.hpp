@@ -130,6 +130,8 @@ class Fighter : public Renderable
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
+	float get_heal_animation();
+
 	// Potato
 	bool potato_is_holding_wedges() const;
 
@@ -205,6 +207,15 @@ class Fighter : public Renderable
 	bool m_broccoli_is_uppercutting = false;
 	bool m_broccoli_uppercut_on_cooldown = false;
 	float m_broccoli_uppercut_cooldown = 0;
+
+	// yam states
+	bool m_yam_is_healing = false;
+	float m_yam_heal_cooldown_ms = 0;
+	float m_yam_heal_animation_ms = 0.0;
+	const float MAX_HEAL_COOLDOWN = 1000.0;
+	const float MAX_HEAL_ANIMATION = 200.0;
+	const int RECOVERY_POINTS = 5;
+
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

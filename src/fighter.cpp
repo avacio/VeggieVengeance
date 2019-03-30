@@ -160,7 +160,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		m_blocking_tank -= ms;
 	}
 	//Stop blocking if blocking tank is empty
-	if (m_is_blocking && m_blocking_tank <= 0) this->set_movement(STOP_BLOCKING);
+	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
 	//Recharche blocking tank
 	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
 		m_blocking_tank += ms;
@@ -275,6 +275,25 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_broccoli_uppercut_cooldown++;
 		}
 
+		//EGGPLANT
+		//Ability 2: Heal
+		if (m_yam_is_healing) {
+			if (m_yam_heal_cooldown_ms <= 0.0) {
+				// heal, but don't go over the health cap
+				if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
+				else { m_health = MAX_HEALTH; }
+				//reset cooldown and state
+				m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
+				m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
+				m_yam_is_healing = false;
+			}
+		}
+		if (m_yam_heal_cooldown_ms > 0.0) {
+			m_yam_heal_cooldown_ms -= ms;
+		}
+		if(m_yam_heal_animation_ms > 0.0) {
+			m_yam_heal_animation_ms -= ms;
+		}
 		
 			
 	}
@@ -317,6 +336,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
+	GLint heal_animation_uloc = glGetUniformLocation(effect.program, "heal_animation");
 	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
@@ -417,6 +437,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniform1i(is_blocking_uloc, m_is_blocking);
 	glUniform1f(blocking_tank_uloc, (float)  m_blocking_tank);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(heal_animation_uloc, m_yam_heal_animation_ms);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -587,6 +608,9 @@ void Fighter::set_movement(int mov)
 		break;
 	case UNPAUSED:
 		m_is_paused = false;
+		break;
+	case HEAL:
+		m_yam_is_healing = true;
 		break;
 	}
 }
@@ -1074,3 +1098,6 @@ void Fighter::potato_charging_up_wedges() {
 	}
 }
 
+float Fighter::get_heal_animation() {
+	return m_yam_heal_animation_ms;
+}

@@ -189,7 +189,8 @@ enum FighterMovementState
 	POWER_PUNCHING = 16,
 	STOP_ABILITIES = 17,
 	PAUSED = 18,
-	UNPAUSED = 19
+	UNPAUSED = 19,
+	HEAL = 20
 };
 
 
