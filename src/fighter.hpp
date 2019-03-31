@@ -9,6 +9,8 @@
 #include "punch.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
+#include "dash.hpp"
+#include "emoji.hpp"
 #include <set>
 #include <random>
 
@@ -39,6 +41,12 @@ class Fighter : public Renderable
 
 	//get collision object for Broccoli's uppercut ability
 	Punch * broccoliUppercut();
+
+	//get collision object for dash
+	Dash * dash();
+
+	//get collision object for emoji
+	Emoji * emoji();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -133,6 +141,8 @@ class Fighter : public Renderable
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
+	float get_heal_animation();
+
 	// Potato
 	bool potato_is_holding_wedges() const;
 
@@ -208,6 +218,24 @@ class Fighter : public Renderable
 	bool m_broccoli_is_uppercutting = false;
 	bool m_broccoli_uppercut_on_cooldown = false;
 	float m_broccoli_uppercut_cooldown = 0;
+
+	// yam states
+	bool m_yam_is_healing = false;
+	float m_yam_heal_cooldown_ms = 0;
+	float m_yam_heal_animation_ms = 0.0;
+	const float MAX_HEAL_COOLDOWN = 1000.0;
+	const float MAX_HEAL_ANIMATION = 200.0;
+	const int RECOVERY_POINTS = 5;
+	bool m_yam_start_dashing = false;
+	float m_yam_dash_cooldown_ms = 0.0;
+	float m_yam_dash_timer_ms = 0.0;
+	const float MAX_DASH_TIMER = 500.0;
+	const float MAX_DASH_COOLDOWN = 1000.0;
+
+	//eggplant states
+	bool m_eggplant_shoot_emoji = false;
+	float m_eggplant_shoot_cooldown = 0.0;
+	const float MAX_EMOJI_SHOOT_COOLDOWN = 500.0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

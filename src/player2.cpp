@@ -33,6 +33,7 @@ void Player2::draw(const mat3 &projection)
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
 	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
+	GLint heal_animation_uloc = glGetUniformLocation(effect.program, "heal_animation");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
 	// Setting vertices and indices
@@ -124,6 +125,7 @@ void Player2::draw(const mat3 &projection)
 	glUniform1i(is_blocking_uloc, is_blocking());
 	glUniform1f(blocking_tank_uloc, (float)get_blocking_tank());
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(heal_animation_uloc, get_heal_animation());
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);

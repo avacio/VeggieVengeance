@@ -528,6 +528,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_B)
 				m_player1.set_movement(ABILITY_2);
+			if (action == GLFW_PRESS && key == GLFW_KEY_T)
+				m_player1.set_movement(HEAL);
+			if (action == GLFW_PRESS && key == GLFW_KEY_E)
+				m_player1.set_movement(EMOJI_P);
+			if (action == GLFW_PRESS && key == GLFW_KEY_R)
+				m_player1.set_movement(DASH);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
 				m_player1.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
@@ -933,9 +939,13 @@ void World::attack_deletion() {
 			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
 			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
 			//remove from list
-			delete m_attacks[i];
+			Attack * attack = m_attacks[i];
 			m_attacks.erase(m_attacks.begin() + i);
 			i--;
+			attack->deincrement_pointer_references();
+			if (attack->get_pointer_references() == 0) {
+				delete attack;
+			}
 		}
 	}
 }

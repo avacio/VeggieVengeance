@@ -11,6 +11,9 @@ public:
 	DamageEffect * get_damage_effect() const;
 	virtual void draw(const mat3 &projection) override = 0;
 	vec2 getPosition();
+	unsigned int get_pointer_references();
+	void deincrement_pointer_references();
+	void increment_pointer_references();
 
 	int m_fighter_id;
 	vec2 m_scale;
@@ -21,5 +24,6 @@ public:
 	int m_width;
 	int m_height;
 	DeletionTime m_delete_when;
+	unsigned int m_pointer_references = 1;
 
 };

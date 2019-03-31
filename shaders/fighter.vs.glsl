@@ -11,6 +11,7 @@ uniform mat3 transform;
 uniform mat3 projection;
 uniform bool is_hurt;
 uniform bool is_blocking;
+uniform float heal_animation;
 
 
 void main()

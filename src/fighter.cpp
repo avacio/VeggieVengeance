@@ -152,7 +152,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		m_blocking_tank -= ms;
 	}
 	//Stop blocking if blocking tank is empty
-	if (m_is_blocking && m_blocking_tank <= 0) this->set_movement(STOP_BLOCKING);
+	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
 	//Recharche blocking tank
 	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
 		m_blocking_tank += ms;
@@ -265,7 +265,75 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			}
 			else
 				m_broccoli_uppercut_cooldown++;
-		}	
+		}
+
+		//YAM
+		//Ability 1: Dash
+		if (m_yam_start_dashing) {
+			if (m_yam_dash_cooldown_ms <= 0.0) {
+				m_yam_dash_timer_ms = MAX_DASH_TIMER;
+			}
+			m_yam_start_dashing = false;
+		}
+		if (m_yam_dash_cooldown_ms > 0.0) {
+			m_yam_dash_cooldown_ms -= ms;
+		}
+		if (m_yam_dash_timer_ms > 0.0) {
+			float target_ms_per_frame = 1000.f / 60.f;
+			float speed_scale = ms / target_ms_per_frame;
+			if (!m_moving_backward && !m_moving_forward)
+				speed_scale *= 2.0;
+			if (m_facing_front && m_position.x < 1150.f) {
+				move({ m_speed * speed_scale, 0.0 });
+			}
+			else if (!m_facing_front && m_position.x > 50.f) {
+				move({ -m_speed * speed_scale, 0.0 });
+			}
+			m_yam_dash_timer_ms -= ms;
+			if (m_yam_dash_timer_ms <= 0.0) {
+				m_yam_dash_cooldown_ms = MAX_DASH_COOLDOWN;
+				attack = dash();
+			}
+		}
+
+		//YAM
+		//Ability 2: Heal
+		if (m_yam_is_healing) {
+			if (m_yam_heal_cooldown_ms <= 0.0) {
+				// heal, but don't go over the health cap
+				if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
+				else { m_health = MAX_HEALTH; }
+				//reset cooldown and state
+				m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
+				m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
+			}
+			m_yam_is_healing = false;
+		}
+		if (m_yam_heal_cooldown_ms > 0.0) {
+			m_yam_heal_cooldown_ms -= ms;
+		}
+		if(m_yam_heal_animation_ms > 0.0) {
+			m_yam_heal_animation_ms -= ms;
+		}
+
+		//EGGPLANT
+		//Ability 1: Circling emojis
+		/*if (m_eggplant_spawn_emoji) {
+
+		}*/
+
+		//EGGPLANT
+		//Ability 2: Emoji projectile
+		if (m_eggplant_shoot_emoji) {
+			if (m_eggplant_shoot_cooldown <= 0.0) {
+				attack = emoji();
+				m_eggplant_shoot_cooldown = MAX_EMOJI_SHOOT_COOLDOWN;
+			}
+			m_eggplant_shoot_emoji = false;
+		}
+		if (m_eggplant_shoot_cooldown > 0.0) {
+			m_eggplant_shoot_cooldown -= ms;
+		}
 	}
 	else
 	{
@@ -306,6 +374,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
+	GLint heal_animation_uloc = glGetUniformLocation(effect.program, "heal_animation");
 	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
@@ -379,6 +448,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniform1i(is_blocking_uloc, m_is_blocking);
 	glUniform1f(blocking_tank_uloc, (float)  m_blocking_tank);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(heal_animation_uloc, m_yam_heal_animation_ms);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -549,6 +619,15 @@ void Fighter::set_movement(int mov)
 		break;
 	case UNPAUSED:
 		m_is_paused = false;
+		break;
+	case HEAL:
+		m_yam_is_healing = true;
+		break;
+	case DASH:
+		m_yam_start_dashing = true;
+		break;
+	case EMOJI_P:
+		m_eggplant_shoot_emoji = true;
 		break;
 	}
 }
@@ -1036,6 +1115,22 @@ void Fighter::potato_charging_up_wedges() {
 	}
 }
 
+float Fighter::get_heal_animation() {
+	return m_yam_heal_animation_ms;
+}
+
+Dash * Fighter::dash() {
+	BoundingBox* b = get_bounding_box();
+	Dash* dash = new Dash(get_id(), { b->xpos, b->ypos }, { b->width, b->height }, m_strength, 0);
+	delete b;
+	return dash;
+}
+
+Emoji * Fighter::emoji() {
+	Emoji * emoji = new Emoji(get_id(), m_position, m_strength, m_facing_front);
+	return emoji;
+}
+
 void Fighter::set_sprite(SpriteType st) const {
 	if (m_fc == POTATO) {
 		switch (st) {
@@ -1090,5 +1185,3 @@ void Fighter::set_sprite(SpriteType st) const {
 		}
 	}
 }
-
-
