@@ -913,8 +913,8 @@ void World::attack_collision() {
 void World::attack_deletion() {
 	for (int i = 0; i < m_attacks.size(); i++) {
 		if (m_attacks[i]->m_damageEffect->m_delete_when == AFTER_UPDATE ||
-			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
-			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
+			((m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT || m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT_OR_TIME) && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
+			((m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME || m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT_OR_TIME) && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
 			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
 			//remove from list
 			delete m_attacks[i];
