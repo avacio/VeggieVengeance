@@ -38,12 +38,7 @@ Bullet::~Bullet() {
 
 
 bool Bullet::init() {
-	if (!bullet_texture.is_valid()) {
-		if (!bullet_texture.load_from_file(textures_path("french_fry.png"))) {
-			fprintf(stderr, "Failed to load bullet texture!");
-			return false;
-		}
-	}
+	bullet_texture = BULLET_TEXTURE;
 
 	// The position corresponds to the center of the texture
 	float wr = bullet_texture.width * 0.5;

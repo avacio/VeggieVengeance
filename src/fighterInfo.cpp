@@ -34,6 +34,8 @@ Texture YAM_TIRED_2_TEXTURE;
 
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
+Texture PLATFORM_TEXTURE;
+Texture BULLET_TEXTURE;
 
 bool load_all_sprites_from_file() {
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) &&
@@ -66,7 +68,9 @@ bool load_all_sprites_from_file() {
 		YAM_TIRED_2_TEXTURE.load_from_file(textures_path("yam_tired_2.png")) &&
 
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
-		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));
+		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
+		PLATFORM_TEXTURE.load_from_file(textures_path("grey.png")) &&
+		BULLET_TEXTURE.load_from_file(textures_path("french_fry.png"));
 
 	if (!initSuccess) {
 		fprintf(stderr, "Failed to load sprites from file!\n");
@@ -91,9 +95,9 @@ void load_fighter_templates() {
 	fighterMap[POTATO] = potato;
 	broccoli.setInfo(BROCCOLI, 3, 3, 100, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" }, "Bouncy sprouts, uppercut, double-jump");
 	fighterMap[BROCCOLI] = broccoli;
-	eggplant.setInfo(EGGPLANT, 4, 2, 100, "solanum melongena", { "Eggsy", "Aubergine", "PurpleCuke", "Thirsty" }, "Emoji bullets");
+	eggplant.setInfo(EGGPLANT, 4, 2, 100, "solanum melongena", { "Eggsy", "Aubergine", "PurpleCuke", "Thirsty" }, "Circling emojis, emoji bullets");
 	fighterMap[EGGPLANT] = eggplant;
-	yam.setInfo(YAM, 3, 5, 80, "ipomoea batatas", { "YamaJama", "MamaYama", "SweeterThanSpud", "SkinnyPotato" }, "Heal, Gap closure");
+	yam.setInfo(YAM, 3, 5, 80, "ipomoea batatas", { "YamaJama", "MamaYama", "SweetzSpud", "SkinnyPotato" }, "Heal, gap closure");
 	fighterMap[YAM] = yam;
 	fprintf(stderr, "Loaded fighter templates\n");
 }

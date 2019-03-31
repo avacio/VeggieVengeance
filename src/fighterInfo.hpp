@@ -89,3 +89,5 @@ extern Texture BROCCOLI_DEATH_TEXTURE;
 
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
+extern Texture PLATFORM_TEXTURE;
+extern Texture BULLET_TEXTURE;
