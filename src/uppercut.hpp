@@ -4,11 +4,10 @@
 #include "damageEffect.hpp"
 #include "attack.hpp"
 
-class Bullet : public Attack {
-	static Texture bullet_texture;
+class Uppercut : public Attack {
 public:
-	Bullet(int id, vec2 pos, unsigned int damage, bool direction);
-	~Bullet();
+	Uppercut(int id, vec2 pos, vec2 size, unsigned int damage, bool direction, float vert_force, float ms);
+	~Uppercut();
 	bool init();
 	void update(float ms);
 	void draw(const mat3 &projection) override;

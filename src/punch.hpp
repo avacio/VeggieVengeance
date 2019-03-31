@@ -5,9 +5,8 @@
 #include "attack.hpp"
 
 class Punch : public Attack {
-	static Texture bullet_texture;
 public:
-	Punch(int id, vec2 pos, vec2 size, unsigned int damage, bool direction, float vert_force);
+	Punch(int id, vec2 pos, vec2 size, unsigned int damage, bool direction);
 	~Punch();
 	bool init();
 	void update(float ms);

@@ -6,8 +6,10 @@
 #include "textRenderer.hpp"
 #include "attack.hpp"
 #include "punch.hpp"
+#include "uppercut.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
+#include "bomb.hpp"
 #include <set>
 #include <random>
 
@@ -37,7 +39,7 @@ class Fighter : public Renderable
 	Punch * powerPunch();
 
 	//get collision object for Broccoli's uppercut ability
-	Punch * broccoliUppercut();
+	Uppercut * broccoliUppercut();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -132,15 +134,16 @@ class Fighter : public Renderable
 
 	// Potato
 
+
 	// Broccoli
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
 	bool broccoli_is_uppercut_on_cooldown();
-	bool broccoli_is_holding_projectiles() const;
+	bool broccoli_is_holding_cauliflowers() const;
 
 	// Helpers 
 	void charging_up_power_punch();
-	void broccoli_charging_up_projectiles();
+	void broccoli_charging_up_cauliflowers();
 
   protected:
   	const int MAX_HEALTH = 100;
@@ -188,23 +191,35 @@ class Fighter : public Renderable
 	int m_punch_counter = 0;
 	bool m_is_paused = false;
 
-	// potato states
-	bool m_broccoli_is_shooting_projectiles = false;
-	bool m_broccoli_is_holding_projectiles = false;
-	bool m_broccoli_is_shooting_charged_projectiles = false;
+	// POTATO states
+	// ABILITY 1: Tater Tot (Bomb)
+	bool m_potato_is_planting_bomb = false;
+	bool m_potato_bomb_planted = false;
+	bool m_potato_explode_planted_bomb = false;
+	bool m_potato_bomb_on_cooldown = false;
+	float m_potato_bomb_cooldown = 0;
+	// ABILITY 2: Fries (Bullet)
 	bool m_potato_is_shooting_fries = false;
 	bool m_potato_fries_on_cooldown = false;
-	bool m_broccoli_projectiles_on_cooldown = false;
-	float m_broccoli_holding_projectiles_timer = 0;
 	float m_potato_fries_cooldown = 0;
-	float m_broccoli_projectiles_cooldown = 0;
+	
+	
 
 	// broccoli states
+	// PASSIVE: Double Jump
 	bool m_broccoli_is_double_jumping = false;
 	int m_broccoli_jump_left = 2;
+	// ABILITY 1: Uppercut
 	bool m_broccoli_is_uppercutting = false;
 	bool m_broccoli_uppercut_on_cooldown = false;
 	float m_broccoli_uppercut_cooldown = 0;
+	// ABILITY 2: Cauliflower (Projectile)
+	bool m_broccoli_is_shooting_cauliflowers = false;
+	bool m_broccoli_is_holding_cauliflowers = false;
+	bool m_broccoli_is_shooting_charged_cauliflowers = false;
+	bool m_broccoli_cauliflowers_on_cooldown = false;
+	float m_broccoli_holding_cauliflowers_timer = 0;
+	float m_broccoli_cauliflowers_cooldown = 0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

@@ -5,7 +5,7 @@
 class DamageEffect
 {
 public:
-	DamageEffect(int xpos, int ypos, int width, int height, unsigned int damage, int id, DeletionTime delete_when, float vert_force);
+	DamageEffect(int xpos, int ypos, int width, int height, unsigned int damage, int id, DeletionTime delete_when);
 	DamageEffect(int xpos, int ypos, int width, int height, unsigned int damage, int id, DeletionTime delete_when, float vert_force, float ms);
 	BoundingBox m_bounding_box;
 	unsigned int m_damage; //the amount of damage this will deal
