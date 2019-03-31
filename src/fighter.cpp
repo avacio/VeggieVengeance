@@ -627,6 +627,9 @@ void Fighter::set_movement(int mov)
 	case DASH:
 		m_yam_start_dashing = true;
 		break;
+	case EMOJI_P:
+		m_eggplant_shoot_emoji = true;
+		break;
 	}
 }
 

@@ -33,7 +33,7 @@ Emoji::~Emoji() {
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	effect.release();
-	printf("destroyed bullet\n");
+	printf("destroyed emoji\n");
 }
 
 
