@@ -131,16 +131,16 @@ class Fighter : public Renderable
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
 	// Potato
-	bool potato_is_holding_wedges() const;
 
 	// Broccoli
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
 	bool broccoli_is_uppercut_on_cooldown();
+	bool broccoli_is_holding_projectiles() const;
 
 	// Helpers 
 	void charging_up_power_punch();
-	void potato_charging_up_wedges();
+	void broccoli_charging_up_projectiles();
 
   protected:
   	const int MAX_HEALTH = 100;
@@ -189,15 +189,15 @@ class Fighter : public Renderable
 	bool m_is_paused = false;
 
 	// potato states
-	bool m_potato_is_shooting_wedges = false;
-	bool m_potato_is_holding_wedges = false;
-	bool m_potato_is_shooting_charged_wedges = false;
+	bool m_broccoli_is_shooting_projectiles = false;
+	bool m_broccoli_is_holding_projectiles = false;
+	bool m_broccoli_is_shooting_charged_projectiles = false;
 	bool m_potato_is_shooting_fries = false;
 	bool m_potato_fries_on_cooldown = false;
-	bool m_potato_wedges_on_cooldown = false;
-	float m_potato_holding_wedges_timer = 0;
+	bool m_broccoli_projectiles_on_cooldown = false;
+	float m_broccoli_holding_projectiles_timer = 0;
 	float m_potato_fries_cooldown = 0;
-	float m_potato_wedges_cooldown = 0;
+	float m_broccoli_projectiles_cooldown = 0;
 
 	// broccoli states
 	bool m_broccoli_is_double_jumping = false;

@@ -41,7 +41,7 @@ Projectile::~Projectile() {
 
 bool Projectile::init() {
 	if (!projectile_texture.is_valid()) {
-		if (!projectile_texture.load_from_file(textures_path("wedge.png"))) {
+		if (!projectile_texture.load_from_file(textures_path("cauliflower.png"))) {
 			fprintf(stderr, "Failed to load projectile texture!");
 			return false;
 		}
