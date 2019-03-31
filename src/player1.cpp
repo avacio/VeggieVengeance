@@ -94,7 +94,7 @@ void Player1::draw(const mat3 &projection)
 			else p_texture = BROCCOLI_CROUCH_TEXTURE;
 		}
 
-		else if (is_holding_power_punch())
+		else if (is_holding_power_punch() || (m_fc == POTATO && potato_is_holding_fries()))
 		{
 			if (m_fc == POTATO) p_texture = POTATO_CHARGING_TEXTURE;
 		}

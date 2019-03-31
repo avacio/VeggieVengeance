@@ -12,7 +12,7 @@ Uppercut::Uppercut(int id, vec2 pos, vec2 size, unsigned int damage, bool direct
 	
 	this->m_width = size.x;
 	this->m_height = size.y;
-	this->m_delete_when = AFTER_UPDATE;
+	this->m_delete_when = AFTER_TIME;
 	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, vert_force, ms);
 }
 
@@ -24,6 +24,7 @@ bool Uppercut::init() {
 	return true;
 }
 void Uppercut::update(float ms) {
+	m_damageEffect->m_time_remain--;
 	return;
 }
 

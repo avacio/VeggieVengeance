@@ -9,7 +9,7 @@
 #define STATUS_TIRED_OUT_TIME 80
 // POTATO
 #define POTATO_MAX_FRIES_COOLDOWN 100
-#define POTATO_MAX_BOMB_COOLDOWN 800
+#define POTATO_MAX_BOMB_COOLDOWN 300
 #define POTATO_MAX_BOMB_TIMER 500
 
 // BROCCOLI
@@ -221,6 +221,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 
 		// POTATO
 		// ABILTIY 1: Fries  (bullet) 
+		else if (m_potato_is_holding_fries)
+			potato_charging_up_fries();
+		else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
+			attack = new Bullet(get_id(), m_position, 10 + m_potato_holding_fries_timer, m_facing_front);
+			m_potato_fries_on_cooldown = true;
+			m_potato_holding_fries_timer = 0;
+			m_potato_is_shooting_charged_fries = false;
+		}
 		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, 10, m_facing_front);
 			m_potato_fries_on_cooldown = true;
@@ -234,23 +242,39 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_potato_fries_cooldown++;
 		}
 
-		// ABILITY 2: Tater Tot Bomb
+		// ABILITY 2: Tater Tot Bombs
 		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
-			attack = new Bomb(get_id(), m_position, 25, 300, POTATO_MAX_BOMB_TIMER);
+			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
+			bomb_pointer = attack;
+			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;
-			m_potato_bomb_on_cooldown = true;
 		}
 		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			//m_potato_bomb_on_cooldown = true;
-			//m_potato_bomb_planted = false;
+			/*
+			if (bomb_pointer != nullptr) {
+				attack = NULL;
+				delete bomb_pointer;
+				bomb_pointer = NULL;
+			}
+			*/
+			m_potato_bomb_on_cooldown = true;
+			m_potato_bomb_planted = false;
+			m_potato_bomb_ticking = false;
+			m_potato_bomb_selftimer = 0;
+		}
+		if (m_potato_bomb_ticking) {
+			if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
+				m_potato_bomb_on_cooldown = true;
+				m_potato_bomb_selftimer = 0;
+			}
+			else
+				m_potato_bomb_selftimer++;
 		}
 		if (m_potato_bomb_on_cooldown) {
 			if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
 				m_potato_bomb_on_cooldown = false;
-				m_potato_bomb_planted = false;
 				m_potato_bomb_cooldown = 0;
-			}
-			else
+			} else
 				m_potato_bomb_cooldown++;
 		}
 		
@@ -516,45 +540,49 @@ void Fighter::set_movement(int mov)
 		}
 		break;
 	case ABILITY_1:
-		if (m_fc == POTATO) {
+		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
 			if (!m_potato_bomb_planted) m_potato_is_planting_bomb = true;
 			else m_potato_explode_planted_bomb = true;
 			m_is_idle = false;
 			break;
 		}
-		else if (m_fc == BROCCOLI) {
+		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
 			break;
 		}
 	case ABILITY_2:
-		if (m_fc == POTATO) {	
+		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
 			m_potato_is_shooting_fries = true;
 			m_is_idle = false;
 			break;
 		}
-		else if (m_fc == BROCCOLI) {
+		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_shooting_cauliflowers = true;
 			m_is_idle = false;
 			break;
 		}
 	case HOLDING_ABILITY_2:
-		if (m_fc == POTATO) {
+		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
+			m_potato_is_holding_fries = true;
+			m_potato_is_shooting_fries = false;
 			m_is_idle = false;
 			break;
 		}
-		else if (m_fc == BROCCOLI) {
+		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_holding_cauliflowers = true;
 			m_broccoli_is_shooting_cauliflowers = false;
 			m_is_idle = false;
 			break;
 		}
 	case CHARGED_ABILITY_2:
-		if (m_fc == POTATO) {
+		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
+			m_potato_is_holding_fries = false;
+			m_potato_is_shooting_charged_fries = true;
 			m_is_idle = false;
 			break;
 		}
-		else if (m_fc == BROCCOLI) {
+		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_holding_cauliflowers = false;
 			m_broccoli_is_shooting_charged_cauliflowers = true;
 			m_is_idle = false;
@@ -630,14 +658,14 @@ void Fighter::apply_damage(DamageEffect * damage_effect) {
 
 		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
 			if (damage_effect->m_vert_force > 0) {
-				m_force.x -= 0.5f * damage_effect->m_damage;
+				m_force.x -= 0.3f * damage_effect->m_damage;
 				m_velocity_y = -damage_effect->m_vert_force;
 			} else 
 				m_force.x -= 1.f * damage_effect->m_damage;
 		}
 		else {
 			if (damage_effect->m_vert_force > 0) {
-				m_force.x += 0.5f * damage_effect->m_damage;
+				m_force.x += 0.3f * damage_effect->m_damage;
 				m_velocity_y = -damage_effect->m_vert_force;
 			}
 			else
@@ -860,6 +888,10 @@ bool Fighter::is_holding_power_punch() const {
 	return m_is_holding_power_punch;
 }
 
+bool Fighter::potato_is_holding_fries() const {
+	return m_potato_is_holding_fries;
+}
+
 
 bool Fighter::broccoli_is_holding_cauliflowers() const {
 	return m_broccoli_is_holding_cauliflowers;
@@ -1015,13 +1047,13 @@ Uppercut * Fighter::broccoliUppercut() {
 		//right facing
 		float xpos = b->xpos + (b->width / 2.0);
 		float width = sizeMultiplier * (b->width / 2.0);
-		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, BROCCOLI_UPPERCUT_VERT_VELO, 30);
+		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, BROCCOLI_UPPERCUT_VERT_VELO, 20);
 	}
 	else {
 		//left facing
 		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
 		float width = sizeMultiplier * (b->width / 2.0);
-		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, BROCCOLI_UPPERCUT_VERT_VELO, 30);
+		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, BROCCOLI_UPPERCUT_VERT_VELO, 20);
 	}
 
 	delete b;
@@ -1098,6 +1130,18 @@ void Fighter::broccoli_charging_up_cauliflowers() {
 		m_tired_out = true;
 		m_broccoli_is_holding_cauliflowers = false;
 		m_broccoli_holding_cauliflowers_timer = 0;
+		m_holding_too_much_timer = 0;
+	}
+}
+
+void Fighter::potato_charging_up_fries() {
+	m_holding_too_much_timer += 0.5;
+	if (m_potato_holding_fries_timer < MAX_CAULIFLOWERS_VELOCITY)
+		m_potato_holding_fries_timer += CAULIFLOWERS_CHARGE_RATE;
+	if (m_holding_too_much_timer >= 120) {
+		m_tired_out = true;
+		m_potato_is_holding_fries = false;
+		m_potato_holding_fries_timer = 0;
 		m_holding_too_much_timer = 0;
 	}
 }

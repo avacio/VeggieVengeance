@@ -133,7 +133,7 @@ class Fighter : public Renderable
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
 	// Potato
-
+	bool potato_is_holding_fries() const;
 
 	// Broccoli
 	bool broccoli_get_jump_left();
@@ -143,6 +143,7 @@ class Fighter : public Renderable
 
 	// Helpers 
 	void charging_up_power_punch();
+	void potato_charging_up_fries();
 	void broccoli_charging_up_cauliflowers();
 
   protected:
@@ -196,11 +197,17 @@ class Fighter : public Renderable
 	bool m_potato_is_planting_bomb = false;
 	bool m_potato_bomb_planted = false;
 	bool m_potato_explode_planted_bomb = false;
+	bool m_potato_bomb_ticking = false;
 	bool m_potato_bomb_on_cooldown = false;
+	float m_potato_bomb_selftimer = 0;
 	float m_potato_bomb_cooldown = 0;
+	Attack * bomb_pointer = NULL;
 	// ABILITY 2: Fries (Bullet)
 	bool m_potato_is_shooting_fries = false;
+	bool m_potato_is_holding_fries = false;
+	bool m_potato_is_shooting_charged_fries = false;
 	bool m_potato_fries_on_cooldown = false;
+	float m_potato_holding_fries_timer = 0;
 	float m_potato_fries_cooldown = 0;
 	
 	

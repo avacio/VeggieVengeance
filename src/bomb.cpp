@@ -15,7 +15,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 	
 	this->m_width = std::fabs(this->m_scale.x) * bomb_texture.width * 0.6f;
 	this->m_height = std::fabs(this->m_scale.y) * bomb_texture.height * 0.6f;
-	this->m_delete_when = AFTER_HIT;
+	this->m_delete_when = AFTER_HIT_OR_TIME;
 	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, vert_force, ms);
 }
 
@@ -82,7 +82,7 @@ bool Bomb::init() {
 		return false;
 }
 void Bomb::update(float ms) {
-	m_timer--;
+	m_damageEffect->m_time_remain--;
 }
 
 void Bomb::draw(const mat3 &projection){
