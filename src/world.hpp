@@ -2,6 +2,7 @@
 
 // internal
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "water.hpp"
 #include "fighter.hpp"
 #include "player1.hpp"
@@ -74,8 +75,9 @@ class World
 	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
 
-	void spawn_char_select_AI(FighterCharacter fc);
+	//void spawn_char_select_AI(FighterCharacter fc);
 	void clear_all_fighters();
+	void init_char_select_ais();
 
 	// Window handle
 	GLFWwindow *m_window;
@@ -100,6 +102,7 @@ class World
 	std::vector<Platform> m_platforms;
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
+	std::vector<AI> m_char_select_ais;
 
 	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;

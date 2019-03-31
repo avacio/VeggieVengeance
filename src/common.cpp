@@ -300,4 +300,3 @@ void Renderable::transform_end()
 {
 	//
 }
-

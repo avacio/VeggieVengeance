@@ -307,6 +307,7 @@ bool MainMenu::set_mode(GameMode mode)
 {
 	reset();
 	m_mode = mode;
+	
 	switch (mode) {
 	case MENU: {
 		init_menu_buttons();
