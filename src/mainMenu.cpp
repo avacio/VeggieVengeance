@@ -1,15 +1,15 @@
 // Header
 #include "mainMenu.hpp"
+#include "fighterInfo.hpp"
 
 Texture MainMenu::m_texture;
 
-bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighterMap)
+bool MainMenu::init(vec2 screen)
 {
 	// Load shared texture
 	m_texture = MAIN_MENU_TEXTURE;
 
 	this->screen = screen;
-	this->fighterMap = fighterMap;
 
 	// The position corresponds to the center of the texture
 	float wr = m_texture.width * 3.5f;
@@ -67,7 +67,6 @@ bool MainMenu::init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighter
 	title = new TextRenderer(mainFontBold, 80);
 	title->setColor({ 0.f,0.f,0.f });
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
-	//title->setPosition({ screen.x/2.f - width/2.f, 180.f });
 	title->setPosition({ 80.f, 180.f });
 
 	return true;
@@ -158,7 +157,9 @@ void MainMenu::draw(const mat3& projection)
 		} else { title->renderString(projection, "CHARACTER SELECT"); }
 		buttons[0]->renderString(projection, "POTATO");
 		buttons[1]->renderString(projection, "BROCCOLI");
-		buttons[2]->renderString(projection, "return");
+		buttons[2]->renderString(projection, "EGGPLANT");
+		buttons[3]->renderString(projection, "YAM");
+		buttons[4]->renderString(projection, "return");
 		draw_char_info(projection);
 	}
 }
@@ -183,42 +184,69 @@ void MainMenu::init_menu_buttons()
 	b2->setColor(defaultColor);
 	b3->setColor(defaultColor);
 
-	int width = b1->get_width_of_string("ONE-PLAYER");
-	b1->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-100.f });
-	width = b2->get_width_of_string("TWO-PLAYER");
-	b2->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) });
-	width = b3->get_width_of_string("TUTORIAL");
-	b3->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) + 100.f });
+	int width = b1->get_width_of_string("POTATO");
+	b1->setPosition({ width / 3.f, screen.y / 2.f-100.f });
+	b2->setPosition({ width / 3.f, (screen.y/2.f) -25.f});
+	b3->setPosition({ width / 3.f, (screen.y / 2.f) + 50.f });
 	buttons.emplace_back(b1);
 	buttons.emplace_back(b2);
 	buttons.emplace_back(b3);
-
-	reset_selection();
 }
 
 void MainMenu::init_select_char_buttons() {
-	TextRenderer* t1 = new TextRenderer(mainFont, 40);
-	TextRenderer* t2 = new TextRenderer(mainFont, 40);
-	TextRenderer* t3 = new TextRenderer(mainFont, 40);
+	// INFO
+	TextRenderer* t1 = new TextRenderer(mainFontBold, 35);
+	TextRenderer* t2 = new TextRenderer(mainFont, 35);
+	TextRenderer* t3 = new TextRenderer(mainFont, 35);
+	TextRenderer* t4 = new TextRenderer(mainFont, 35);
+	TextRenderer* t5 = new TextRenderer(mainFontBold, 35);
+	TextRenderer* t6 = new TextRenderer(mainFont, 35);
 
 	t1->setColor({0.f,0.f,0.f});
 	t2->setColor({ 0.f,0.f,0.f });
 	t3->setColor({ 0.f,0.f,0.f });
+	t4->setColor({ 0.f,0.f,0.f });
+	t5->setColor({ 0.f,0.f,0.f });
+	t6->setColor({ 0.f,0.f,0.f });
 
 	int width = t1->get_width_of_string("solanum tuberosum");
-	t1->setPosition({ screen.x / 2.f, screen.y / 2.f - 100.f }); //  width / 4.f
-	t2->setPosition({ screen.x / 2.f, (screen.y / 2.f) });
-	t3->setPosition({ screen.x / 2.f, (screen.y / 2.f) + 100.f });
+	t1->setPosition({ screen.x / 3.f, screen.y / 2.f - 100.f }); //  width / 4.f
+	t2->setPosition({ screen.x / 3.f, (screen.y / 2.f) - 50.f });
+	t3->setPosition({ screen.x / 3.f, (screen.y / 2.f) });
+	t4->setPosition({ screen.x / 3.f, (screen.y / 2.f) + 50.f });
+	t5->setPosition({ screen.x / 3.f, (screen.y / 2.f) + 100.f });
+	t6->setPosition({ screen.x / 3.f, (screen.y / 2.f) + 150.f });
+
 	text.emplace_back(t1);
 	text.emplace_back(t2);
 	text.emplace_back(t3);
+	text.emplace_back(t4);
+	text.emplace_back(t5);
+	text.emplace_back(t6);
 
-	width = buttons[0]->get_width_of_string("POTATO");
-	buttons[0]->setPosition({ width / 3.f, screen.y / 2.f - 100.f });
-	buttons[1]->setPosition({ width / 3.f, (screen.y / 2.f) });
-	buttons[2]->setPosition({ width / 3.f, (screen.y / 2.f) + 100.f });
+	// BUTTONS
+	TextRenderer* b1 = new TextRenderer(mainFont, 50);
+	TextRenderer* b2 = new TextRenderer(mainFont, 50);
+	TextRenderer* b3 = new TextRenderer(mainFont, 50);
+	TextRenderer* b4 = new TextRenderer(mainFont, 50);
+	TextRenderer* b5 = new TextRenderer(mainFont, 50);
+	b1->setColor(selectedColor);
+	b2->setColor(defaultColor);
+	b3->setColor(defaultColor);
+	b4->setColor(defaultColor);
+	b5->setColor(defaultColor);
 
-	reset_selection();
+	width = b1->get_width_of_string("POTATO");
+	b1->setPosition({ width / 3.f, screen.y / 2.f - 100.f });
+	b2->setPosition({ width / 3.f, (screen.y / 2.f) -25.f});
+	b3->setPosition({ width / 3.f, (screen.y / 2.f) +50.f});
+	b4->setPosition({ width / 3.f, (screen.y / 2.f) +125.f});
+	b5->setPosition({ width / 3.f, (screen.y / 2.f) + 200.f });
+	buttons.emplace_back(b1);
+	buttons.emplace_back(b2);
+	buttons.emplace_back(b3);
+	buttons.emplace_back(b4);
+	buttons.emplace_back(b5);
 }
 
 GameMode MainMenu::set_selected_mode()
@@ -245,9 +273,12 @@ FighterCharacter MainMenu::get_selected_char()
 		return POTATO;
 	case 1:
 		return BROCCOLI;
-	case 2: {
+	case 2:
+		return EGGPLANT;
+	case 3:
+		return YAM;
+	case 4: 
 		return BLANK;
-	}
 	default:
 		return POTATO;
 	}
@@ -259,6 +290,9 @@ void MainMenu::draw_char_info(const mat3& projection)
 	text[0]->renderString(projection, fighterMap[get_selected_char()].sciName);
 	text[1]->renderString(projection, "STR: " + int_to_stat_string(fighterMap[get_selected_char()].strength));
 	text[2]->renderString(projection, "SPD: " + int_to_stat_string(fighterMap[get_selected_char()].speed));
+	text[3]->renderString(projection, std::to_string(fighterMap[get_selected_char()].health) + "HP");
+	text[4]->renderString(projection, "Abilities: ");
+	text[5]->renderString(projection, fighterMap[get_selected_char()].abilities);
 }
 
 std::string MainMenu::int_to_stat_string(int in) {
@@ -271,20 +305,21 @@ std::string MainMenu::int_to_stat_string(int in) {
 
 bool MainMenu::set_mode(GameMode mode)
 {
+	reset();
 	m_mode = mode;
 	
 	switch (mode) {
-		case MENU: {
-			reset();
-			init_menu_buttons();
-		}
-		case CHARSELECT:
-			init_menu_buttons();
-			init_select_char_buttons();
-			break;
-		default:
-			break;
-		}
+	case MENU: {
+		init_menu_buttons();
+		break;
+	}
+	case CHARSELECT: {
+		init_select_char_buttons();
+		break;
+	}
+	default:
+		break;
+	}
 	return true;
 }
 
@@ -301,6 +336,7 @@ void MainMenu::reset() {
 
 void Screen::change_selection(bool goDown)
 {
+	//std::cout << "buttons size: " << buttons.size() << ", selectedButtonIndex: " << selectedButtonIndex << std::endl;
 	buttons[selectedButtonIndex]->setColor(defaultColor);
 	if (selectedButtonIndex == buttons.size() - 1 && goDown) {
 		buttons[0]->setColor(selectedColor);
@@ -324,5 +360,6 @@ void Screen::reset_selection()
 {
 	buttons[selectedButtonIndex]->setColor(defaultColor);
 	buttons[0]->setColor(selectedColor);
+
 	selectedButtonIndex = 0;
 }

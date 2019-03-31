@@ -81,7 +81,7 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	isPausedText = new TextRenderer(mainFontBold, 60);
 	width = isPausedText->get_width_of_string("PAUSED");
-	isPausedText->setPosition({ screen.x/2.f - width / 2.f, 150.f }); // screen.x/2.f - width*0.4f
+	isPausedText->setPosition({ screen.x/2.f - width / 2.f, 100.f }); // screen.x/2.f - width*0.4f
 	isPausedText->setColor({ 0.f,0.f,0.f });
 	
 	unsigned int tutorialTextSize = 30;
@@ -122,10 +122,10 @@ bool Background::init(vec2 screen, GameMode mode)
 	width = changeVolume->get_width_of_string("PageUpDownInc./Dec.volume");
 	changeVolume->setPosition({screen.x-(width*1.15f), 580.f});
 
-	winnerText = new TextRenderer(mainFontBold, 42);
+	winnerText = new TextRenderer(mainFontBold, 38);
 	winnerText->setColor({ 0.4f,0.1f,0.1f });
-	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaa");
-	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 150.f });
+	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaaaaaaa");
+	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
 
 	init_buttons();
 
@@ -231,8 +231,11 @@ void Background::draw(const mat3& projection)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	drawPlayerInfo(projection);
 
-	if (m_mode == TUTORIAL || m_paused || m_is_game_over) {
+	if (m_help_on) {
 		drawTutorialText(projection);
+	}
+	if (m_mode == TUTORIAL || m_paused || m_is_game_over) {
+		handleText(projection);
 	}
 	drawNameplates(projection);
 }
@@ -252,6 +255,13 @@ void Background::setPaused(bool isPaused) {
 	m_paused = isPaused;
 }
 
+void Background::setHelp(bool isHelpOn) {
+	m_help_on = isHelpOn;
+}
+
+bool Background::getHelp() {
+	return m_help_on;
+}
 
 void Background::setPlayerInfo(int p1Lives, int p1HP, int p1BL, int p2Lives, int p2HP, int p2BL) {
 	this->p1Lives = p1Lives;
@@ -301,34 +311,41 @@ void Background::drawPlayerInfo(const mat3& projection) {
 	}
 }
 
-void Background::drawTutorialText(const mat3& projection) {
+void Background::handleText(const mat3& projection) {
 	if (m_is_game_over) {
 		winnerText->renderString(projection, "CREAM OF THE CROP: " + winnerName);
 		buttons[0]->renderString(projection, "RESTART");
 		buttons[1]->renderString(projection, "MAIN MENU");
 		buttons[2]->renderString(projection, "QUIT");
-	} else if (m_paused) {
+	}
+	else if (m_paused) {
 		isPausedText->renderString(projection, "PAUSED");
 		buttons[0]->renderString(projection, "RESUME");
 		buttons[1]->renderString(projection, "MAIN MENU");
 		buttons[2]->renderString(projection, "QUIT");
-	} else {
-		jump->renderString(projection, "W/I: Jump");
-		left->renderString(projection, "A/J: Move left");
-		right->renderString(projection, "D/L: Move right");
-		crouch->renderString(projection, "S/K: Crouch");
-		pause->renderString(projection, "Esc: Pause");
-		reset->renderString(projection, "F5: Reset");
-		ability1->renderString(projection, "V/NUM2: Special Ability");
-		ability2->renderString(projection, "B/NUM3: Special Ability");
-		shield->renderString(projection, "L Shift/R Shift: Shield");
-		punch->renderString(projection, "C/NUM1: Punch");
-		pauseMusic->renderString(projection, "Insert: Pause/Resume song");
-		randomSong->renderString(projection, "Home: Random song");
-		changeSong->renderString(projection, "Delete/End: Prev/Next song");
-		changeVolume->renderString(projection, "Page Up/Down: Inc./Dec. volume");
+	}
+	else {
+		drawTutorialText(projection);
 	}
 }
+
+void Background::drawTutorialText(const mat3& projection) {
+	jump->renderString(projection, "W/I: Jump");
+	left->renderString(projection, "A/J: Move left");
+	right->renderString(projection, "D/L: Move right");
+	crouch->renderString(projection, "S/K: Crouch");
+	pause->renderString(projection, "Esc: Pause");
+	reset->renderString(projection, "F5: Reset");
+	ability1->renderString(projection, "V/NUM2: Special Ability");
+	ability2->renderString(projection, "B/NUM3: Special Ability");
+	shield->renderString(projection, "L Shift/R Shift: Shield");
+	punch->renderString(projection, "C/NUM1: Punch");
+	pauseMusic->renderString(projection, "Insert: Pause/Resume song");
+	randomSong->renderString(projection, "Home: Random song");
+	changeSong->renderString(projection, "Delete/End: Prev/Next song");
+	changeVolume->renderString(projection, "Page Up/Down: Inc./Dec. volume");
+}
+
 void Background::addNameplate(TextRenderer* td, std::string name) {
 	nameplates[td] = name;
 }
@@ -343,20 +360,20 @@ void Background::drawNameplates(const mat3& projection) {
 
 void Background::init_buttons()
 {
-	TextRenderer* resume = new TextRenderer(mainFont, 60);
-	TextRenderer* mainMenu = new TextRenderer(mainFont, 60);
-	TextRenderer* quit = new TextRenderer(mainFont, 60);
+	TextRenderer* resume = new TextRenderer(mainFont, 45);
+	TextRenderer* mainMenu = new TextRenderer(mainFont, 45);
+	TextRenderer* quit = new TextRenderer(mainFont, 45);
 
 	resume->setColor(selectedColor);
 	mainMenu->setColor(defaultColor);
 	quit->setColor(defaultColor);
 
 	int width = resume->get_width_of_string("RESUME");
-	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-150.f });
+	resume->setPosition({ screen.x / 2.f - width / 2.f, screen.y / 2.f-225.f });
 	width = mainMenu->get_width_of_string("MAIN-MENU");
-	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) -75.f});
+	mainMenu->setPosition({ screen.x / 2.f - width / 2.f, (screen.y/2.f) -175.f});
 	width = quit->get_width_of_string("QUIT");
-	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f)});
+	quit->setPosition({ screen.x / 2.f - width / 2.f, (screen.y / 2.f) -125.f});
 	buttons.emplace_back(resume);
 	buttons.emplace_back(mainMenu);
 	buttons.emplace_back(quit);

@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "textRenderer.hpp"
+#include "fighterInfo.hpp"
 
 class Screen
 {
@@ -33,7 +34,7 @@ class MainMenu : public Renderable, public Screen
 public:
 	// Creates all the associated render resources and default transform
 	//bool init(vec2 screen);
-	bool init(vec2 screen, std::map<FighterCharacter, FighterInfo> fighterMap);
+	bool init(vec2 screen);
 
 	// Releases all the associated resources
 	void destroy();
@@ -73,7 +74,6 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 	GameMode m_mode = MENU;
-	std::map<FighterCharacter, FighterInfo> fighterMap;
 
 	std::vector<TextRenderer*> text;
 };

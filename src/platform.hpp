@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "boundingBox.hpp"
 class Platform: public Renderable
 {

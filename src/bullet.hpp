@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "damageEffect.hpp"
 #include "attack.hpp"
 
