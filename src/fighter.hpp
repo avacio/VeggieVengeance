@@ -10,6 +10,7 @@
 #include "bullet.hpp"
 #include "projectile.hpp"
 #include "dash.hpp"
+#include "emoji.hpp"
 #include <set>
 #include <random>
 
@@ -43,6 +44,9 @@ class Fighter : public Renderable
 
 	//get collision object for dash
 	Dash * dash();
+
+	//get collision object for emoji
+	Emoji * emoji();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -227,6 +231,11 @@ class Fighter : public Renderable
 	float m_yam_dash_timer_ms = 0.0;
 	const float MAX_DASH_TIMER = 500.0;
 	const float MAX_DASH_COOLDOWN = 1000.0;
+
+	//eggplant states
+	bool m_eggplant_shoot_emoji = false;
+	float m_eggplant_shoot_cooldown = 0.0;
+	const float MAX_EMOJI_SHOOT_COOLDOWN = 500.0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

@@ -168,7 +168,8 @@ enum FighterMovementState
 	PAUSED = 18,
 	UNPAUSED = 19,
 	HEAL = 20,
-	DASH = 21
+	DASH = 21,
+	EMOJI_P = 22
 };
 
 

@@ -316,7 +316,25 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		if(m_yam_heal_animation_ms > 0.0) {
 			m_yam_heal_animation_ms -= ms;
 		}
-		
+
+		//EGGPLANT
+		//Ability 1: Circling emojis
+		/*if (m_eggplant_spawn_emoji) {
+
+		}*/
+
+		//EGGPLANT
+		//Ability 2: Emoji projectile
+		if (m_eggplant_shoot_emoji) {
+			if (m_eggplant_shoot_cooldown <= 0.0) {
+				attack = emoji();
+				m_eggplant_shoot_cooldown = MAX_EMOJI_SHOOT_COOLDOWN;
+			}
+			m_eggplant_shoot_emoji = false;
+		}
+		if (m_eggplant_shoot_cooldown > 0.0) {
+			m_eggplant_shoot_cooldown -= ms;
+		}
 	}
 	else
 	{
@@ -1104,6 +1122,11 @@ Dash * Fighter::dash() {
 	Dash* dash = new Dash(get_id(), { b->xpos, b->ypos }, { b->width, b->height }, m_strength, 0);
 	delete b;
 	return dash;
+}
+
+Emoji * Fighter::emoji() {
+	Emoji * emoji = new Emoji(get_id(), m_position, m_strength, m_facing_front);
+	return emoji;
 }
 
 void Fighter::set_sprite(SpriteType st) const {

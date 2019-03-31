@@ -4,12 +4,12 @@
 #include "damageEffect.hpp"
 #include "attack.hpp"
 
-class Dash : public Attack {
+class Emoji : public Attack {
+	static Texture emoji_texture;
 public:
-	Dash(int id, vec2 pos, vec2 size, unsigned int damage, float vert_force);
-	~Dash();
+	Emoji(int id, vec2 pos, unsigned int damage, bool direction);
+	~Emoji();
 	bool init();
 	void update(float ms);
 	void draw(const mat3 &projection) override;
-private:
 };
