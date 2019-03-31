@@ -18,7 +18,7 @@ Bullet::Bullet(int id, vec2 pos, unsigned int damage, bool direction) {
 	this->m_width = std::fabs(this->m_scale.x) * bullet_texture.width;
 	this->m_height = std::fabs(this->m_scale.y) * bullet_texture.height;
 	this->m_delete_when = AFTER_HIT;
-	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, 0);
+	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when);
 }
 
 Bullet::~Bullet() {
