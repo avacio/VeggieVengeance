@@ -399,6 +399,19 @@ void Fighter::draw(const mat3 &projection)
 		if (is_paused()) {
 
 		}
+
+		else if (is_uppercutting())
+		{
+			m_punch_counter++;
+			set_sprite(UPPERCUT);
+
+			if (m_punch_counter > 30)
+			{
+				m_punch_counter = 0;
+				set_uppercut(false);
+			}
+		}
+
 		else if (is_punching()) {
 			if (!is_crouching()) { set_sprite(PUNCH); }
 			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
