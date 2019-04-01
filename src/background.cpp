@@ -124,8 +124,6 @@ bool Background::init(vec2 screen, GameMode mode)
 
 	winnerText = new TextRenderer(mainFontBold, 38);
 	winnerText->setColor({ 0.4f,0.1f,0.1f });
-	width = winnerText->get_width_of_string("CREAM OF CROP:aaaaaaaaaaaaaaa");
-	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
 
 	init_buttons();
 
@@ -313,6 +311,8 @@ void Background::drawPlayerInfo(const mat3& projection) {
 
 void Background::handleText(const mat3& projection) {
 	if (m_is_game_over) {
+		float width = winnerText->get_width_of_string("CREAM OF CROP:aaaa" + winnerName);
+		winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
 		winnerText->renderString(projection, "CREAM OF THE CROP: " + winnerName);
 		buttons[0]->renderString(projection, "RESTART");
 		buttons[1]->renderString(projection, "MAIN MENU");

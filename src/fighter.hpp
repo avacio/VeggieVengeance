@@ -143,6 +143,7 @@ class Fighter : public Renderable
 
 	float get_heal_animation();
 
+	FighterCharacter m_fc;
 	// Potato
 	bool potato_is_holding_wedges() const;
 
@@ -163,7 +164,6 @@ class Fighter : public Renderable
 	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
 
-	FighterCharacter m_fc;
 	std::string m_name;
 	TextRenderer* m_nameplate;
 

@@ -8,7 +8,7 @@
 #include <sstream>
 
 #define HEAT_WAVE_RATE 80
-#define HEAT_WAVE_LENGTH 1
+#define HEAT_WAVE_LENGTH 2
 
 // Same as static in c, local to compilation unit
 namespace
@@ -618,6 +618,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			m_player2.set_movement(STOP_PUNCHING);
 			m_player2.set_movement(STOP_ABILITIES);
 			m_player2.set_movement(PAUSED);
+			set_heat_wave(false);
 
 			for (auto &fighter : m_ais)
 				fighter.set_movement(PAUSED);
@@ -713,10 +714,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 void World::reset()
 {
-
 	m_attacks.clear();
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
+	set_heat_wave(false);
 
 	switch (m_mode) {
 	case DEV:
@@ -988,16 +989,11 @@ void World::set_heat_wave(bool on) {
 		m_heat_wave_time = glfwGetTime();
 		m_water.set_is_wavy(true);
 		int dmg = 20;
-		//for (int i = 0; i < m_ais.size(); i++) { // fighters does not work for some reason
-		//	m_fighters[i].apply_damage(dmg);
-		//	m_fighters[i].set_hurt(true);
-		//	//std::cout << "HURT fighter: " << i << std::endl;
-		//}
 	} else {
 		m_heat_wave_time = -1.f;
 		m_water.set_is_wavy(false);
 		for (int i = 0; i < m_ais.size(); i++) {
-			m_fighters[i].set_hurt(false);
+			m_ais[i].set_hurt(false);
 		}
 		if (m_player1.get_in_play()) { m_player1.set_hurt(false); }
 		if (m_player2.get_in_play()) { m_player2.set_hurt(false); }
@@ -1020,12 +1016,13 @@ void World::apply_stage_fx_dmg() {
 	}
 	if (m_player2.get_in_play()) {
 		m_player2.set_hurt(true);
-		if (cond == 0 && !m_player2.is_blocking())
+		if (cond && !m_player2.is_blocking())
 			m_player2.apply_damage(1);
 	}
-	for (int i = 0; i < m_ais.size(); i++) { // fighters does not work for some reason
-		m_fighters[i].apply_damage(1);
-		m_fighters[i].set_hurt(true);
+	for (int i = 0; i < m_ais.size(); i++) { // m_fighters does not work for some reason
+		if (cond && !m_ais[i].is_blocking())
+			m_ais[i].apply_damage(1);
+			m_ais[i].set_hurt(true);
 	}
 }
 
