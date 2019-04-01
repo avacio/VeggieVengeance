@@ -528,12 +528,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_B)
 				m_player1.set_movement(ABILITY_2);
-			if (action == GLFW_PRESS && key == GLFW_KEY_T)
-				m_player1.set_movement(HEAL);
-			if (action == GLFW_PRESS && key == GLFW_KEY_E)
-				m_player1.set_movement(EMOJI_P);
-			if (action == GLFW_PRESS && key == GLFW_KEY_R)
-				m_player1.set_movement(DASH);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
 				m_player1.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())

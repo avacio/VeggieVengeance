@@ -527,45 +527,56 @@ void Fighter::set_movement(int mov)
 		if (m_fc == POTATO) {
 			m_potato_is_shooting_fries = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
-			break;
 		}
+		else if (m_fc == YAM) {
+			m_yam_start_dashing = true;
+			m_is_idle = false;
+		}
+		else if (m_fc == EGGPLANT) {
+			//not implemented yet!
+		}
+		break;
 	case ABILITY_2:
 		if (m_fc == POTATO) {
 			m_potato_is_shooting_wedges = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_is_idle = false;
-			break;
 		}
+		else if (m_fc == YAM) {
+			m_yam_is_healing = true;
+			m_is_idle = false;
+		}
+		else if (m_fc == EGGPLANT) {
+			m_eggplant_shoot_emoji = true;
+			m_is_idle = false;
+		}
+		break;
 	case HOLDING_ABILITY_2:
 		if (m_fc == POTATO) {
 			m_potato_is_holding_wedges = true;
 			m_potato_is_shooting_wedges = false;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_is_idle = false;
-			break;
 		}
+		break;
 	case CHARGED_ABILITY_2:
 		if (m_fc == POTATO) {
 			m_potato_is_holding_wedges = false;
 			m_potato_is_shooting_charged_wedges = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_is_idle = false;
-			break;
 		}
+		break;
 	case HOLDING_POWER_PUNCH:
 		m_is_holding_power_punch = true;
 		m_is_punching = false;
@@ -599,13 +610,12 @@ void Fighter::set_movement(int mov)
 			m_potato_is_shooting_fries = false;
 			m_potato_is_shooting_wedges = false;
 			m_is_idle = true;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_broccoli_is_uppercutting = false;
 			m_is_idle = true;
-			break;
 		}
+		break;
 	case BLOCKING:
 		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
 		if (!m_is_punching && m_blocking_tank >= 1000)
@@ -619,15 +629,6 @@ void Fighter::set_movement(int mov)
 		break;
 	case UNPAUSED:
 		m_is_paused = false;
-		break;
-	case HEAL:
-		m_yam_is_healing = true;
-		break;
-	case DASH:
-		m_yam_start_dashing = true;
-		break;
-	case EMOJI_P:
-		m_eggplant_shoot_emoji = true;
 		break;
 	}
 }
