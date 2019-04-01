@@ -33,7 +33,6 @@ Bullet::~Bullet() {
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	effect.release();
-	printf("destroyed bullet\n");
 }
 
 

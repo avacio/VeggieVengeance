@@ -316,23 +316,57 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_yam_heal_animation_ms -= ms;
 		}
 
+
 		//EGGPLANT
 		//Ability 1: Circling emojis
-		/*if (m_eggplant_spawn_emoji) {
-
-		}*/
+		for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+			//emoji update function
+			// check for out-of-play emojis and remove
+			if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
+				// this means it has been removed in the collision loop and we should remove it too!
+				m_eggplant_emojis[i]->deincrement_pointer_references();
+				delete m_eggplant_emojis[i];
+				m_eggplant_emojis[i] = NULL;
+				m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
+				i--;
+				m_eggplant_emoji_count--;
+			}
+			else {
+				//otherwise, they are in play, and you will want to provide them your location
+				m_eggplant_emojis[i]->set_fighter_pos(m_position);
+			}
+		}
+		if (m_eggplant_spawn_emoji) {
+			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
+				Emoji * e = emoji();
+				attack = e;
+				m_eggplant_emojis.push_back(e);
+				e->increment_pointer_references();
+				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
+				m_eggplant_emoji_count++;
+			}
+			m_eggplant_spawn_emoji = false;
+		}
+		if (m_eggplant_spawn_cooldown > 0.0) {
+			m_eggplant_spawn_cooldown -= ms;
+		}
 
 		//EGGPLANT
 		//Ability 2: Emoji projectile
 		if (m_eggplant_shoot_emoji) {
-			if (m_eggplant_shoot_cooldown <= 0.0) {
-				attack = emoji();
-				m_eggplant_shoot_cooldown = MAX_EMOJI_SHOOT_COOLDOWN;
+			if (m_eggplant_emoji_count > 0) {
+				Emoji * e = NULL;
+				// search for the first circling emoji, if any
+				for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+					if (m_eggplant_emojis[i]->is_circling()) {
+						e = m_eggplant_emojis[i];
+						break;
+					}
+				}
+				if (e != NULL) 
+					e->fire_emoji(m_facing_front);
 			}
 			m_eggplant_shoot_emoji = false;
-		}
-		if (m_eggplant_shoot_cooldown > 0.0) {
-			m_eggplant_shoot_cooldown -= ms;
 		}
 	}
 	else
@@ -537,7 +571,7 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 		}
 		else if (m_fc == EGGPLANT) {
-			//not implemented yet!
+			m_eggplant_spawn_emoji = true;
 		}
 		break;
 	case ABILITY_2:
@@ -790,6 +824,19 @@ void Fighter::die() {
 		}
 		else if (m_crouch_state == CROUCH_PRESSED) {
 			m_crouch_state = NOT_CROUCHING;
+		}
+
+		if (m_eggplant_emojis.size() > 0) {
+			for (auto &eggplant_emoji : m_eggplant_emojis) {
+				eggplant_emoji->m_damageEffect->m_hit_fighter = true;
+				eggplant_emoji->deincrement_pointer_references();
+				if (eggplant_emoji->get_pointer_references() == 0) {
+					delete eggplant_emoji;
+					eggplant_emoji = NULL;
+				}
+			}
+			m_eggplant_emojis.clear();
+			m_eggplant_emoji_count = 0;
 		}
 
 		if (m_lives > 0)
