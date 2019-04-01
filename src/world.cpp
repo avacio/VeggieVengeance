@@ -169,6 +169,8 @@ void World::destroy()
 
 	Mix_CloseAudio();
 
+	m_knife.destroy();
+
 	if (m_player1.get_in_play())
 	{
 		m_player1.destroy();
@@ -238,6 +240,8 @@ bool World::update(float elapsed_ms)
 		attack_collision();
 		//damage effect removal loop
 		attack_deletion();
+
+		m_knife.update(elapsed_ms);
 		
 		//update players + ai
 		Attack * attack = NULL;
@@ -344,6 +348,8 @@ void World::draw()
 		}
 	} else {
 		m_bg.draw(projection_2D);
+
+		m_knife.draw(projection_2D);
 
 		if (m_player1.get_in_play())
 		{
@@ -708,6 +714,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		// random song
 		m_background_track = get_random_number(m_bgms.size() - 1);
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
+	}
+
+	// Spawn mesh for testing purposes
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
+		printf("knife");
+		m_knife.init();
 	}
 }
 
