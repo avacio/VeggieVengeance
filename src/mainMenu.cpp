@@ -331,6 +331,7 @@ void MainMenu::reset() {
 	}
 	text.clear();
 	selectedButtonIndex = 0;
+	is_player_1_chosen = false;
 }
 
 
