@@ -53,10 +53,10 @@ bool Background::init(vec2 screen, GameMode mode)
 	// Setting initial values, scale is negative to make it face the opposite way
 	// 1.0 would be as big as the original texture
 
-	m_scale.x = 0.4f;
-	m_scale.y = 0.4f;
+	m_scale.x = 0.36f;
+	m_scale.y = 0.36f;
 	m_rotation = 0.f;
-	m_position = { 600.f, 400.f };
+	m_position = { 600.f, 425.f };
 
 	m_initialized = true;
 
