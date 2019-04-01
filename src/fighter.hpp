@@ -233,9 +233,13 @@ class Fighter : public Renderable
 	const float MAX_DASH_COOLDOWN = 1000.0;
 
 	//eggplant states
+	bool m_eggplant_spawn_emoji = false;
 	bool m_eggplant_shoot_emoji = false;
-	float m_eggplant_shoot_cooldown = 0.0;
-	const float MAX_EMOJI_SHOOT_COOLDOWN = 500.0;
+	unsigned int m_eggplant_emoji_count = 0;
+	float m_eggplant_spawn_cooldown = 0.0;
+	const float MAX_EMOJI_SPAWN_COOLDOWN = 500.0;
+	const unsigned int MAX_EMOJI_COUNT = 3;
+	std::vector<Emoji*> m_eggplant_emojis;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 
