@@ -255,7 +255,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
-			m_broccoli_is_uppercutting = false;
+			//m_broccoli_is_uppercutting = false;
 			m_broccoli_uppercut_on_cooldown = true;
 		}
 		if (m_broccoli_uppercut_on_cooldown) {
@@ -529,7 +529,8 @@ void Fighter::set_movement(int mov)
 			m_is_idle = false;
 		}
 		else if (m_fc == BROCCOLI) {
-			m_broccoli_is_uppercutting = true;
+			if (!m_broccoli_uppercut_on_cooldown)
+				m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
 		}
 		else if (m_fc == YAM) {
@@ -612,7 +613,7 @@ void Fighter::set_movement(int mov)
 			m_is_idle = true;
 		}
 		else if (m_fc == BROCCOLI) {
-			m_broccoli_is_uppercutting = false;
+			//m_broccoli_is_uppercutting = false;
 			m_is_idle = true;
 		}
 		break;
@@ -915,6 +916,11 @@ void Fighter::set_power_punch(bool punch)
 	m_is_power_punching = punch;
 }
 
+void Fighter::set_uppercut(bool uc)
+{
+	m_broccoli_is_uppercutting = uc;
+}
+
 int Fighter::get_alive() const
 {
 	return m_is_alive;
@@ -944,6 +950,10 @@ bool Fighter::broccoli_get_jump_left() {
 
 bool Fighter::broccoli_is_uppercut_on_cooldown() {
 	return m_broccoli_uppercut_on_cooldown;
+}
+
+bool Fighter::is_uppercutting() const {
+	return m_broccoli_is_uppercutting;
 }
 
 //void Fighter::reset(int init_position)
@@ -1156,6 +1166,7 @@ void Fighter::set_sprite(SpriteType st) const {
 			case CROUCH_PUNCH: f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
 			case CROUCH: f_texture = BROCCOLI_CROUCH_TEXTURE; break;
 			case DEATH: f_texture = BROCCOLI_DEATH_TEXTURE; break;
+			case UPPERCUT: f_texture = BROCCOLI_UPPERCUT_TEXTURE; break;
 		}
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB

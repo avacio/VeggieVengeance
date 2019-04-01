@@ -29,7 +29,8 @@ enum SpriteType
 	CHARGING,
 	DEATH,
 	TIRED_1,
-	TIRED_2
+	TIRED_2,
+	UPPERCUT
 };
 
 struct FighterInfo
@@ -86,6 +87,7 @@ extern Texture BROCCOLI_PUNCH_TEXTURE;
 extern Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
 extern Texture BROCCOLI_CROUCH_TEXTURE;
 extern Texture BROCCOLI_DEATH_TEXTURE;
+extern Texture BROCCOLI_UPPERCUT_TEXTURE;
 
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
