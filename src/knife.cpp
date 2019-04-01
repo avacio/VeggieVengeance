@@ -9,6 +9,28 @@
 #include <string>
 #include <algorithm>
 
+float knifeOffset = 75.f;
+float dropSpeed = 5.f;
+void Knife::spawn_knife(unsigned int damage, vec2 pos) {
+	//pre-determined bullet attributes
+	this->m_scale = vec2({ 0.5f, 0.5f });
+	this->m_velocity = vec2({ 7.0f, 0.0f });
+
+	//variable bullet attributes
+	//this->m_fighter_id = id;
+	this->m_position = pos;
+	this->m_damage = damage;
+	this->m_width = std::fabs(this->m_scale.x);
+	this->m_height = std::fabs(this->m_scale.y);
+	this->m_delete_when = AFTER_HIT;
+	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, 0);
+
+	boundingBox = new BoundingBox(pos.x, pos.y+knifeOffset, m_width*0.6f, m_height*1.5f); // stub
+	m_position = pos;
+	init();
+}
+
+//bool Knife::init(unsigned int damage, vec2 pos)
 bool Knife::init()
 {
 	std::vector<Vertex> vertices;
@@ -76,9 +98,7 @@ bool Knife::init()
 	// Setting initial values
 	m_scale.x = 100.f;
 	m_scale.y = 100.f;
-	m_is_alive = true;
 	m_num_indices = indices.size();
-	m_position = { 450.f, 550.f };
 	m_rotation = 0.f;
 
 	return true;
@@ -99,30 +119,20 @@ void Knife::destroy()
 // Called on each frame by World::update()
 void Knife::update(float ms)
 {
-	const float SALMON_SPEED = 200.f;
-	float step = SALMON_SPEED * (ms / 1000);
-	if (m_is_alive)
-	{
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// UPDATE SALMON POSITION HERE BASED ON KEY PRESSED (World::on_key())
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	boundingBox->xpos = m_position.x;
+	boundingBox->ypos = m_position.y + knifeOffset;
 
-
-
+	if (!m_is_on_ground) {
+		m_position.y += dropSpeed;
 	}
-	else
-	{
-		// If dead we make it face upwards and sink deep down
-		set_rotation(3.1415f);
-		move({ 0.f, step });
+	if (m_done) {
+		m_position.y -= dropSpeed*2.f;
 	}
-
 }
 
 void Knife::draw(const mat3& projection)
 {
 	transform_begin();
-
 	transform_translate(m_position);
 	transform_scale(m_scale);
 	transform_rotate(m_rotation);
@@ -160,8 +170,7 @@ void Knife::draw(const mat3& projection)
 	// !!! Salmon Color
 	float color[] = { 1.f, 1.f, 1.f };
 
-	if (m_is_alive) { glUniform3fv(color_uloc, 1, color); }
-
+	glUniform3fv(color_uloc, 1, color);
 	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
 
 	// Drawing!
@@ -174,23 +183,23 @@ vec2 Knife::get_position()const
 	return m_position;
 }
 
-void Knife::move(vec2 off)
-{
-	m_position.x += off.x; m_position.y += off.y;
-}
-
 void Knife::set_rotation(float radians)
 {
 	m_rotation = radians;
 }
 
-bool Knife::is_alive()const
+// Simple bounding box collision check, 
+bool Knife::collides_with(const Fighter& f)
 {
-	return m_is_alive;
-}
-
-// Called when the salmon collides with a turtle
-void Knife::kill()
-{
-	m_is_alive = false;
+	float dx = m_position.x - f.get_position().x;
+	float dy = m_position.y - f.get_position().y;
+	float d_sq = dx * dx + dy * dy;
+	float other_r = std::max(f.get_bounding_box()->xpos, f.get_bounding_box()->ypos);
+	float my_r = std::max(m_scale.x, m_scale.y);
+	float r = std::max(other_r, my_r);
+	//r *= 0.6f;
+	r *= 0.15f;
+	if (d_sq < r * r)
+		return true;
+	return false;
 }

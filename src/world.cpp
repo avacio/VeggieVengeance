@@ -7,8 +7,11 @@
 #include <cassert>
 #include <sstream>
 
-#define HEAT_WAVE_RATE 80
+#define HEAT_WAVE_RATE 75
 #define HEAT_WAVE_LENGTH 2
+
+#define FALLING_KNIVES_RATE 15
+#define FALLING_KNIVES_LENGTH 2.5
 
 // Same as static in c, local to compilation unit
 namespace
@@ -169,8 +172,6 @@ void World::destroy()
 
 	Mix_CloseAudio();
 
-	m_knife.destroy();
-
 	if (m_player1.get_in_play())
 	{
 		m_player1.destroy();
@@ -186,6 +187,11 @@ void World::destroy()
 		platform.destroy();
 	}
 	m_platforms.clear();
+
+	for (auto &k : m_knives) {
+		k.destroy();
+	}
+	m_knives.clear();
 
 	if (m_bg.m_initialized) {
 		m_bg.destroy();
@@ -241,7 +247,28 @@ bool World::update(float elapsed_ms)
 		//damage effect removal loop
 		attack_deletion();
 
-		m_knife.update(elapsed_ms);
+		// KNIVES STAGE EFFECT
+		for (auto &k : m_knives) {
+			k.update(elapsed_ms);
+			if (m_player1.get_in_play() && m_player1.get_alive()) {
+				if (k.collides_with(m_player1)) {
+					m_player1.apply_damage(k.m_damage);
+				}
+			}
+			k.update(elapsed_ms);
+			if (m_player2.get_in_play() && m_player2.get_alive()) {
+				if (k.collides_with(m_player2)) {
+					m_player2.apply_damage(k.m_damage);
+				}
+			}
+			for (auto &ai : m_ais) {
+				ai.apply_damage(k.m_damage);
+			}
+
+			for (auto &p : m_platforms) {
+				if (p.check_collision(*k.boundingBox)) { k.m_is_on_ground = true; }
+			}
+		}
 		
 		//update players + ai
 		Attack * attack = NULL;
@@ -273,12 +300,38 @@ bool World::update(float elapsed_ms)
 			}
 		}
 		if (m_mode != MENU && m_mode != CHARSELECT) {
-			if (get_heat_wave_time() > HEAT_WAVE_LENGTH) {
+			// STAGE EFFECTS (will not happen at same time)
+			// HEAT WAVE
+			if (get_stage_fx_time() > HEAT_WAVE_LENGTH) {
+				m_bg.warningText = "";
 				set_heat_wave(false);
 			} else if (m_heat_wave_on) {
 				apply_stage_fx_dmg();
-			} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) {
+			//} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) {
+			} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0 && !m_falling_knives_on) {
+				//m_bg.warningText = "!!! GET READY TO BLOCK IN: 3";
+				m_bg.warningText = "!!! BLOCK !!!";
 				set_heat_wave(true);
+			}
+
+			// STAGE EFFECT: FALLING KNIVES
+			//std::cout << "FALLING KNIVES ON: " << m_falling_knives_on<< std::endl;
+			if (get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
+				set_falling_knives(false);
+			} else if (!m_falling_knives_on && m_knives.size() > 0) {
+				bool all_outside = true;
+				for (auto &k : m_knives) {
+					if (k.get_position().y >= 0.f)
+						all_outside = false;
+				}
+				if (all_outside) {
+					for (auto &k : m_knives) {
+						k.destroy();
+					}
+					m_knives.clear();
+				}
+			} else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0 && !m_heat_wave_on) {
+				set_falling_knives(true);
 			}
 		}
 	}
@@ -349,7 +402,8 @@ void World::draw()
 	} else {
 		m_bg.draw(projection_2D);
 
-		m_knife.draw(projection_2D);
+		for (auto &k : m_knives)
+			k.draw(projection_2D);
 
 		if (m_player1.get_in_play())
 		{
@@ -718,8 +772,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 	// Spawn mesh for testing purposes
 	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
-		printf("knife");
-		m_knife.init();
+		set_falling_knives(true);
+	}
+	if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
+		set_falling_knives(false);
 	}
 }
 
@@ -730,6 +786,11 @@ void World::reset()
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
 	set_heat_wave(false);
+	m_bg.warningText = "";
+	for (auto &k : m_knives) {
+		k.destroy();
+	}
+	m_knives.clear();
 
 	switch (m_mode) {
 	case DEV:
@@ -778,7 +839,10 @@ bool World::set_mode(GameMode mode) {
 	m_bg.set_game_over(false, "");
 
 	clear_all_fighters();
-
+	for (auto &k : m_knives) {
+		k.destroy();
+	}
+	m_knives.clear();
 	if (m_bg.m_initialized) {
 		m_bg.destroy();
 	}
@@ -995,14 +1059,39 @@ bool World::is_game_over() {
 	return false;
 }
 
+void World::set_falling_knives(bool on) {
+	if (m_falling_knives_on == on) { return; }
+	m_falling_knives_on = on;
+	if (on) {
+		printf("knife");
+		m_stage_fx_time = glfwGetTime();
+		Knife k0, k1, k2, k3;
+		k0.spawn_knife(10, { 400.f, -50.f });
+		if (m_ais.size() > 0) { k2.spawn_knife(10, { m_ais[0].get_position().x, -12.f }); }
+		else { k1.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
+		if (m_player1.get_in_play()) { k2.spawn_knife(10, { m_player1.get_position().x, 0.f }); }
+		else { k2.spawn_knife(10, { get_random_number(8)*100.f+50.f, 0.f }); }
+		if (m_player2.get_in_play()) { k3.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
+		else { k3.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
+		m_knives.emplace_back(k0);
+		m_knives.emplace_back(k1);
+		m_knives.emplace_back(k2);
+		m_knives.emplace_back(k3);
+	} else {
+		for (auto &k : m_knives) {
+			k.m_done = true;
+		}
+	}
+}
+
 void World::set_heat_wave(bool on) {
 	if (m_heat_wave_on == on) { return; }
 	if (on) {
-		m_heat_wave_time = glfwGetTime();
+		m_stage_fx_time = glfwGetTime();
 		m_water.set_is_wavy(true);
 		int dmg = 20;
 	} else {
-		m_heat_wave_time = -1.f;
+		m_stage_fx_time = -1.f;
 		m_water.set_is_wavy(false);
 		for (int i = 0; i < m_ais.size(); i++) {
 			m_ais[i].set_hurt(false);
@@ -1014,9 +1103,9 @@ void World::set_heat_wave(bool on) {
 	std::cout << "HEAT WAVE: " << on << std::endl;
 }
 
-float World::get_heat_wave_time() {
-	if (!m_heat_wave_on) { return -1; }
-	return glfwGetTime() - m_heat_wave_time;
+float World::get_stage_fx_time() {
+	if (!m_heat_wave_on && !m_falling_knives_on) { return -1; }
+	return glfwGetTime() - m_stage_fx_time;
 }
 
 void World::apply_stage_fx_dmg() {

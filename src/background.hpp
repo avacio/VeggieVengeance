@@ -4,6 +4,7 @@
 #include "fighterInfo.hpp"
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
+#include <string.h>
 
 // Background
 class Background : public Renderable, public Screen
@@ -59,6 +60,7 @@ public:
 	void drawPlayerInfo(const mat3& projection);
 	void handleText(const mat3& projection);
 	void drawTutorialText(const mat3& projection);
+	//void drawWarning(const mat3& projection, std::string t);
 
 	void addNameplate(TextRenderer* td, std::string name);
 	void drawNameplates(const mat3& projection);
@@ -67,6 +69,7 @@ public:
 	void set_game_over(bool go, std::string wn);
 
 	bool m_initialized = false;
+	std::string warningText = "";
 
 private:
 	vec2 screen;
