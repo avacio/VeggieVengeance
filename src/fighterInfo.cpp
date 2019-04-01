@@ -37,6 +37,17 @@ Texture YAM_DEATH_TEXTURE;
 Texture YAM_TIRED_1_TEXTURE;
 Texture YAM_TIRED_2_TEXTURE;
 
+Texture EGGPLANT_TEXTURE;
+Texture EGGPLANT_IDLE_TEXTURE;
+Texture EGGPLANT_CROUCH_TEXTURE;
+Texture EGGPLANT_PUNCH_TEXTURE;
+Texture EGGPLANT_CROUCH_PUNCH_TEXTURE;
+Texture EGGPLANT_CHARGING_TEXTURE;
+Texture EGGPLANT_POWER_PUNCH_TEXTURE;
+Texture EGGPLANT_DEATH_TEXTURE;
+Texture EGGPLANT_TIRED_1_TEXTURE;
+Texture EGGPLANT_TIRED_2_TEXTURE;
+
 Texture MAIN_MENU_TEXTURE;
 Texture BACKGROUND_TEXTURE;
 Texture PLATFORM_TEXTURE;
@@ -81,6 +92,17 @@ bool load_all_sprites_from_file() {
 		YAM_DEATH_TEXTURE.load_from_file(textures_path("yam_death.png")) &&
 		YAM_TIRED_1_TEXTURE.load_from_file(textures_path("yam_tired_1.png")) &&
 		YAM_TIRED_2_TEXTURE.load_from_file(textures_path("yam_tired_2.png")) &&
+
+		EGGPLANT_TEXTURE.load_from_file(textures_path("eggplant.png")) &&
+		EGGPLANT_IDLE_TEXTURE.load_from_file(textures_path("eggplant_idle.png")) &&
+		EGGPLANT_CROUCH_TEXTURE.load_from_file(textures_path("eggplant_crouch.png")) &&
+		EGGPLANT_PUNCH_TEXTURE.load_from_file(textures_path("eggplant_punch.png")) &&
+		EGGPLANT_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("eggplant_crouch_punch.png")) &&
+		EGGPLANT_CHARGING_TEXTURE.load_from_file(textures_path("eggplant_charging.png")) &&
+		EGGPLANT_POWER_PUNCH_TEXTURE.load_from_file(textures_path("eggplant_power_punch.png")) &&
+		EGGPLANT_DEATH_TEXTURE.load_from_file(textures_path("eggplant_death.png")) &&
+		EGGPLANT_TIRED_1_TEXTURE.load_from_file(textures_path("eggplant_tired_1.png")) &&
+		EGGPLANT_TIRED_2_TEXTURE.load_from_file(textures_path("eggplant_tired_2.png")) &&
 
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
