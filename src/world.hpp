@@ -14,6 +14,7 @@
 #include "textRenderer.hpp"
 #include "mainMenu.hpp"
 #include "platform.hpp"
+#include "knife.hpp"
 
 // stlib
 #include <vector>
@@ -103,6 +104,8 @@ class World
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 	std::vector<AI> m_char_select_ais;
+
+	Knife m_knife;
 
 	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;

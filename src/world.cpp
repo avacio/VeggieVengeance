@@ -136,12 +136,12 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	spawn_platform(0, 650, 1200, 10);
-	spawn_platform(-2, 551, 100, 10);
-	spawn_platform(1117, 551, 115, 10);
-	spawn_platform(137, 440, 220, 10);
-	spawn_platform(847, 440, 220, 10);
-	spawn_platform(375, 308, 453, 10);
+	spawn_platform(0, 635, 1200, 8); //main platform
+	spawn_platform(14, 546, 100, 8); //toaster platform
+	spawn_platform(1109, 546, 115, 8); //ricecooker platform
+	spawn_platform(225, 447, 155, 8); //left cupboard platform
+	spawn_platform(820, 447, 155, 8); //right cupboard platform
+	spawn_platform(400, 328, 405, 8); //middle cupboard platform
 
 	init_char_select_ais();
 
@@ -168,6 +168,8 @@ void World::destroy()
 	Mix_FreeChunk(m_charged_punch_audio);
 
 	Mix_CloseAudio();
+
+	m_knife.destroy();
 
 	if (m_player1.get_in_play())
 	{
@@ -238,6 +240,8 @@ bool World::update(float elapsed_ms)
 		attack_collision();
 		//damage effect removal loop
 		attack_deletion();
+
+		m_knife.update(elapsed_ms);
 		
 		//update players + ai
 		Attack * attack = NULL;
@@ -344,6 +348,8 @@ void World::draw()
 		}
 	} else {
 		m_bg.draw(projection_2D);
+
+		m_knife.draw(projection_2D);
 
 		if (m_player1.get_in_play())
 		{
@@ -708,6 +714,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		// random song
 		m_background_track = get_random_number(m_bgms.size() - 1);
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
+	}
+
+	// Spawn mesh for testing purposes
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
+		printf("knife");
+		m_knife.init();
 	}
 }
 
