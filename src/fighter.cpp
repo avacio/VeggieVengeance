@@ -237,14 +237,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		// ABILITY 2: Tater Tot Bombs
 		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
-			bomb_pointer = attack;
-			attack->increment_pointer_references();
+			//bomb_pointer = attack;
+			//attack->increment_pointer_references();
 			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;
 		}
 		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			attack->deincrement_pointer_references();
-			bomb_pointer = NULL;
+			//attack->deincrement_pointer_references();
+			//bomb_pointer = NULL;
 			m_potato_bomb_on_cooldown = true;
 			m_potato_bomb_planted = false;
 			m_potato_bomb_ticking = false;
