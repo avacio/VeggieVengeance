@@ -3,7 +3,6 @@
 #include "common.hpp"
 #include "damageEffect.hpp"
 #include "attack.hpp"
-#include <SDL_mixer.h>
 
 
 class Bomb : public Attack {
@@ -15,5 +14,7 @@ public:
 	void update(float ms);
 	void draw(const mat3 &projection) override;
 private:
-	float m_timer;
+	float m_velocity_y = 0;
+	const vec2 gravity = { 0.0, 800.0 };
+	const float TERMINAL_VELOCITY_Y = 400.0;
 };

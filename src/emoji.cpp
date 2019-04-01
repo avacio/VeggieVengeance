@@ -1,22 +1,20 @@
 #include "emoji.hpp"
 
-Texture Emoji::emoji_texture;
-
 Emoji::Emoji(int id, vec2 pos, unsigned int damage, bool direction) {
 	//variable bullet attributes
 	this->m_fighter_id = id;
 	this->m_position = pos;
+	this->fighter_position = pos;
 	this->m_damage = damage;
 
 	//pre-determined bullet attributes
-	this->m_scale = vec2({ 0.1f, 0.15f });
+	this->m_scale = vec2({ 0.5f, 0.5f });
 	this->m_velocity = vec2({ 7.0f, 0.0f });
-	//flip velocity if moving left
-	if (!direction) {
-		this->m_velocity.x *= -1.0;
-	}
-	this->m_width = std::fabs(this->m_scale.x) * emoji_texture.width;
-	this->m_height = std::fabs(this->m_scale.y) * emoji_texture.height;
+	
+	set_texture();
+	//this->emoji_texture = &EMOJI_SWEAT_TEXTURE;
+	this->m_width = std::fabs(this->m_scale.x) * emoji_texture->width;
+	this->m_height = std::fabs(this->m_scale.y) * emoji_texture->height;
 	this->m_delete_when = AFTER_HIT;
 	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, 0);
 }
@@ -33,21 +31,13 @@ Emoji::~Emoji() {
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	effect.release();
-	printf("destroyed emoji\n");
 }
 
 
 bool Emoji::init() {
-	if (!emoji_texture.is_valid()) {
-		if (!emoji_texture.load_from_file(textures_path("french_fry.png"))) {
-			fprintf(stderr, "Failed to load bullet texture!");
-			return false;
-		}
-	}
-
 	// The position corresponds to the center of the texture
-	float wr = emoji_texture.width * 0.5;
-	float hr = emoji_texture.height * 0.5;
+	float wr = emoji_texture->width * 0.5;
+	float hr = emoji_texture->height * 0.5;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -86,9 +76,22 @@ bool Emoji::init() {
 }
 
 void Emoji::update(float ms) {
-	m_position.x += m_velocity.x;
-	m_damageEffect->m_bounding_box.xpos = m_position.x;
-	m_damageEffect->m_bounding_box.ypos = m_position.y;
+	if (state == FIRED) {
+		m_position.x += m_velocity.x;
+		m_damageEffect->m_bounding_box.xpos = m_position.x;
+		m_damageEffect->m_bounding_box.ypos = m_position.y;
+	}
+	else if (state == CIRCLING){
+		m_position.x  = fighter_position.x +  cos(angle)*radius;
+		m_position.y = fighter_position.y + sin(angle)*radius;
+		m_damageEffect->m_bounding_box.xpos = m_position.x;
+		m_damageEffect->m_bounding_box.ypos = m_position.y;
+		angle += angle_increment;
+		if (angle >= 2 * PI) {
+			//to prevent overflow
+			angle = 0;
+		}
+	}
 }
 
 void Emoji::draw(const mat3 &projection) {
@@ -126,7 +129,7 @@ void Emoji::draw(const mat3 &projection) {
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, emoji_texture.id);
+	glBindTexture(GL_TEXTURE_2D, emoji_texture->id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -138,4 +141,38 @@ void Emoji::draw(const mat3 &projection) {
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
+}
+
+void Emoji::set_texture() {
+	int texture_no = get_random_number(3);
+	switch (texture_no) {
+		case 0 :
+			this->emoji_texture = &EMOJI_MOUTH_TEXTURE;
+			break;
+		case 1 :
+			this->emoji_texture = &EMOJI_SWEAT_TEXTURE;
+			break;
+		case 2:
+			this->emoji_texture = &EMOJI_100_TEXTURE;
+			break;
+		case 3:
+			this->emoji_texture = &EMOJI_OKHAND_TEXTURE;
+			break;
+	}
+}
+
+void Emoji::fire_emoji(bool direction) {
+	state = FIRED;
+	//flip velocity if moving left
+	if (!direction) {
+		this->m_velocity.x *= -1.0;
+	}
+}
+
+void Emoji::set_fighter_pos(vec2 pos) {
+	fighter_position = pos;
+}
+
+bool Emoji::is_circling() {
+	return state == CIRCLING;
 }

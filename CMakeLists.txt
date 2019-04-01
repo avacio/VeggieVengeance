@@ -54,6 +54,7 @@ set(SOURCE_FILES
 	src/dash.cpp
 	src/fighterInfo.cpp
 	src/emoji.cpp
+	src/knife.cpp
 
 
     	src/project_path.hpp
@@ -79,6 +80,7 @@ set(SOURCE_FILES
 	src/dash.hpp
 	src/fighterInfo.hpp
 	src/emoji.hpp
+	src/knife.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

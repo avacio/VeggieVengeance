@@ -15,6 +15,7 @@
 #include "emoji.hpp"
 #include <set>
 #include <random>
+#include <SDL_mixer.h>
 
 class Fighter : public Renderable
 {
@@ -131,6 +132,8 @@ class Fighter : public Renderable
 
 	bool is_paused() const;
 
+	bool is_uppercutting() const;
+
 	int get_blocking_tank() const;
 
 	int get_crouch_state();
@@ -139,12 +142,15 @@ class Fighter : public Renderable
 
 	void set_power_punch(bool punch);
 
+	void set_uppercut(bool uc);
+
 	void reset();
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
 	float get_heal_animation();
 
+	FighterCharacter m_fc;
 	// Potato
 	bool potato_is_holding_fries() const;
 
@@ -167,7 +173,6 @@ class Fighter : public Renderable
 	int m_lives; //counter for lives/stock remaining
 	vec2 m_position;  // Window coordinates
 
-	FighterCharacter m_fc;
 	std::string m_name;
 	TextRenderer* m_nameplate;
 
@@ -255,9 +260,14 @@ class Fighter : public Renderable
 	const float MAX_DASH_COOLDOWN = 1000.0;
 
 	//eggplant states
+	bool m_eggplant_spawn_emoji = false;
 	bool m_eggplant_shoot_emoji = false;
+	unsigned int m_eggplant_emoji_count = 0;
+	float m_eggplant_spawn_cooldown = 0.0;
 	float m_eggplant_shoot_cooldown = 0.0;
-	const float MAX_EMOJI_SHOOT_COOLDOWN = 500.0;
+	const float MAX_EMOJI_SPAWN_COOLDOWN = 500.0;
+	const unsigned int MAX_EMOJI_COUNT = 3;
+	std::vector<Emoji*> m_eggplant_emojis;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

@@ -237,19 +237,27 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		// ABILITY 2: Tater Tot Bombs
 		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
-			//bomb_pointer = attack;
-			//attack->increment_pointer_references();
+			bomb_pointer = attack;
+			bomb_pointer->increment_pointer_references();
 			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;
 		}
-		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			//attack->deincrement_pointer_references();
-			//bomb_pointer = NULL;
+		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted && bomb_pointer != NULL) {
+			//Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+			bomb_pointer->m_damageEffect->m_hit_fighter = true;
+			bomb_pointer->deincrement_pointer_references();
+			printf("after planted, before delete: %i \n", bomb_pointer->get_pointer_references());
+			if (bomb_pointer->get_pointer_references() == 0) {
+				delete bomb_pointer;
+				printf("deleted in fighter.cpp\n");
+			}
+			bomb_pointer = NULL;
 			m_potato_bomb_on_cooldown = true;
 			m_potato_bomb_planted = false;
 			m_potato_bomb_ticking = false;
 			m_potato_bomb_selftimer = 0;
 		}
+		
 		if (m_potato_bomb_ticking) {
 			if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
 				m_potato_bomb_on_cooldown = true;
@@ -279,7 +287,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
-			m_broccoli_is_uppercutting = false;
 			m_broccoli_uppercut_on_cooldown = true;
 		}
 		if (m_broccoli_uppercut_on_cooldown) {
@@ -363,18 +370,55 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_yam_heal_animation_ms -= ms;
 		}
 
+
 		//EGGPLANT
 		//Ability 1: Circling emojis
-		/*if (m_eggplant_spawn_emoji) {
-
-		}*/
+		for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+			//emoji update function
+			// check for out-of-play emojis and remove
+			if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
+				// this means it has been removed in the collision loop and we should remove it too!
+				m_eggplant_emojis[i]->deincrement_pointer_references();
+				delete m_eggplant_emojis[i];
+				m_eggplant_emojis[i] = NULL;
+				m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
+				i--;
+				m_eggplant_emoji_count--;
+			}
+			else {
+				//otherwise, they are in play, and you will want to provide them your location
+				m_eggplant_emojis[i]->set_fighter_pos(m_position);
+			}
+		}
+		if (m_eggplant_spawn_emoji) {
+			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
+				Emoji * e = emoji();
+				attack = e;
+				m_eggplant_emojis.push_back(e);
+				e->increment_pointer_references();
+				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
+				m_eggplant_emoji_count++;
+			}
+			m_eggplant_spawn_emoji = false;
+		}
+		if (m_eggplant_spawn_cooldown > 0.0) {
+			m_eggplant_spawn_cooldown -= ms;
+		}
 
 		//EGGPLANT
 		//Ability 2: Emoji projectile
 		if (m_eggplant_shoot_emoji) {
-			if (m_eggplant_shoot_cooldown <= 0.0) {
-				attack = emoji();
-				m_eggplant_shoot_cooldown = MAX_EMOJI_SHOOT_COOLDOWN;
+			if (m_eggplant_emoji_count > 0) {
+				Emoji * e = NULL;
+				// search for the first circling emoji, if any
+				for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+					if (m_eggplant_emojis[i]->is_circling()) {
+						e = m_eggplant_emojis[i];
+						break;
+					}
+				}
+				if (e != NULL) 
+					e->fire_emoji(m_facing_front);
 			}
 			m_eggplant_shoot_emoji = false;
 		}
@@ -447,6 +491,19 @@ void Fighter::draw(const mat3 &projection)
 		if (is_paused()) {
 
 		}
+
+		else if (is_uppercutting())
+		{
+			m_punch_counter++;
+			set_sprite(UPPERCUT);
+
+			if (m_punch_counter > 30)
+			{
+				m_punch_counter = 0;
+				set_uppercut(false);
+			}
+		}
+
 		else if (is_punching()) {
 			if (!is_crouching()) { set_sprite(PUNCH); }
 			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
@@ -576,50 +633,61 @@ void Fighter::set_movement(int mov)
 			if (!m_potato_bomb_planted) m_potato_is_planting_bomb = true;
 			else m_potato_explode_planted_bomb = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
-			break;
 		}
+		else if (m_fc == YAM) {
+			m_yam_start_dashing = true;
+			m_is_idle = false;
+		}
+		else if (m_fc == EGGPLANT) {
+			m_eggplant_spawn_emoji = true;
+		}
+		break;
 	case ABILITY_2:
 		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
 			m_potato_is_shooting_fries = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_shooting_cauliflowers = true;
 			m_is_idle = false;
-			break;
 		}
+		else if (m_fc == YAM) {
+			m_yam_is_healing = true;
+			m_is_idle = false;
+		}
+		else if (m_fc == EGGPLANT) {
+			m_eggplant_shoot_emoji = true;
+			m_is_idle = false;
+		}
+		break;
 	case HOLDING_ABILITY_2:
 		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
 			m_potato_is_holding_fries = true;
 			m_potato_is_shooting_fries = false;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_holding_cauliflowers = true;
 			m_broccoli_is_shooting_cauliflowers = false;
 			m_is_idle = false;
-			break;
 		}
+		break;
 	case CHARGED_ABILITY_2:
 		if (m_fc == POTATO && !m_is_blocking && !m_tired_out) {
 			m_potato_is_holding_fries = false;
 			m_potato_is_shooting_charged_fries = true;
 			m_is_idle = false;
-			break;
 		}
 		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
 			m_broccoli_is_holding_cauliflowers = false;
 			m_broccoli_is_shooting_charged_cauliflowers = true;
 			m_is_idle = false;
-			break;
 		}
+		break;
 	case HOLDING_POWER_PUNCH:
 		m_is_holding_power_punch = true;
 		m_is_punching = false;
@@ -654,14 +722,13 @@ void Fighter::set_movement(int mov)
 			m_potato_explode_planted_bomb = false;
 			m_potato_is_shooting_fries = false;
 			m_is_idle = true;
-			break;
 		}
 		else if (m_fc == BROCCOLI) {
 			m_broccoli_is_uppercutting = false;
 			m_broccoli_is_shooting_cauliflowers = false;
 			m_is_idle = true;
-			break;
 		}
+		break;
 	case BLOCKING:
 		//CANNOT BLOCK UNTIL BLOCKING TANK IS ATLEAST 1000 (1second of recharge)
 		if (!m_is_punching && m_blocking_tank >= 1000)
@@ -675,15 +742,6 @@ void Fighter::set_movement(int mov)
 		break;
 	case UNPAUSED:
 		m_is_paused = false;
-		break;
-	case HEAL:
-		m_yam_is_healing = true;
-		break;
-	case DASH:
-		m_yam_start_dashing = true;
-		break;
-	case EMOJI_P:
-		m_eggplant_shoot_emoji = true;
 		break;
 	}
 }
@@ -847,6 +905,19 @@ void Fighter::die() {
 			m_crouch_state = NOT_CROUCHING;
 		}
 
+		if (m_eggplant_emojis.size() > 0) {
+			for (auto &eggplant_emoji : m_eggplant_emojis) {
+				eggplant_emoji->m_damageEffect->m_hit_fighter = true;
+				eggplant_emoji->deincrement_pointer_references();
+				if (eggplant_emoji->get_pointer_references() == 0) {
+					delete eggplant_emoji;
+					eggplant_emoji = NULL;
+				}
+			}
+			m_eggplant_emojis.clear();
+			m_eggplant_emoji_count = 0;
+		}
+
 		if (m_lives > 0)
 		{
 			m_respawn_timer = RESPAWN_TIME;
@@ -878,19 +949,30 @@ void Fighter::check_respawn(float ms) {
 			m_tired_out = false;
 			m_is_jumping = false;
 			m_is_punching = false;
-			m_potato_is_shooting_fries = false;
-			m_broccoli_is_holding_cauliflowers = false;
-			m_broccoli_is_shooting_cauliflowers = false;
-			m_broccoli_cauliflowers_on_cooldown = false;
-			m_broccoli_is_double_jumping = false;
-			m_broccoli_jump_left = 2;
-			m_broccoli_is_uppercutting = false;
-			m_broccoli_uppercut_on_cooldown = false;
-			m_broccoli_uppercut_cooldown = 0;
 			m_is_holding_power_punch = false;
 			m_is_power_punching = false;
 			m_force.x = 0;
 			m_force.y = 0;
+			// Potato flags
+			m_potato_is_shooting_fries = false;
+			m_potato_is_holding_fries = false;
+			m_potato_fries_cooldown = 0;
+			m_potato_fries_on_cooldown = false;
+			m_potato_bomb_planted = false;
+			m_potato_bomb_selftimer = 0;
+			m_potato_bomb_ticking = 0;
+			m_potato_bomb_cooldown = 0;
+			m_potato_bomb_on_cooldown = false;
+			// Broccoli flags
+			m_broccoli_is_double_jumping = false;
+			m_broccoli_jump_left = 2;
+			m_broccoli_is_holding_cauliflowers = false;
+			m_broccoli_is_shooting_cauliflowers = false;
+			m_broccoli_cauliflowers_cooldown = 0;
+			m_broccoli_cauliflowers_on_cooldown = false;
+			m_broccoli_is_uppercutting = false;
+			m_broccoli_uppercut_on_cooldown = false;
+			m_broccoli_uppercut_cooldown = 0;		
 		}
 	}
 }
@@ -974,6 +1056,11 @@ void Fighter::set_power_punch(bool punch)
 	m_is_power_punching = punch;
 }
 
+void Fighter::set_uppercut(bool uc)
+{
+	m_broccoli_is_uppercutting = uc;
+}
+
 int Fighter::get_alive() const
 {
 	return m_is_alive;
@@ -1003,6 +1090,10 @@ bool Fighter::broccoli_get_jump_left() {
 
 bool Fighter::broccoli_is_uppercut_on_cooldown() {
 	return m_broccoli_uppercut_on_cooldown;
+}
+
+bool Fighter::is_uppercutting() const {
+	return m_broccoli_is_uppercutting;
 }
 
 //void Fighter::reset(int init_position)
@@ -1227,20 +1318,24 @@ void Fighter::set_sprite(SpriteType st) const {
 			case CROUCH_PUNCH: f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
 			case CROUCH: f_texture = BROCCOLI_CROUCH_TEXTURE; break;
 			case DEATH: f_texture = BROCCOLI_DEATH_TEXTURE; break;
+			case UPPERCUT: f_texture = BROCCOLI_UPPERCUT_TEXTURE; break;
+			case TIRED_1: f_texture = BROCCOLI_TIRED_1_TEXTURE; break;
+			case TIRED_2: f_texture = BROCCOLI_TIRED_2_TEXTURE; break;
+			case CHARGING: f_texture = BROCCOLI_CHARGING_TEXTURE; break;
 		}
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB
 		switch (st) {
-		default: f_texture = YAM_TEXTURE; break;
-		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
-		case PUNCH: f_texture = YAM_PUNCH_TEXTURE; break;
-		case POWER_PUNCH: f_texture = YAM_POWER_PUNCH_TEXTURE; break;
-		case CROUCH_PUNCH: f_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
-		case CROUCH: f_texture = YAM_CROUCH_TEXTURE; break;
-		case CHARGING: f_texture = YAM_CHARGING_TEXTURE; break;
-		case DEATH: f_texture = YAM_DEATH_TEXTURE; break;
-		case TIRED_1: f_texture = YAM_TIRED_1_TEXTURE; break;
-		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
+		default: f_texture = EGGPLANT_TEXTURE; break;
+		case IDLE: f_texture = EGGPLANT_IDLE_TEXTURE; break;
+		case PUNCH: f_texture = EGGPLANT_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: f_texture = EGGPLANT_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: f_texture = EGGPLANT_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: f_texture = EGGPLANT_CROUCH_TEXTURE; break;
+		case CHARGING: f_texture = EGGPLANT_CHARGING_TEXTURE; break;
+		case DEATH: f_texture = EGGPLANT_DEATH_TEXTURE; break;
+		case TIRED_1: f_texture = EGGPLANT_TIRED_1_TEXTURE; break;
+		case TIRED_2: f_texture = EGGPLANT_TIRED_2_TEXTURE; break;
 		}
 	} else if (m_fc == YAM) {
 		switch (st) {

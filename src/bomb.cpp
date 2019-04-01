@@ -1,4 +1,5 @@
 #include "bomb.hpp"
+#include <SDL_mixer.h>
 
 Texture Bomb::bomb_texture;
 
@@ -11,7 +12,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 
 	//pre-determined bullet attributes
 	this->m_scale = vec2({ 0.1f, 0.1f });
-	this->m_velocity = vec2({ 7.0f, 0.0f });
+	this->m_velocity = vec2({ 0.0f, 0.0f });
 	
 	this->m_width = std::fabs(this->m_scale.x) * bomb_texture.width * 0.6f;
 	this->m_height = std::fabs(this->m_scale.y) * bomb_texture.height * 0.6f;
@@ -20,6 +21,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 }
 
 Bomb::~Bomb() {
+	printf("deleted");
 	Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
 	delete m_damageEffect;
 
