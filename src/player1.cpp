@@ -189,16 +189,16 @@ void Player1::set_sprite(SpriteType st) const {
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB
 		switch (st) {
-		default: p_texture = YAM_TEXTURE; break;
-		case IDLE: p_texture = YAM_IDLE_TEXTURE; break;
-		case PUNCH: p_texture = YAM_PUNCH_TEXTURE; break;
-		case POWER_PUNCH: p_texture = YAM_POWER_PUNCH_TEXTURE; break;
-		case CROUCH_PUNCH: p_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
-		case CROUCH: p_texture = YAM_CROUCH_TEXTURE; break;
-		case CHARGING: p_texture = YAM_CHARGING_TEXTURE; break;
-		case DEATH: p_texture = YAM_DEATH_TEXTURE; break;
-		case TIRED_1: p_texture = YAM_TIRED_1_TEXTURE; break;
-		case TIRED_2: p_texture = YAM_TIRED_2_TEXTURE; break;
+		default: p_texture = EGGPLANT_TEXTURE; break;
+		case IDLE: p_texture = EGGPLANT_IDLE_TEXTURE; break;
+		case PUNCH: p_texture = EGGPLANT_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: p_texture = EGGPLANT_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: p_texture = EGGPLANT_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: p_texture = EGGPLANT_CROUCH_TEXTURE; break;
+		case CHARGING: p_texture = EGGPLANT_CHARGING_TEXTURE; break;
+		case DEATH: p_texture = EGGPLANT_DEATH_TEXTURE; break;
+		case TIRED_1: p_texture = EGGPLANT_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = EGGPLANT_TIRED_2_TEXTURE; break;
 		}
 	}
 	else if (m_fc == YAM) {
