@@ -21,6 +21,10 @@ Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
 Texture BROCCOLI_CROUCH_TEXTURE;
 Texture BROCCOLI_DEATH_TEXTURE;
 Texture BROCCOLI_UPPERCUT_TEXTURE;
+Texture BROCCOLI_TIRED_1_TEXTURE;
+Texture BROCCOLI_TIRED_2_TEXTURE;
+Texture BROCCOLI_CHARGING_TEXTURE;
+Texture BROCCOLI_POWER_PUNCH_TEXTURE;
 
 Texture YAM_TEXTURE;
 Texture YAM_IDLE_TEXTURE;
@@ -62,6 +66,10 @@ bool load_all_sprites_from_file() {
 		BROCCOLI_CROUCH_TEXTURE.load_from_file(textures_path("broccoli_crouch.png")) &&
 		BROCCOLI_DEATH_TEXTURE.load_from_file(textures_path("broccoli_death.png")) &&
 		BROCCOLI_UPPERCUT_TEXTURE.load_from_file(textures_path("broccoli_uppercut.png")) &&
+		BROCCOLI_TIRED_1_TEXTURE.load_from_file(textures_path("broccoli_tired_1.png")) &&
+		BROCCOLI_TIRED_2_TEXTURE.load_from_file(textures_path("broccoli_tired_2.png")) &&
+		BROCCOLI_CHARGING_TEXTURE.load_from_file(textures_path("broccoli_charging.png")) &&
+		BROCCOLI_POWER_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_power_punch.png")) &&
 
 		YAM_TEXTURE.load_from_file(textures_path("yam.png")) &&
 		YAM_IDLE_TEXTURE.load_from_file(textures_path("yam_idle.png")) &&

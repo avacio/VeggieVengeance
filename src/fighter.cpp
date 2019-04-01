@@ -1180,6 +1180,9 @@ void Fighter::set_sprite(SpriteType st) const {
 			case CROUCH: f_texture = BROCCOLI_CROUCH_TEXTURE; break;
 			case DEATH: f_texture = BROCCOLI_DEATH_TEXTURE; break;
 			case UPPERCUT: f_texture = BROCCOLI_UPPERCUT_TEXTURE; break;
+			case TIRED_1: f_texture = BROCCOLI_TIRED_1_TEXTURE; break;
+			case TIRED_2: f_texture = BROCCOLI_TIRED_2_TEXTURE; break;
+			case CHARGING: f_texture = BROCCOLI_CHARGING_TEXTURE; break;
 		}
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB

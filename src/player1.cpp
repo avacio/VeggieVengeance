@@ -177,11 +177,14 @@ void Player1::set_sprite(SpriteType st) const {
 		default: p_texture = BROCCOLI_TEXTURE; break;
 		case IDLE: p_texture = BROCCOLI_IDLE_TEXTURE; break;
 		case PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break;
-		case POWER_PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break; // TODO: STUB
+		case POWER_PUNCH: p_texture = BROCCOLI_POWER_PUNCH_TEXTURE; break; // TODO: STUB
 		case CROUCH_PUNCH: p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
 		case CROUCH: p_texture = BROCCOLI_CROUCH_TEXTURE; break;
 		case DEATH: p_texture = BROCCOLI_DEATH_TEXTURE; break;
 		case UPPERCUT: p_texture = BROCCOLI_UPPERCUT_TEXTURE; break;
+		case TIRED_1: p_texture = BROCCOLI_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = BROCCOLI_TIRED_2_TEXTURE; break;
+		case CHARGING: p_texture = BROCCOLI_CHARGING_TEXTURE; break;
 		}
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB
