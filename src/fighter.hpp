@@ -129,6 +129,8 @@ class Fighter : public Renderable
 
 	bool is_paused() const;
 
+	bool is_uppercutting() const;
+
 	int get_blocking_tank() const;
 
 	int get_crouch_state();
@@ -136,6 +138,8 @@ class Fighter : public Renderable
 	void set_crouch_state(CrouchState cs);
 
 	void set_power_punch(bool punch);
+
+	void set_uppercut(bool uc);
 
 	void reset();
 

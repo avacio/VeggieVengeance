@@ -77,7 +77,20 @@ void Player1::draw(const mat3 &projection)
 				m_anim_counter = 0;
 		}
 
-		else if (is_punching()) {
+		else if (is_uppercutting())
+		{
+			m_punch_counter++;
+			set_sprite(UPPERCUT);
+
+			if (m_punch_counter > 30)
+			{
+				m_punch_counter = 0;
+				set_uppercut(false);
+			}
+		}
+
+		else if (is_punching())
+		{
 			if (!is_crouching()) { set_sprite(PUNCH); }
 			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
 		}
@@ -85,6 +98,7 @@ void Player1::draw(const mat3 &projection)
 		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
 		else if (is_holding_power_punch()) { set_sprite(CHARGING); }
+
 
 		else if (is_power_punching())
 		{
@@ -163,10 +177,14 @@ void Player1::set_sprite(SpriteType st) const {
 		default: p_texture = BROCCOLI_TEXTURE; break;
 		case IDLE: p_texture = BROCCOLI_IDLE_TEXTURE; break;
 		case PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break;
-		case POWER_PUNCH: p_texture = BROCCOLI_PUNCH_TEXTURE; break; // TODO: STUB
+		case POWER_PUNCH: p_texture = BROCCOLI_POWER_PUNCH_TEXTURE; break; // TODO: STUB
 		case CROUCH_PUNCH: p_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
 		case CROUCH: p_texture = BROCCOLI_CROUCH_TEXTURE; break;
 		case DEATH: p_texture = BROCCOLI_DEATH_TEXTURE; break;
+		case UPPERCUT: p_texture = BROCCOLI_UPPERCUT_TEXTURE; break;
+		case TIRED_1: p_texture = BROCCOLI_TIRED_1_TEXTURE; break;
+		case TIRED_2: p_texture = BROCCOLI_TIRED_2_TEXTURE; break;
+		case CHARGING: p_texture = BROCCOLI_CHARGING_TEXTURE; break;
 		}
 	}
 	else if (m_fc == EGGPLANT) { // TODO: STUB
