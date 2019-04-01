@@ -91,3 +91,8 @@ extern Texture MAIN_MENU_TEXTURE;
 extern Texture BACKGROUND_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
+
+extern Texture EMOJI_SWEAT_TEXTURE;
+extern Texture EMOJI_MOUTH_TEXTURE;
+extern Texture EMOJI_100_TEXTURE;
+extern Texture EMOJI_OKHAND_TEXTURE;

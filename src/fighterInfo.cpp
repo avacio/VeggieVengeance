@@ -37,6 +37,11 @@ Texture BACKGROUND_TEXTURE;
 Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
 
+Texture EMOJI_SWEAT_TEXTURE;
+Texture EMOJI_MOUTH_TEXTURE;
+Texture EMOJI_100_TEXTURE;
+Texture EMOJI_OKHAND_TEXTURE;
+
 bool load_all_sprites_from_file() {
 	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) &&
 		POTATO_IDLE_TEXTURE.load_from_file(textures_path("potato_idle.png")) &&
@@ -70,7 +75,12 @@ bool load_all_sprites_from_file() {
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
 		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
 		PLATFORM_TEXTURE.load_from_file(textures_path("grey.png")) &&
-		BULLET_TEXTURE.load_from_file(textures_path("french_fry.png"));
+		BULLET_TEXTURE.load_from_file(textures_path("french_fry.png")) &&
+
+		EMOJI_SWEAT_TEXTURE.load_from_file(textures_path("sweat_wind.png")) &&
+		EMOJI_MOUTH_TEXTURE.load_from_file(textures_path("mouth_wind.png")) &&
+		EMOJI_100_TEXTURE.load_from_file(textures_path("100_wind.png")) &&
+		EMOJI_OKHAND_TEXTURE.load_from_file(textures_path("okhand_wind.png"));
 
 	if (!initSuccess) {
 		fprintf(stderr, "Failed to load sprites from file!\n");
