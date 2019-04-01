@@ -1,15 +1,13 @@
 #pragma once
 
 #include "common.hpp"
-#include "fighterInfo.hpp"
 #include "damageEffect.hpp"
 #include "attack.hpp"
 
-class Bullet : public Attack {
-	static Texture bullet_texture;
+class Dash : public Attack {
 public:
-	Bullet(int id, vec2 pos, unsigned int damage, bool direction);
-	~Bullet();
+	Dash(int id, vec2 pos, vec2 size, unsigned int damage, float vert_force);
+	~Dash();
 	bool init();
 	void update(float ms);
 	void draw(const mat3 &projection) override;

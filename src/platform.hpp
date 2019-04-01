@@ -1,11 +1,12 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "boundingBox.hpp"
 class Platform: public Renderable
 {
 public:
-	static Texture fighter_texture;
+	static Texture platform_texture;
 	Platform(float xpos, float ypos, float width, float height);
 	bool check_collision(BoundingBox b);
 	bool check_collision_outer_top(BoundingBox b);

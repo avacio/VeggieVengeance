@@ -51,6 +51,9 @@ set(SOURCE_FILES
 	src/platform.cpp
 	src/uppercut.cpp
 	src/bomb.cpp
+	src/dash.cpp
+	src/fighterInfo.cpp
+	src/emoji.cpp
 
 
     	src/project_path.hpp
@@ -73,6 +76,9 @@ set(SOURCE_FILES
 	src/platform.hpp
 	src/uppercut.hpp
 	src/bomb.hpp
+	src/dash.hpp
+	src/fighterInfo.hpp
+	src/emoji.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

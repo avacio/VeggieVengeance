@@ -13,7 +13,7 @@ Punch::Punch(int id, vec2 pos, vec2 size, unsigned int damage, bool direction) {
 	this->m_width = size.x;
 	this->m_height = size.y;
 	this->m_delete_when = AFTER_UPDATE;
-	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when);
+	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, 0);
 }
 
 Punch::~Punch() {

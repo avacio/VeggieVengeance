@@ -25,16 +25,14 @@
 
 Texture Fighter::f_texture;
 
-
 Fighter::Fighter(unsigned int id) : m_id(id) {
 }
 
 bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
-{
+{	
 	// Load shared texture
 	m_fc = fc;
-	if (fc == BROCCOLI) { f_texture = BROCCOLI_TEXTURE; }
-	else { f_texture = POTATO_TEXTURE; }
+	set_sprite(ORIGINAL);
 
 	// The position corresponds to the center of the texture
 	//float wr = fighter_texture.width * 3.5f;
@@ -95,19 +93,14 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_scale.y = 1.2f;
 	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
 	m_rotation = 0.f;
+
+	// initialized in fighterInfo.cpp
+	MAX_HEALTH = fighterMap[m_fc].health;
+	m_speed = fighterMap[m_fc].speed * 1.5f;
+	m_strength = fighterMap[m_fc].strength;
+	m_mass = 1.f;
+	
 	m_health = MAX_HEALTH;
-	switch (fc) {
-	case POTATO:
-		m_speed = 3.f;
-		m_strength = 5;
-		m_mass = 1.f;
-		break;
-	case BROCCOLI:
-		m_speed = 5.f;
-		m_strength = 3;
-		m_mass = 1.f;
-		break;
-	};
 	m_lives = STARTING_LIVES;
 	m_velocity_y = 0.0;
 	m_name = name;
@@ -148,7 +141,6 @@ void Fighter::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
-	// delete m_nameplate;
 	effect.release();
 }
 
@@ -163,7 +155,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		m_blocking_tank -= ms;
 	}
 	//Stop blocking if blocking tank is empty
-	if (m_is_blocking && m_blocking_tank <= 0) this->set_movement(STOP_BLOCKING);
+	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
 	//Recharche blocking tank
 	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
 		m_blocking_tank += ms;
@@ -246,17 +238,13 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
 			bomb_pointer = attack;
+			attack->increment_pointer_references();
 			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;
 		}
 		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			/*
-			if (bomb_pointer != nullptr) {
-				attack = NULL;
-				delete bomb_pointer;
-				bomb_pointer = NULL;
-			}
-			*/
+			attack->deincrement_pointer_references();
+			bomb_pointer = NULL;
 			m_potato_bomb_on_cooldown = true;
 			m_potato_bomb_planted = false;
 			m_potato_bomb_ticking = false;
@@ -303,7 +291,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_broccoli_uppercut_cooldown++;
 		}
 
-		// ABILITY 2: C (projectile)
+		// ABILITY 2: Cauliflower (projectile)
 		else if (m_broccoli_is_holding_cauliflowers)
 			broccoli_charging_up_cauliflowers();
 		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
@@ -323,6 +311,75 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			}
 			else
 				m_broccoli_cauliflowers_cooldown++;
+		}
+
+
+		//YAM
+		//Ability 1: Dash
+		if (m_yam_start_dashing) {
+			if (m_yam_dash_cooldown_ms <= 0.0) {
+				m_yam_dash_timer_ms = MAX_DASH_TIMER;
+			}
+			m_yam_start_dashing = false;
+		}
+		if (m_yam_dash_cooldown_ms > 0.0) {
+			m_yam_dash_cooldown_ms -= ms;
+		}
+		if (m_yam_dash_timer_ms > 0.0) {
+			float target_ms_per_frame = 1000.f / 60.f;
+			float speed_scale = ms / target_ms_per_frame;
+			if (!m_moving_backward && !m_moving_forward)
+				speed_scale *= 2.0;
+			if (m_facing_front && m_position.x < 1150.f) {
+				move({ m_speed * speed_scale, 0.0 });
+			}
+			else if (!m_facing_front && m_position.x > 50.f) {
+				move({ -m_speed * speed_scale, 0.0 });
+			}
+			m_yam_dash_timer_ms -= ms;
+			if (m_yam_dash_timer_ms <= 0.0) {
+				m_yam_dash_cooldown_ms = MAX_DASH_COOLDOWN;
+				attack = dash();
+			}
+		}
+
+		//YAM
+		//Ability 2: Heal
+		if (m_yam_is_healing) {
+			if (m_yam_heal_cooldown_ms <= 0.0) {
+				// heal, but don't go over the health cap
+				if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
+				else { m_health = MAX_HEALTH; }
+				//reset cooldown and state
+				m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
+				m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
+			}
+			m_yam_is_healing = false;
+		}
+		if (m_yam_heal_cooldown_ms > 0.0) {
+			m_yam_heal_cooldown_ms -= ms;
+		}
+		if(m_yam_heal_animation_ms > 0.0) {
+			m_yam_heal_animation_ms -= ms;
+		}
+
+		//EGGPLANT
+		//Ability 1: Circling emojis
+		/*if (m_eggplant_spawn_emoji) {
+
+		}*/
+
+		//EGGPLANT
+		//Ability 2: Emoji projectile
+		if (m_eggplant_shoot_emoji) {
+			if (m_eggplant_shoot_cooldown <= 0.0) {
+				attack = emoji();
+				m_eggplant_shoot_cooldown = MAX_EMOJI_SHOOT_COOLDOWN;
+			}
+			m_eggplant_shoot_emoji = false;
+		}
+		if (m_eggplant_shoot_cooldown > 0.0) {
+			m_eggplant_shoot_cooldown -= ms;
 		}
 
 	}
@@ -365,6 +422,7 @@ void Fighter::draw(const mat3 &projection)
 	GLint projection_uloc = glGetUniformLocation(effect.program, "projection");
 	GLint is_hurt_uloc = glGetUniformLocation(effect.program, "is_hurt");
 	GLint is_blocking_uloc = glGetUniformLocation(effect.program, "is_blocking");
+	GLint heal_animation_uloc = glGetUniformLocation(effect.program, "heal_animation");
 	GLint blocking_tank_uloc = glGetUniformLocation(effect.program, "blocking_tank");
 	GLuint time_uloc = glGetUniformLocation(effect.program, "time");
 
@@ -389,34 +447,19 @@ void Fighter::draw(const mat3 &projection)
 		if (is_paused()) {
 
 		}
-
-		else if (is_punching())
-		{
-			if (!is_crouching()) {
-				if (m_fc == POTATO) f_texture = POTATO_PUNCH_TEXTURE;
-				else f_texture = BROCCOLI_PUNCH_TEXTURE;
-			}
-			else if (is_crouching()) {
-				if (m_fc == POTATO) f_texture = POTATO_CROUCH_PUNCH_TEXTURE;
-				else f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE;
-			}
+		else if (is_punching()) {
+			if (!is_crouching()) { set_sprite(PUNCH); }
+			else if (is_crouching()) { set_sprite(CROUCH_PUNCH); }
 		}
 
-		else if (!is_punching() && is_crouching())
-		{
-			if (m_fc == POTATO) f_texture = POTATO_CROUCH_TEXTURE;
-			else f_texture = BROCCOLI_CROUCH_TEXTURE;
-		}
+		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
-		else if (is_holding_power_punch())
-		{
-			if (m_fc == POTATO) f_texture = POTATO_CHARGING_TEXTURE;
-		}
+		else if (is_holding_power_punch()) { set_sprite(CHARGING); }
 
 		else if (is_power_punching())
 		{
 			m_punch_counter++;
-			if (m_fc == POTATO) f_texture = POTATO_POWER_PUNCH_TEXTURE;
+			set_sprite(POWER_PUNCH);
 
 			if (m_punch_counter > 20)
 			{
@@ -424,24 +467,13 @@ void Fighter::draw(const mat3 &projection)
 				set_power_punch(false);
 			}
 		}
-
 		else if (!is_punching())
 		{
 			if (get_alive() && !is_crouching())
 			{
 				m_anim_counter++;
-				if (m_anim_counter < 25)
-				{
-					if (m_fc == POTATO) f_texture = POTATO_IDLE_TEXTURE;
-					else f_texture = BROCCOLI_IDLE_TEXTURE;
-				}
-
-				else if (m_anim_counter > 25 && m_anim_counter < 50)
-				{
-					if (m_fc == POTATO) f_texture = POTATO_TEXTURE;
-					else f_texture = BROCCOLI_TEXTURE;
-				}
-
+				if (m_anim_counter < 25) { set_sprite(IDLE); }
+				else if (m_anim_counter > 25 && m_anim_counter < 50) { set_sprite(ORIGINAL); }
 				else if (m_anim_counter >= 50)
 					m_anim_counter = 0;
 			}
@@ -450,8 +482,7 @@ void Fighter::draw(const mat3 &projection)
 
 	else if (!get_alive())
 	{
-		if (m_fc == POTATO) f_texture = POTATO_DEATH_TEXTURE;
-		else f_texture = BROCCOLI_DEATH_TEXTURE;
+		set_sprite(DEATH);
 	}
 
 	glBindTexture(GL_TEXTURE_2D, f_texture.id);
@@ -465,6 +496,7 @@ void Fighter::draw(const mat3 &projection)
 	glUniform1i(is_blocking_uloc, m_is_blocking);
 	glUniform1f(blocking_tank_uloc, (float)  m_blocking_tank);
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(heal_animation_uloc, m_yam_heal_animation_ms);
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -643,6 +675,15 @@ void Fighter::set_movement(int mov)
 		break;
 	case UNPAUSED:
 		m_is_paused = false;
+		break;
+	case HEAL:
+		m_yam_is_healing = true;
+		break;
+	case DASH:
+		m_yam_start_dashing = true;
+		break;
+	case EMOJI_P:
+		m_eggplant_shoot_emoji = true;
 		break;
 	}
 }
@@ -1146,3 +1187,73 @@ void Fighter::potato_charging_up_fries() {
 	}
 }
 
+float Fighter::get_heal_animation() {
+	return m_yam_heal_animation_ms;
+}
+
+Dash * Fighter::dash() {
+	BoundingBox* b = get_bounding_box();
+	Dash* dash = new Dash(get_id(), { b->xpos, b->ypos }, { b->width, b->height }, m_strength, 0);
+	delete b;
+	return dash;
+}
+
+Emoji * Fighter::emoji() {
+	Emoji * emoji = new Emoji(get_id(), m_position, m_strength, m_facing_front);
+	return emoji;
+}
+
+void Fighter::set_sprite(SpriteType st) const {
+	if (m_fc == POTATO) {
+		switch (st) {
+			default: f_texture = POTATO_TEXTURE; break;
+			case IDLE: f_texture = POTATO_IDLE_TEXTURE; break;
+			case PUNCH: f_texture = POTATO_PUNCH_TEXTURE; break;
+			case POWER_PUNCH: f_texture = POTATO_POWER_PUNCH_TEXTURE; break;
+			case CROUCH_PUNCH: f_texture = POTATO_CROUCH_PUNCH_TEXTURE; break;
+			case CROUCH: f_texture = POTATO_CROUCH_TEXTURE; break;
+			case CHARGING: f_texture = POTATO_CHARGING_TEXTURE; break;
+			case DEATH: f_texture = POTATO_DEATH_TEXTURE; break;
+			case TIRED_1: f_texture = POTATO_TIRED_1_TEXTURE; break;
+			case TIRED_2: f_texture = POTATO_TIRED_2_TEXTURE; break;
+		}
+	}
+	else if (m_fc == BROCCOLI) {
+		switch (st) {
+			default: f_texture = BROCCOLI_TEXTURE; break;
+			case IDLE: f_texture = BROCCOLI_IDLE_TEXTURE; break;
+			case PUNCH: f_texture = BROCCOLI_PUNCH_TEXTURE; break;
+			case POWER_PUNCH: f_texture = BROCCOLI_PUNCH_TEXTURE; break; // TODO: STUB
+			case CROUCH_PUNCH: f_texture = BROCCOLI_CROUCH_PUNCH_TEXTURE; break;
+			case CROUCH: f_texture = BROCCOLI_CROUCH_TEXTURE; break;
+			case DEATH: f_texture = BROCCOLI_DEATH_TEXTURE; break;
+		}
+	}
+	else if (m_fc == EGGPLANT) { // TODO: STUB
+		switch (st) {
+		default: f_texture = YAM_TEXTURE; break;
+		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: f_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: f_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: f_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: f_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: f_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: f_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: f_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
+		}
+	} else if (m_fc == YAM) {
+		switch (st) {
+		default: f_texture = YAM_TEXTURE; break;
+		case IDLE: f_texture = YAM_IDLE_TEXTURE; break;
+		case PUNCH: f_texture = YAM_PUNCH_TEXTURE; break;
+		case POWER_PUNCH: f_texture = YAM_POWER_PUNCH_TEXTURE; break;
+		case CROUCH_PUNCH: f_texture = YAM_CROUCH_PUNCH_TEXTURE; break;
+		case CROUCH: f_texture = YAM_CROUCH_TEXTURE; break;
+		case CHARGING: f_texture = YAM_CHARGING_TEXTURE; break;
+		case DEATH: f_texture = YAM_DEATH_TEXTURE; break;
+		case TIRED_1: f_texture = YAM_TIRED_1_TEXTURE; break;
+		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
+		}
+	}
+}

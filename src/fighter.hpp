@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "fighterInfo.hpp"
 #include "damageEffect.hpp"
 #include "platform.hpp"
 #include "textRenderer.hpp"
@@ -10,6 +11,8 @@
 #include "bullet.hpp"
 #include "projectile.hpp"
 #include "bomb.hpp"
+#include "dash.hpp"
+#include "emoji.hpp"
 #include <set>
 #include <random>
 
@@ -40,6 +43,12 @@ class Fighter : public Renderable
 
 	//get collision object for Broccoli's uppercut ability
 	Uppercut * broccoliUppercut();
+
+	//get collision object for dash
+	Dash * dash();
+
+	//get collision object for emoji
+	Emoji * emoji();
 
 	// Returns the current bubble position
 	vec2 get_position() const;
@@ -84,6 +93,8 @@ class Fighter : public Renderable
 	unsigned int get_id() const;
 
 	FighterCharacter get_fc() const;
+	void set_sprite(SpriteType st) const;
+
 
 	//void jump_update();
 	void apply_friction();
@@ -132,6 +143,8 @@ class Fighter : public Renderable
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
 
+	float get_heal_animation();
+
 	// Potato
 	bool potato_is_holding_fries() const;
 
@@ -147,7 +160,7 @@ class Fighter : public Renderable
 	void broccoli_charging_up_cauliflowers();
 
   protected:
-  	const int MAX_HEALTH = 100;
+  	int MAX_HEALTH;
 	const int STARTING_LIVES = 3;
 
 	int m_health;
@@ -227,6 +240,24 @@ class Fighter : public Renderable
 	bool m_broccoli_cauliflowers_on_cooldown = false;
 	float m_broccoli_holding_cauliflowers_timer = 0;
 	float m_broccoli_cauliflowers_cooldown = 0;
+
+	// yam states
+	bool m_yam_is_healing = false;
+	float m_yam_heal_cooldown_ms = 0;
+	float m_yam_heal_animation_ms = 0.0;
+	const float MAX_HEAL_COOLDOWN = 1000.0;
+	const float MAX_HEAL_ANIMATION = 200.0;
+	const int RECOVERY_POINTS = 5;
+	bool m_yam_start_dashing = false;
+	float m_yam_dash_cooldown_ms = 0.0;
+	float m_yam_dash_timer_ms = 0.0;
+	const float MAX_DASH_TIMER = 500.0;
+	const float MAX_DASH_COOLDOWN = 1000.0;
+
+	//eggplant states
+	bool m_eggplant_shoot_emoji = false;
+	float m_eggplant_shoot_cooldown = 0.0;
+	const float MAX_EMOJI_SHOOT_COOLDOWN = 500.0;
 
 	CrouchState m_crouch_state = NOT_CROUCHING;
 

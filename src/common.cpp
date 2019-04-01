@@ -3,7 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 
-
 // stlib
 #include <vector>
 #include <iostream>
@@ -48,27 +47,6 @@ bool gl_has_errors()
 
 	return true;
 }
-
-Texture POTATO_TEXTURE;
-Texture POTATO_IDLE_TEXTURE;
-Texture POTATO_PUNCH_TEXTURE;
-Texture POTATO_POWER_PUNCH_TEXTURE;
-Texture POTATO_CROUCH_PUNCH_TEXTURE;
-Texture POTATO_CROUCH_TEXTURE;
-Texture POTATO_CHARGING_TEXTURE;
-Texture POTATO_DEATH_TEXTURE;
-Texture POTATO_TIRED_1_TEXTURE;
-Texture POTATO_TIRED_2_TEXTURE;
-
-Texture BROCCOLI_TEXTURE;
-Texture BROCCOLI_IDLE_TEXTURE;
-Texture BROCCOLI_PUNCH_TEXTURE;
-Texture BROCCOLI_CROUCH_PUNCH_TEXTURE;
-Texture BROCCOLI_CROUCH_TEXTURE;
-Texture BROCCOLI_DEATH_TEXTURE;
-
-Texture MAIN_MENU_TEXTURE;
-Texture BACKGROUND_TEXTURE;
 
 float dot(vec2 l, vec2 r)
 {
@@ -322,64 +300,3 @@ void Renderable::transform_end()
 {
 	//
 }
-
-//FighterInfo::FighterInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names) {
-void FighterInfo::setInfo(FighterCharacter fc, int strength, int speed, std::string sciName, std::vector<std::string> names)
-{
-	this->fc = fc;
-	this->strength = strength;
-	this->sciName = sciName;
-	this->speed = speed;
-	this->names = names;
-}
-
-std::string FighterInfo::getFCName() {
-	int r = get_random_number(names.size()-1);
-	//std::cout << "NAMES SIZE: " << names.size() << std::endl;
-	//std::cout << "rand: " << r << std::endl;
-	std::string p = names.at(r);
-
-	if (std::find(takenNames.begin(), takenNames.end(), p) != takenNames.end()) {
-		std::string newP = p + "Jr";
-		names.emplace_back(newP);
-		takenNames.emplace_back(newP);
-		return newP;
-	}
-	else {
-		takenNames.emplace_back(p);
-		return p;
-	}
-}
-
-void FighterInfo::clearTaken() {
-	takenNames.clear();
-}
-
-
-bool load_all_sprites_from_file() {
-	bool initSuccess = POTATO_TEXTURE.load_from_file(textures_path("potato.png")) &&
-		POTATO_IDLE_TEXTURE.load_from_file(textures_path("potato_idle.png")) &&
-		POTATO_PUNCH_TEXTURE.load_from_file(textures_path("potato_punch.png")) &&
-		POTATO_POWER_PUNCH_TEXTURE.load_from_file(textures_path("potato_power_punch.png")) &&
-		POTATO_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("potato_crouch_punch.png")) &&
-		POTATO_CROUCH_TEXTURE.load_from_file(textures_path("potato_crouch.png")) &&
-		POTATO_CHARGING_TEXTURE.load_from_file(textures_path("potato_charging.png")) &&
-		POTATO_DEATH_TEXTURE.load_from_file(textures_path("potato_death.png")) &&
-		POTATO_TIRED_1_TEXTURE.load_from_file(textures_path("potato_tired_1.png")) &&
-		POTATO_TIRED_2_TEXTURE.load_from_file(textures_path("potato_tired_2.png")) &&
-
-		BROCCOLI_TEXTURE.load_from_file(textures_path("broccoli.png")) &&
-		BROCCOLI_IDLE_TEXTURE.load_from_file(textures_path("broccoli_idle.png")) &&
-		BROCCOLI_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_punch.png")) &&
-		BROCCOLI_CROUCH_PUNCH_TEXTURE.load_from_file(textures_path("broccoli_crouch_punch.png")) &&
-		BROCCOLI_CROUCH_TEXTURE.load_from_file(textures_path("broccoli_crouch.png")) &&
-		BROCCOLI_DEATH_TEXTURE.load_from_file(textures_path("broccoli_death.png")) &&
-
-		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
-		BACKGROUND_TEXTURE.load_from_file(textures_path("background.png"));
-
-	if (!initSuccess) { fprintf(stderr, "Failed to load sprites from file!\n");
-	}
-	return initSuccess;
-}
-
