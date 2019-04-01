@@ -232,9 +232,15 @@ void Background::draw(const mat3& projection)
 	if (m_help_on) {
 		drawTutorialText(projection);
 	}
+
 	if (m_mode == TUTORIAL || m_paused || m_is_game_over) {
 		handleText(projection);
+	} else if (warningText != "") {
+		float width = winnerText->get_width_of_string(warningText);
+		winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
+		winnerText->renderString(projection, warningText);
 	}
+
 	drawNameplates(projection);
 }
 
@@ -338,13 +344,19 @@ void Background::drawTutorialText(const mat3& projection) {
 	reset->renderString(projection, "F5: Reset");
 	ability1->renderString(projection, "V/NUM2: Special Ability");
 	ability2->renderString(projection, "B/NUM3: Special Ability");
-	shield->renderString(projection, "L Shift/R Shift: Shield");
+	shield->renderString(projection, "L Shift/R Shift: Block");
 	punch->renderString(projection, "C/NUM1: Punch");
 	pauseMusic->renderString(projection, "Insert: Pause/Resume song");
 	randomSong->renderString(projection, "Home: Random song");
 	changeSong->renderString(projection, "Delete/End: Prev/Next song");
 	changeVolume->renderString(projection, "Page Up/Down: Inc./Dec. volume");
 }
+
+//void Background::drawWarning(const mat3& projection, std::string t) {
+//	float width = winnerText->get_width_of_string(t+"aaa");
+//	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
+//	winnerText->renderString(projection, t);
+//}
 
 void Background::addNameplate(TextRenderer* td, std::string name) {
 	nameplates[td] = name;
