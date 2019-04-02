@@ -250,8 +250,8 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		
 		
 		if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
-			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
-			bomb_pointer = attack;
+			bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
+			attack = bomb_pointer;
 			bomb_pointer->increment_pointer_references();
 			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;

@@ -220,7 +220,7 @@ class Fighter : public Renderable
 	bool m_potato_bomb_on_cooldown = false;
 	float m_potato_bomb_selftimer = 0;
 	float m_potato_bomb_cooldown = 0;
-	Attack * bomb_pointer = NULL;
+	Bomb * bomb_pointer = NULL;
 	// ABILITY 2: Fries (Bullet)
 	bool m_potato_is_shooting_fries = false;
 	bool m_potato_is_holding_fries = false;
