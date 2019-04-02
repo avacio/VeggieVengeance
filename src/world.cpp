@@ -250,13 +250,13 @@ bool World::update(float elapsed_ms)
 		// KNIVES STAGE EFFECT
 		for (auto &k : m_knives) {
 			k.update(elapsed_ms);
-			if (m_player1.get_in_play() && m_player1.get_alive()) {
+			if (m_player1.get_in_play() && m_player1.get_alive() && !m_player1.is_blocking()) {
 				if (k.collides_with(m_player1)) {
 					m_player1.apply_damage(k.m_damage);
 				}
 			}
 			k.update(elapsed_ms);
-			if (m_player2.get_in_play() && m_player2.get_alive()) {
+			if (m_player2.get_in_play() && m_player2.get_alive() && !m_player2.is_blocking()) {
 				if (k.collides_with(m_player2)) {
 					m_player2.apply_damage(k.m_damage);
 				}
@@ -592,7 +592,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
 				m_player1.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_C) {
+			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING) {
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 				Mix_PlayChannel(1, m_charging_up_audio, 0);
 			}	
@@ -643,7 +643,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(HOLDING_ABILITY_2);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.potato_is_holding_wedges())
 				m_player2.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING) {
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
 				Mix_PlayChannel(2, m_charging_up_audio, 0);
 			}
