@@ -216,14 +216,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		// ABILTIY 1: Fries  (bullet) 
 		
 		if (m_potato_is_holding_fries) potato_charging_up_fries();
-		if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
+		else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
 			m_potato_fries_on_cooldown = true;
 			m_holding_too_much_timer = 0;
 			m_potato_holding_fries_timer = 0;
 			m_potato_is_shooting_charged_fries = false;
 		}
-		if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
+		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
 			m_potato_fries_on_cooldown = true;
 		}
@@ -247,7 +247,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_potato_bomb_planted = false;
 			}
 		}
-		if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
+		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
 			attack = bomb_pointer;
 			bomb_pointer->increment_pointer_references();
@@ -292,7 +292,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_broccoli_is_double_jumping = false;
 		}
 		// Ability 1: Uppercut
-		if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
 			m_broccoli_uppercut_on_cooldown = true;
@@ -308,14 +308,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 
 		// ABILITY 2: Cauliflower (projectile)
 		if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
-		if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 			m_holding_too_much_timer = 0;
 			m_broccoli_holding_cauliflowers_timer = 0;
 			m_broccoli_is_shooting_charged_cauliflowers = false;
 		}
-		if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 		}
@@ -398,10 +398,10 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_eggplant_emojis[i]->set_fighter_pos(m_position);
 			}
 		}
-		if (m_eggplant_spawn_emoji) {
+		if (m_eggplant_spawn_emoji) {				
 			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
 				Emoji * e = emoji();
-				attack = e;
+				attack = e;	
 				m_eggplant_emojis.push_back(e);
 				e->increment_pointer_references();
 				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
@@ -445,7 +445,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
-	//printf("%i\n", m_broccoli_holding_cauliflowers_timer);
 	//return null if not attacking, or the collision object if attacking
 	return attack;
 }
