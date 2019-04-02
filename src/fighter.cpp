@@ -172,7 +172,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
-		x_position_update(added_speed, ms);
+		x_position_update(added_speed, ms, platforms);
 		crouch_update();
 
 		// GENERAL
@@ -760,7 +760,7 @@ void Fighter::apply_friction() {
 	}
 }
 
-void Fighter::x_position_update(float added_speed, float ms) {
+void Fighter::x_position_update(float added_speed, float ms, std::vector<Platform> platforms) {
 
 	//!!! need to include this before merge
 	//if (m_is_holding_power_punch)
@@ -802,7 +802,11 @@ void Fighter::x_position_update(float added_speed, float ms) {
 		}
 	}
 
-	move({ added_speed * speed_scale, 0.f });
+	if (m_position.x > 50.f && m_position.x < 1150.f) {
+		vec2 oldPosition = m_position;
+		move({ added_speed * speed_scale, 0.f });
+		platform_pass_through(platforms, oldPosition);
+	}
 }
 
 void Fighter::crouch_update() {
@@ -832,7 +836,6 @@ void Fighter::die() {
 
 		//uncrouch in death
 		if (m_crouch_state == IS_CROUCHING) {
-			m_scale.y = 0.2f;
 			m_position.y -= 25.f;
 			m_crouch_state = NOT_CROUCHING;
 		}
@@ -881,6 +884,7 @@ void Fighter::check_respawn(float ms) {
 			m_rotation = 0;
 			m_position = m_initial_pos;
 			m_blocking_tank = FULL_BLOCK_TANK;
+			m_is_blocking = true;
 			m_tired_out = false;
 			m_is_jumping = false;
 			m_is_punching = false;
@@ -1148,6 +1152,20 @@ void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPositi
 		}
 		delete b;
 	}
+}
+
+//revert to old position if new position passes through one of the platforms
+void Fighter::platform_pass_through(std::vector<Platform> platforms, vec2 oldPosition) {
+	for (int i = 0; i < platforms.size(); i++) {
+		BoundingBox platform_bounding_box = platforms[i].get_bounding_box();
+
+		if ((m_position.x > platform_bounding_box.xpos && oldPosition.x < platform_bounding_box.xpos) || 
+			(oldPosition.x > platform_bounding_box.xpos && m_position.x < platform_bounding_box.xpos)) {
+			m_position = oldPosition;
+			break;
+		}
+
+	}		
 }
 
 void Fighter::y_position_update(float ms) {

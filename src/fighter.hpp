@@ -97,7 +97,7 @@ class Fighter : public Renderable
 	//void jump_update();
 	void apply_friction();
 
-	void x_position_update(float added_speed, float ms);
+	void x_position_update(float added_speed, float ms, std::vector<Platform> platforms);
 
 	void y_position_update(float ms);
 	
@@ -144,6 +144,8 @@ class Fighter : public Renderable
 	void reset();
 
 	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
+
+	void platform_pass_through(std::vector<Platform> platforms, vec2 oldPosition);
 
 	float get_heal_animation();
 
