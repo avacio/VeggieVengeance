@@ -445,7 +445,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
-	printf("%i\n", m_broccoli_holding_cauliflowers_timer);
+	//printf("%i\n", m_broccoli_holding_cauliflowers_timer);
 	//return null if not attacking, or the collision object if attacking
 	return attack;
 }

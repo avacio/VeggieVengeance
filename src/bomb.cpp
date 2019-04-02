@@ -21,7 +21,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 }
 
 Bomb::~Bomb() {
-	printf("bomb destructor\n");
+	//printf("bomb destructor\n");
 	delete m_damageEffect;
 
 	glDeleteBuffers(1, &mesh.vbo);
