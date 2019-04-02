@@ -20,6 +20,7 @@
 #define MAX_CAULIFLOWERS_VELOCITY 20
 #define CAULIFLOWERS_CHARGE_RATE 0.5
 
+
 #include <math.h>
 #include <cmath>
 
@@ -235,22 +236,32 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 
 		// ABILITY 2: Tater Tot Bombs
-		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
+		
+		if (bomb_pointer != NULL) {
+			if (bomb_pointer->get_pointer_references() == 1) {
+				bomb_pointer->deincrement_pointer_references();
+				Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+				delete bomb_pointer;
+				bomb_pointer = NULL;
+				m_potato_bomb_on_cooldown = true;
+				m_potato_bomb_planted = false;
+			}
+		}
+		
+		
+		if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			attack = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
 			bomb_pointer = attack;
 			bomb_pointer->increment_pointer_references();
 			m_potato_bomb_ticking = true;
 			m_potato_bomb_planted = true;
 		}
-		else if (m_potato_explode_planted_bomb && m_potato_bomb_planted && bomb_pointer != NULL) {
-			//Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+		
+		if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
+			Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
 			bomb_pointer->m_damageEffect->m_hit_fighter = true;
 			bomb_pointer->deincrement_pointer_references();
-			printf("after planted, before delete: %i \n", bomb_pointer->get_pointer_references());
-			if (bomb_pointer->get_pointer_references() == 0) {
-				delete bomb_pointer;
-				printf("deleted in fighter.cpp\n");
-			}
+			if (bomb_pointer->get_pointer_references() == 0) delete bomb_pointer;
 			bomb_pointer = NULL;
 			m_potato_bomb_on_cooldown = true;
 			m_potato_bomb_planted = false;
@@ -260,6 +271,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		
 		if (m_potato_bomb_ticking) {
 			if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
+				m_potato_bomb_ticking = false;
 				m_potato_bomb_on_cooldown = true;
 				m_potato_bomb_selftimer = 0;
 			}
@@ -284,7 +296,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_broccoli_is_double_jumping = false;
 		}
 		// Ability 1: Uppercut
-		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+		if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
 			m_broccoli_uppercut_on_cooldown = true;
@@ -299,15 +311,15 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		}
 
 		// ABILITY 2: Cauliflower (projectile)
-		else if (m_broccoli_is_holding_cauliflowers)
+		if (m_broccoli_is_holding_cauliflowers)
 			broccoli_charging_up_cauliflowers();
-		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 			m_broccoli_holding_cauliflowers_timer = 0;
 			m_broccoli_is_shooting_charged_cauliflowers = false;
 		}
-		else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 		}

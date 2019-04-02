@@ -21,8 +21,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 }
 
 Bomb::~Bomb() {
-	printf("deleted");
-	Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+	printf("bomb destructor\n");
 	delete m_damageEffect;
 
 	glDeleteBuffers(1, &mesh.vbo);

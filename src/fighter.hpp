@@ -15,6 +15,7 @@
 #include "emoji.hpp"
 #include <set>
 #include <random>
+#include <iostream>
 #include <SDL_mixer.h>
 
 class Fighter : public Renderable
