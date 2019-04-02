@@ -1,5 +1,8 @@
 #include "attack.hpp"
 
+Attack::~Attack() {
+}
+
 BoundingBox Attack::get_bounding_box() const {
 	return this->m_damageEffect->m_bounding_box;
 }

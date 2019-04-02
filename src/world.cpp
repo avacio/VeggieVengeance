@@ -590,7 +590,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
 				m_player1.set_movement(HOLDING_ABILITY_2);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_B && m_player1.potato_is_holding_wedges())
+			if (action == GLFW_RELEASE && key == GLFW_KEY_B && (m_player1.broccoli_is_holding_cauliflowers() || m_player1.potato_is_holding_fries()))
 				m_player1.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING) {
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
@@ -610,7 +610,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && !m_player1.is_holding_power_punch())
 				m_player1.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && !m_player1.potato_is_holding_wedges())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_B || key == GLFW_KEY_V) && (!m_player1.broccoli_is_holding_cauliflowers() || !m_player1.potato_is_holding_fries()))
 				m_player1.set_movement(STOP_ABILITIES);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(STOP_BLOCKING);
@@ -641,7 +641,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
 				m_player2.set_movement(HOLDING_ABILITY_2);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && m_player2.potato_is_holding_wedges())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && (m_player2.broccoli_is_holding_cauliflowers() || m_player2.potato_is_holding_fries()))
 				m_player2.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING) {
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
@@ -661,7 +661,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(RELEASE_CROUCH);
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && !m_player2.is_holding_power_punch())
 				m_player2.set_movement(STOP_PUNCHING);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && !m_player2.potato_is_holding_wedges())
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_2 || GLFW_KEY_KP_3 || key == GLFW_KEY_PERIOD || key == GLFW_KEY_COMMA) && (!m_player2.broccoli_is_holding_cauliflowers() || !m_player2.potato_is_holding_fries()))
 				m_player2.set_movement(STOP_ABILITIES);
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT_SHIFT)
 				m_player2.set_movement(STOP_BLOCKING);
@@ -1006,8 +1006,8 @@ void World::attack_collision() {
 void World::attack_deletion() {
 	for (int i = 0; i < m_attacks.size(); i++) {
 		if (m_attacks[i]->m_damageEffect->m_delete_when == AFTER_UPDATE ||
-			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
-			(m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
+			((m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT || m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT_OR_TIME) && m_attacks[i]->m_damageEffect->m_hit_fighter) ||
+			((m_attacks[i]->m_damageEffect->m_delete_when == AFTER_TIME || m_attacks[i]->m_damageEffect->m_delete_when == AFTER_HIT_OR_TIME) && m_attacks[i]->m_damageEffect->m_time_remain <= 0) ||
 			!check_collision_world(m_attacks[i]->m_damageEffect->m_bounding_box)) {
 			//remove from list
 			Attack * attack = m_attacks[i];

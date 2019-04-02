@@ -1,30 +1,27 @@
-#include "projectile.hpp"
+#include "bomb.hpp"
+#include <SDL_mixer.h>
 
-Texture Projectile::projectile_texture;
+Texture Bomb::bomb_texture;
 
-Projectile::Projectile(int id, vec2 pos, float add_velo, unsigned int damage, bool direction) {
-	//variable projectile attributes
-	m_fighter_id = id;
-	m_position = pos;
-	m_damage = damage;
+Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
+	//variable bomb attributes
+	this->m_fighter_id = id;
+	this->m_position.x = pos.x;
+	this->m_position.y = pos.y + 40;
+	this->m_damage = damage;
 
-	//inherent projectile attributes
-	m_scale = vec2({ 0.07f, 0.07f });
-	m_velocity = vec2({ (float) 7.0 + add_velo, (float) -10.0 });
-	//if facing left, change direction of velocity to move left
-	if (!direction) {
-		m_velocity.x *= -1.0;
-	}
-	m_width = std::fabs(m_scale.x) * projectile_texture.width;
-	m_height = std::fabs(m_scale.y) * projectile_texture.height;
-	m_delete_when = AFTER_HIT;
-	m_damageEffect = new DamageEffect(m_position.x, m_position.y, m_width, m_height, m_damage, m_fighter_id, m_delete_when, 0);
-
-	m_acceleration = 0.5f;
-	m_bounce_loss = 0.75f;
+	//pre-determined bullet attributes
+	this->m_scale = vec2({ 0.1f, 0.1f });
+	this->m_velocity = vec2({ 0.0f, 0.0f });
+	
+	this->m_width = std::fabs(this->m_scale.x) * bomb_texture.width * 0.6f;
+	this->m_height = std::fabs(this->m_scale.y) * bomb_texture.height * 0.6f;
+	this->m_delete_when = AFTER_HIT_OR_TIME;
+	this->m_damageEffect = new DamageEffect(this->m_position.x, this->m_position.y, this->m_width, this->m_height, this->m_damage, this->m_fighter_id, this->m_delete_when, vert_force, ms);
 }
 
-Projectile::~Projectile() {
+Bomb::~Bomb() {
+	//printf("bomb destructor\n");
 	delete m_damageEffect;
 
 	glDeleteBuffers(1, &mesh.vbo);
@@ -36,20 +33,19 @@ Projectile::~Projectile() {
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	effect.release();
-	//printf("destroyed projectile\n");
 }
 
-bool Projectile::init() {
-	if (!projectile_texture.is_valid()) {
-		if (!projectile_texture.load_from_file(textures_path("cauliflower.png"))) {
-			fprintf(stderr, "Failed to load projectile texture!");
+bool Bomb::init() {
+	if (!bomb_texture.is_valid()) {
+		if (!bomb_texture.load_from_file(textures_path("tater_tot.png"))) {
+			fprintf(stderr, "Failed to load bomb texture!");
 			return false;
 		}
 	}
 
 	// The position corresponds to the center of the texture
-	float wr = projectile_texture.width * 0.5;
-	float hr = projectile_texture.height * 0.5;
+	float wr = bomb_texture.width * 0.5;
+	float hr = bomb_texture.height * 0.5;
 
 	TexturedVertex vertices[4];
 	vertices[0].position = { -wr, +hr, -0.02f };
@@ -86,31 +82,16 @@ bool Projectile::init() {
 	if (!effect.load_from_file(shader_path("textured.vs.glsl"), shader_path("textured.fs.glsl")))
 		return false;
 }
-
-void Projectile::update(float ms) {
-	float target_ms_per_frame = 1000.f / 60.f;
-	float speed_scale = ms / target_ms_per_frame;
-
-	m_position.x += m_velocity.x * speed_scale;
-	m_position.y += m_velocity.y * speed_scale;
-
-	if (m_position.y > 630.f) {
-		m_velocity.y = -m_velocity.y * m_bounce_loss;
-		m_position.y = 630.f;
-	}
-
-	m_damageEffect->m_bounding_box.xpos = m_position.x;
-	m_damageEffect->m_bounding_box.ypos = m_position.y;
-
-	m_velocity.y += m_acceleration;
+void Bomb::update(float ms) {
+	m_damageEffect->m_time_remain--;
 }
 
-void Projectile::draw(const mat3 &projection) {
+void Bomb::draw(const mat3 &projection){
 	transform_begin();
 	transform_translate(m_position);
 	transform_scale(m_scale);
 	transform_end();
-	
+
 	// Setting shaders
 	glUseProgram(effect.program);
 
@@ -140,7 +121,7 @@ void Projectile::draw(const mat3 &projection) {
 
 	// Enabling and binding texture to slot 0
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, projectile_texture.id);
+	glBindTexture(GL_TEXTURE_2D, bomb_texture.id);
 
 	// Setting uniform values to the currently bound program
 	glUniformMatrix3fv(transform_uloc, 1, GL_FALSE, (float *)&transform);
@@ -151,4 +132,5 @@ void Projectile::draw(const mat3 &projection) {
 
 	// Drawing!
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
 }

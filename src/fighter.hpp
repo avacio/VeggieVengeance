@@ -7,12 +7,16 @@
 #include "textRenderer.hpp"
 #include "attack.hpp"
 #include "punch.hpp"
+#include "uppercut.hpp"
 #include "bullet.hpp"
 #include "projectile.hpp"
+#include "bomb.hpp"
 #include "dash.hpp"
 #include "emoji.hpp"
 #include <set>
 #include <random>
+#include <iostream>
+#include <SDL_mixer.h>
 
 class Fighter : public Renderable
 {
@@ -40,7 +44,7 @@ class Fighter : public Renderable
 	Punch * powerPunch();
 
 	//get collision object for Broccoli's uppercut ability
-	Punch * broccoliUppercut();
+	Uppercut * broccoliUppercut();
 
 	//get collision object for dash
 	Dash * dash();
@@ -151,16 +155,18 @@ class Fighter : public Renderable
 
 	FighterCharacter m_fc;
 	// Potato
-	bool potato_is_holding_wedges() const;
+	bool potato_is_holding_fries() const;
 
 	// Broccoli
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
 	bool broccoli_is_uppercut_on_cooldown();
+	bool broccoli_is_holding_cauliflowers() const;
 
 	// Helpers 
 	void charging_up_power_punch();
-	void potato_charging_up_wedges();
+	void potato_charging_up_fries();
+	void broccoli_charging_up_cauliflowers();
 
   protected:
   	int MAX_HEALTH;
@@ -207,23 +213,41 @@ class Fighter : public Renderable
 	int m_punch_counter = 0;
 	bool m_is_paused = false;
 
-	// potato states
-	bool m_potato_is_shooting_wedges = false;
-	bool m_potato_is_holding_wedges = false;
-	bool m_potato_is_shooting_charged_wedges = false;
+	// POTATO states
+	// ABILITY 1: Tater Tot (Bomb)
+	bool m_potato_is_planting_bomb = false;
+	bool m_potato_bomb_planted = false;
+	bool m_potato_explode_planted_bomb = false;
+	bool m_potato_bomb_ticking = false;
+	bool m_potato_bomb_on_cooldown = false;
+	float m_potato_bomb_selftimer = 0;
+	float m_potato_bomb_cooldown = 0;
+	Bomb * bomb_pointer = NULL;
+	// ABILITY 2: Fries (Bullet)
 	bool m_potato_is_shooting_fries = false;
+	bool m_potato_is_holding_fries = false;
+	bool m_potato_is_shooting_charged_fries = false;
 	bool m_potato_fries_on_cooldown = false;
-	bool m_potato_wedges_on_cooldown = false;
-	float m_potato_holding_wedges_timer = 0;
+	float m_potato_holding_fries_timer = 0;
 	float m_potato_fries_cooldown = 0;
-	float m_potato_wedges_cooldown = 0;
+	
+	
 
 	// broccoli states
+	// PASSIVE: Double Jump
 	bool m_broccoli_is_double_jumping = false;
 	int m_broccoli_jump_left = 2;
+	// ABILITY 1: Uppercut
 	bool m_broccoli_is_uppercutting = false;
 	bool m_broccoli_uppercut_on_cooldown = false;
 	float m_broccoli_uppercut_cooldown = 0;
+	// ABILITY 2: Cauliflower (Projectile)
+	bool m_broccoli_is_shooting_cauliflowers = false;
+	bool m_broccoli_is_holding_cauliflowers = false;
+	bool m_broccoli_is_shooting_charged_cauliflowers = false;
+	bool m_broccoli_cauliflowers_on_cooldown = false;
+	float m_broccoli_holding_cauliflowers_timer = 0;
+	float m_broccoli_cauliflowers_cooldown = 0;
 
 	// yam states
 	bool m_yam_is_healing = false;
@@ -243,6 +267,7 @@ class Fighter : public Renderable
 	bool m_eggplant_shoot_emoji = false;
 	unsigned int m_eggplant_emoji_count = 0;
 	float m_eggplant_spawn_cooldown = 0.0;
+	float m_eggplant_shoot_cooldown = 0.0;
 	const float MAX_EMOJI_SPAWN_COOLDOWN = 500.0;
 	const unsigned int MAX_EMOJI_COUNT = 3;
 	std::vector<Emoji*> m_eggplant_emojis;

@@ -5,6 +5,7 @@
 
 class Attack : public Renderable {
 public:
+	virtual ~Attack() = 0;
 	virtual bool init() = 0;
 	virtual void update(float ms) = 0;
 	BoundingBox get_bounding_box() const;

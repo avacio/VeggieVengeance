@@ -49,13 +49,15 @@ set(SOURCE_FILES
 	src/attack.cpp
 	src/punch.cpp
 	src/platform.cpp
+	src/uppercut.cpp
+	src/bomb.cpp
 	src/dash.cpp
 	src/fighterInfo.cpp
 	src/emoji.cpp
 	src/knife.cpp
 
 
-    src/project_path.hpp
+    	src/project_path.hpp
 	src/common.hpp
 	src/fighter.hpp
 	src/player1.hpp
@@ -73,6 +75,8 @@ set(SOURCE_FILES
 	src/attack.hpp
 	src/punch.hpp
 	src/platform.hpp
+	src/uppercut.hpp
+	src/bomb.hpp
 	src/dash.hpp
 	src/fighterInfo.hpp
 	src/emoji.hpp

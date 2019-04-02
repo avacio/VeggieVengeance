@@ -2,7 +2,7 @@
 
 Texture Bullet::bullet_texture;
 
-Bullet::Bullet(int id, vec2 pos, unsigned int damage, bool direction) {
+Bullet::Bullet(int id, vec2 pos, float added_velo, unsigned int damage, bool direction) {
 	//variable bullet attributes
 	this->m_fighter_id = id;
 	this->m_position = pos;
@@ -10,7 +10,7 @@ Bullet::Bullet(int id, vec2 pos, unsigned int damage, bool direction) {
 
 	//pre-determined bullet attributes
 	this->m_scale = vec2({ 0.1f, 0.15f });
-	this->m_velocity = vec2({ 7.0f, 0.0f });
+	this->m_velocity = vec2({ 7.0f + added_velo, 0.0f });
 	//flip velocity if moving left
 	if (!direction) {
 		this->m_velocity.x *= -1.0;

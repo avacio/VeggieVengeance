@@ -5,8 +5,7 @@
 
 Texture Player1::p_texture;
 
-Player1::Player1(unsigned int id) : Fighter(id)
-{
+Player1::Player1(unsigned int id) : Fighter(id) {
 }
 
 void Player1::draw(const mat3 &projection)
@@ -97,7 +96,9 @@ void Player1::draw(const mat3 &projection)
 
 		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
-		else if (is_holding_power_punch()) { set_sprite(CHARGING); }
+		else if (is_holding_power_punch() || (m_fc == POTATO && potato_is_holding_fries()) || (m_fc == BROCCOLI && broccoli_is_holding_cauliflowers())) { 
+			set_sprite(CHARGING); 
+		}
 
 
 		else if (is_power_punching())
