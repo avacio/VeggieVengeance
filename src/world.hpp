@@ -51,6 +51,8 @@ class World
 	bool set_mode(GameMode mode);
 	void set_paused(bool isPaused);
 
+	void init_stage(Stage stage);
+
 	void play_grunt_audio();
 	void draw_rectangle();
 
@@ -77,7 +79,6 @@ class World
 	bool check_collision(BoundingBox b1, BoundingBox b2);
 	bool check_collision_world(BoundingBox b1);
 
-	//void spawn_char_select_AI(FighterCharacter fc);
 	void clear_all_fighters();
 	void init_char_select_ais();
 
@@ -128,6 +129,8 @@ class World
 	/////////
 	FighterCharacter selectedP1 = POTATO; // POTATO
 	FighterCharacter selectedP2 = POTATO; // POTATO
+	Stage selected_stage = KITCHEN;
+	GameMode selected_fight_mode = PVP;
 
 	// C++ rng
 	std::default_random_engine m_rng;

@@ -3,12 +3,13 @@
 
 Texture Background::bg_texture;
 
-bool Background::init(vec2 screen, GameMode mode)
+bool Background::init(vec2 screen, GameMode mode, Stage stage)
 {
 	m_mode = mode;
 
 	// Load shared texture
-	bg_texture = BACKGROUND_TEXTURE;
+	//if (stage == OVEN) // TODO oven bg
+	bg_texture = KITCHEN_BACKGROUND_TEXTURE;
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture
@@ -351,12 +352,6 @@ void Background::drawTutorialText(const mat3& projection) {
 	changeSong->renderString(projection, "Delete/End: Prev/Next song");
 	changeVolume->renderString(projection, "Page Up/Down: Inc./Dec. volume");
 }
-
-//void Background::drawWarning(const mat3& projection, std::string t) {
-//	float width = winnerText->get_width_of_string(t+"aaa");
-//	winnerText->setPosition({ screen.x / 2.f - width / 2.f, 100.f });
-//	winnerText->renderString(projection, t);
-//}
 
 void Background::addNameplate(TextRenderer* td, std::string name) {
 	nameplates[td] = name;

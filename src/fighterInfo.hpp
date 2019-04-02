@@ -33,6 +33,13 @@ enum SpriteType
 	UPPERCUT
 };
 
+enum Stage
+{
+	KITCHEN = 0,
+	OVEN,
+	VANILLA //  for main menu
+};
+
 struct FighterInfo
 {
 public:
@@ -105,7 +112,7 @@ extern Texture BROCCOLI_CHARGING_TEXTURE;
 extern Texture BROCCOLI_POWER_PUNCH_TEXTURE;
 
 extern Texture MAIN_MENU_TEXTURE;
-extern Texture BACKGROUND_TEXTURE;
+extern Texture KITCHEN_BACKGROUND_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 

@@ -61,6 +61,9 @@ public:
 	void init_select_char_buttons();
 	void draw_char_info(const mat3& projection);
 	std::string int_to_stat_string(int in);
+	//////// STAGE SELECT FUNCTIONS
+	void init_select_stage_buttons();
+	Stage get_selected_stage();
 
 	FighterCharacter selectedP1 = BLANK;
 	bool is_player_1_chosen = false; // for picking PVP

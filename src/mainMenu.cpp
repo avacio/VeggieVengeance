@@ -150,7 +150,7 @@ void MainMenu::draw(const mat3& projection)
 		buttons[1]->renderString(projection, "TWO-PLAYER");
 		buttons[2]->renderString(projection, "TUTORIAL");
 	}
-	else {
+	else if (m_mode == CHARSELECT) {
 		if (m_selected_mode == PVP) {
 			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
 			else { title->renderString(projection, "P2 CHARACTER SELECT"); }
@@ -161,6 +161,12 @@ void MainMenu::draw(const mat3& projection)
 		buttons[3]->renderString(projection, "YAM");
 		buttons[4]->renderString(projection, "return");
 		draw_char_info(projection);
+	}
+	else {
+		title->renderString(projection, "STAGE SELECT");
+		buttons[0]->renderString(projection, "KITCHEN");
+		buttons[1]->renderString(projection, "OVEN");
+		buttons[2]->renderString(projection, "return");
 	}
 }
 
@@ -249,6 +255,27 @@ void MainMenu::init_select_char_buttons() {
 	buttons.emplace_back(b5);
 }
 
+void MainMenu::init_select_stage_buttons()
+{
+	TextRenderer* b1 = new TextRenderer(mainFont, 50);
+	TextRenderer* b2 = new TextRenderer(mainFont, 50);
+	TextRenderer* b3 = new TextRenderer(mainFont, 50);
+
+	b1->setColor(selectedColor);
+	b2->setColor(defaultColor);
+	b3->setColor(defaultColor);
+
+	int width = b1->get_width_of_string("POTATO");
+	b1->setPosition({ width / 3.f, screen.y / 2.f - 100.f });
+	b2->setPosition({ width / 3.f, (screen.y / 2.f) - 25.f });
+	b3->setPosition({ width / 3.f, (screen.y / 2.f) + 50.f });
+	buttons.emplace_back(b1);
+	buttons.emplace_back(b2);
+	buttons.emplace_back(b3);
+
+
+}
+
 GameMode MainMenu::set_selected_mode()
 {
 	switch (selectedButtonIndex) {
@@ -284,6 +311,20 @@ FighterCharacter MainMenu::get_selected_char()
 	}
 }
 
+Stage MainMenu::get_selected_stage()
+{
+	switch (selectedButtonIndex) {
+	case 0:
+		return KITCHEN;
+	case 1:
+		return OVEN;
+	case 2:
+		return VANILLA;
+	default:
+		return KITCHEN;
+	}
+}
+
 void MainMenu::draw_char_info(const mat3& projection)
 {
 	if (get_selected_char() == BLANK) { return; }
@@ -315,6 +356,10 @@ bool MainMenu::set_mode(GameMode mode)
 	}
 	case CHARSELECT: {
 		init_select_char_buttons();
+		break;
+	}
+	case STAGESELECT: {
+		init_select_stage_buttons();
 		break;
 	}
 	default:
