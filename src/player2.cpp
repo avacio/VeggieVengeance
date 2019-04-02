@@ -95,7 +95,9 @@ void Player2::draw(const mat3 &projection)
 
 		else if (!is_punching() && is_crouching()) { set_sprite(CROUCH); }
 
-		else if (is_holding_power_punch() || (m_fc == POTATO && potato_is_holding_fries())) { set_sprite(CHARGING); }
+		else if (is_holding_power_punch() || (m_fc == POTATO && potato_is_holding_fries()) || (m_fc == BROCCOLI && broccoli_is_holding_cauliflowers())) {
+			set_sprite(CHARGING);
+		}
 
 		else if (is_power_punching())
 		{

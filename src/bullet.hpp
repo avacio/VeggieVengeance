@@ -8,7 +8,7 @@
 class Bullet : public Attack {
 	static Texture bullet_texture;
 public:
-	Bullet(int id, vec2 pos, unsigned int damage, bool direction);
+	Bullet(int id, vec2 pos, float added_velo, unsigned int damage, bool direction);
 	~Bullet();
 	bool init();
 	void update(float ms);
