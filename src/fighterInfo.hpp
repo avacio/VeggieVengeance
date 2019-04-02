@@ -37,7 +37,8 @@ enum Stage
 {
 	KITCHEN = 0,
 	OVEN,
-	VANILLA //  for main menu
+	VANILLA,
+	MENUBORDER // border around stage select picture
 };
 
 struct FighterInfo
@@ -113,6 +114,7 @@ extern Texture BROCCOLI_POWER_PUNCH_TEXTURE;
 
 extern Texture MAIN_MENU_TEXTURE;
 extern Texture KITCHEN_BACKGROUND_TEXTURE;
+extern Texture OVEN_BACKGROUND_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 

@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "textRenderer.hpp"
+#include "textureRenderer.hpp"
 #include "fighterInfo.hpp"
 
 class Screen
@@ -27,6 +28,10 @@ class MainMenu : public Renderable, public Screen
 {
 	// Background texture
 	static Texture m_texture;
+
+	//// Stage textures
+	//static Texture m_stage_1_tx;
+	//static Texture m_stage_2_tx;
 
 	// GUI text renderer
 	TextRenderer* title;
@@ -63,6 +68,7 @@ public:
 	std::string int_to_stat_string(int in);
 	//////// STAGE SELECT FUNCTIONS
 	void init_select_stage_buttons();
+	void init_stage_textures();
 	Stage get_selected_stage();
 
 	FighterCharacter selectedP1 = BLANK;
@@ -76,7 +82,13 @@ private:
 	vec2 m_position; // Window coordinates
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
+
+	//// STAGE TEXTURES
+	//vec2 m_stage_position; // Window coordinates
+	//vec2 m_stage_scale; // 1.f in each dimension. 1.f is as big as the associated texture
+
 	GameMode m_mode = MENU;
 
 	std::vector<TextRenderer*> text;
+	std::vector<TextureRenderer> stage_textures;
 };

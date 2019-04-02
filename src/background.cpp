@@ -8,8 +8,8 @@ bool Background::init(vec2 screen, GameMode mode, Stage stage)
 	m_mode = mode;
 
 	// Load shared texture
-	//if (stage == OVEN) // TODO oven bg
-	bg_texture = KITCHEN_BACKGROUND_TEXTURE;
+	if (stage == OVEN) { bg_texture = OVEN_BACKGROUND_TEXTURE; }
+	else { bg_texture = KITCHEN_BACKGROUND_TEXTURE; }
 	this->screen = screen;
 
 	// The position corresponds to the center of the texture

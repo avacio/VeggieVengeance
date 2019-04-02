@@ -43,6 +43,7 @@ set(SOURCE_FILES
 	src/damageEffect.cpp
 	src/boundingBox.cpp
 	src/textRenderer.cpp
+	src/textureRenderer.cpp
 	src/mainMenu.cpp
 	src/bullet.cpp
 	src/projectile.cpp
@@ -56,7 +57,6 @@ set(SOURCE_FILES
 	src/emoji.cpp
 	src/knife.cpp
 
-
     	src/project_path.hpp
 	src/common.hpp
 	src/fighter.hpp
@@ -69,6 +69,7 @@ set(SOURCE_FILES
 	src/damageEffect.hpp
 	src/boundingBox.hpp
 	src/textRenderer.hpp
+	src/textureRenderer.hpp
 	src/mainMenu.hpp
 	src/bullet.hpp
 	src/projectile.hpp

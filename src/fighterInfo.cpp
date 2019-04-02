@@ -50,6 +50,7 @@ Texture EGGPLANT_TIRED_2_TEXTURE;
 
 Texture MAIN_MENU_TEXTURE;
 Texture KITCHEN_BACKGROUND_TEXTURE;
+Texture OVEN_BACKGROUND_TEXTURE;
 Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
 
@@ -105,7 +106,8 @@ bool load_all_sprites_from_file() {
 		EGGPLANT_TIRED_2_TEXTURE.load_from_file(textures_path("eggplant_tired_2.png")) &&
 
 		MAIN_MENU_TEXTURE.load_from_file(textures_path("mainMenu.jpg")) &&
-		KITCHEN_BACKGROUND_TEXTURE.load_from_file(textures_path("background.png")) &&
+		KITCHEN_BACKGROUND_TEXTURE.load_from_file(textures_path("kitchen_background.png")) &&
+		OVEN_BACKGROUND_TEXTURE.load_from_file(textures_path("oven_background.png")) && // TODO
 		PLATFORM_TEXTURE.load_from_file(textures_path("grey.png")) &&
 		BULLET_TEXTURE.load_from_file(textures_path("french_fry.png")) &&
 

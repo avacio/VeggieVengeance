@@ -10,7 +10,7 @@
 #define HEAT_WAVE_RATE 75
 #define HEAT_WAVE_LENGTH 2
 
-#define FALLING_KNIVES_RATE 100
+#define FALLING_KNIVES_RATE 75
 #define FALLING_KNIVES_LENGTH 2.5
 
 // Same as static in c, local to compilation unit
@@ -140,7 +140,8 @@ bool World::init(vec2 screen, GameMode mode)
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
 	init_char_select_ais();
-	init_stage(VANILLA);
+	//init_stage_select_textures();
+	init_stage(MENUBORDER);
 
 	return m_water.init() && initSuccess;
 }
@@ -211,7 +212,7 @@ bool World::update(float elapsed_ms)
 		return true;
 	}
 
-	if (m_mode == CHARSELECT || m_mode == MENU) {
+	if (m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) {
 		for (AI& ai : m_char_select_ais) {
 			ai.update(elapsed_ms, m_platforms, m_player1.get_position());
 		}
@@ -219,7 +220,6 @@ bool World::update(float elapsed_ms)
 
 	if (!m_game_over && is_game_over()) {
 		m_game_over = is_game_over();
-		//m_water.set_game_over(m_winner_name);
 		m_bg.set_game_over(true, m_winner_name);
 	}
 
@@ -294,38 +294,45 @@ bool World::update(float elapsed_ms)
 			}
 		}
 		if (m_mode != MENU && m_mode != CHARSELECT && m_mode != STAGESELECT) {
-			// STAGE EFFECTS (will not happen at same time)
+			// STAGE EFFECTS -- 1 per stage
 			// HEAT WAVE
-			if (get_stage_fx_time() > HEAT_WAVE_LENGTH) {
-				m_bg.warningText = "";
-				set_heat_wave(false);
-			} else if (m_heat_wave_on) {
-				apply_stage_fx_dmg();
-			//} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) {
-			} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0 && !m_falling_knives_on) {
-				//m_bg.warningText = "!!! GET READY TO BLOCK IN: 3";
-				m_bg.warningText = "!!! BLOCK !!!";
-				set_heat_wave(true);
+			if (selected_stage = OVEN) {
+				if (get_stage_fx_time() > HEAT_WAVE_LENGTH) {
+					m_bg.warningText = "";
+					set_heat_wave(false);
+				}
+				else if (m_heat_wave_on) {
+					apply_stage_fx_dmg();
+					//} else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) {
+				}
+				else if ((int)glfwGetTime() % HEAT_WAVE_RATE == 0) { //&& !m_falling_knives_on
+					//m_bg.warningText = "!!! GET READY TO BLOCK IN: 3";
+					m_bg.warningText = "!!! BLOCK !!!";
+					set_heat_wave(true);
+				}
 			}
 
 			// STAGE EFFECT: FALLING KNIVES
-			//std::cout << "FALLING KNIVES ON: " << m_falling_knives_on<< std::endl;
-			if (get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
-				set_falling_knives(false);
-			} else if (!m_falling_knives_on && m_knives.size() > 0) {
-				bool all_outside = true;
-				for (auto &k : m_knives) {
-					if (k.get_position().y >= 0.f)
-						all_outside = false;
+			if (selected_stage == KITCHEN) {
+				if (get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
+					set_falling_knives(false);
 				}
-				if (all_outside) {
+				else if (!m_falling_knives_on && m_knives.size() > 0) {
+					bool all_outside = true;
 					for (auto &k : m_knives) {
-						k.destroy();
+						if (k.get_position().y >= 0.f)
+							all_outside = false;
 					}
-					m_knives.clear();
+					if (all_outside) {
+						for (auto &k : m_knives) {
+							k.destroy();
+						}
+						m_knives.clear();
+					}
 				}
-			} else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0 && !m_heat_wave_on) {
-				set_falling_knives(true);
+				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
+					set_falling_knives(true);
+				}
 			}
 		}
 	}
@@ -385,14 +392,17 @@ void World::draw()
 		m_menu.draw(projection_2D); // m_char_select_ais are never deleted throughout the game but are only initialized once
 		if (m_mode == MENU) {
 			m_char_select_ais[0].draw(projection_2D);
-		}
-		//else if (m_mode == CHARSELECT) {
-		else {
+		} else if (m_mode == CHARSELECT) {
+		//else {
 			FighterCharacter fc = m_menu.get_selected_char();
 			if (fc != BLANK) { m_char_select_ais[fc].draw(projection_2D); }
-			else {
-				m_char_select_ais[0].draw(projection_2D);
-			}
+			else { m_char_select_ais[0].draw(projection_2D);}
+		} else if (m_mode == STAGESELECT) {
+	/*		for (auto &platform : m_platforms)
+				platform.draw(projection_2D);*/
+			if (m_menu.get_selected_stage() != MENUBORDER) {
+				m_platforms[0].draw(projection_2D);
+			} else { m_char_select_ais[0].draw(projection_2D); }
 		}
 	} else {
 		m_bg.draw(projection_2D);
@@ -555,7 +565,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				}
 			} else if (m_mode == STAGESELECT) {
 				selected_stage = m_menu.get_selected_stage();
-				if (selected_stage == VANILLA) { // RETURN OPTION
+				if (selected_stage == MENUBORDER) { // RETURN OPTION
 					set_mode(CHARSELECT);
 				} else { set_mode(selected_fight_mode); }
 			}
@@ -854,7 +864,7 @@ bool World::set_mode(GameMode mode) {
 
 	switch (mode) {
 		case MENU:
-			init_stage(VANILLA); // platform for menu AI
+			init_stage(MENUBORDER); // platform for menu AI
 			m_player1.set_in_play(true); // needed to make AI respond
 			set_paused(false);
 			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(MENU);
@@ -950,6 +960,12 @@ void World::init_stage(Stage stage) {
 			spawn_platform(400, 328, 405, 8); //middle cupboard platform
 			break;
 		}
+		case MENUBORDER: {
+			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
+			//spawn_platform(0, 200, 1200, 8); //title underline
+			spawn_platform(0, 635, 1200, 8); //main platform
+			break;
+		}
 		default: {
 			spawn_platform(0, 635, 1200, 8); //main platform
 			break;
@@ -957,11 +973,9 @@ void World::init_stage(Stage stage) {
 	}
 }
 
-
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
 {
 }
-
 
 bool World::check_collision_world(BoundingBox b1) {
 	// !!! refactor so that this doesn't use magic numbers

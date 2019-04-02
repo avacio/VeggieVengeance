@@ -1,6 +1,5 @@
 // Header
 #include "mainMenu.hpp"
-#include "fighterInfo.hpp"
 
 Texture MainMenu::m_texture;
 
@@ -69,6 +68,7 @@ bool MainMenu::init(vec2 screen)
 	int width = title->get_width_of_string("VEGGIEVENGEANCE");
 	title->setPosition({ 80.f, 180.f });
 
+	init_stage_textures();
 	return true;
 }
 
@@ -77,7 +77,6 @@ bool MainMenu::init(vec2 screen)
 void MainMenu::destroy()
 {
 	m_initialized = false;
-	//is_player_1_chosen = false;
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -149,8 +148,7 @@ void MainMenu::draw(const mat3& projection)
 		buttons[0]->renderString(projection, "ONE-PLAYER");
 		buttons[1]->renderString(projection, "TWO-PLAYER");
 		buttons[2]->renderString(projection, "TUTORIAL");
-	}
-	else if (m_mode == CHARSELECT) {
+	} else if (m_mode == CHARSELECT) {
 		if (m_selected_mode == PVP) {
 			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
 			else { title->renderString(projection, "P2 CHARACTER SELECT"); }
@@ -161,12 +159,18 @@ void MainMenu::draw(const mat3& projection)
 		buttons[3]->renderString(projection, "YAM");
 		buttons[4]->renderString(projection, "return");
 		draw_char_info(projection);
-	}
-	else {
+	} else if (m_mode == STAGESELECT) {
 		title->renderString(projection, "STAGE SELECT");
 		buttons[0]->renderString(projection, "KITCHEN");
 		buttons[1]->renderString(projection, "OVEN");
 		buttons[2]->renderString(projection, "return");
+		
+		Stage s = get_selected_stage();
+		if (s != MENUBORDER) {
+			stage_textures[s].draw(projection);
+			if (s == KITCHEN) { text[0]->renderString(projection, "HAZARD: Falling knives"); }
+			else if (s == OVEN) { text[0]->renderString(projection, "HAZARD: Heat wave"); }
+		}
 	}
 }
 
@@ -257,6 +261,14 @@ void MainMenu::init_select_char_buttons() {
 
 void MainMenu::init_select_stage_buttons()
 {
+	// INFO
+	TextRenderer* t1 = new TextRenderer(mainFontBold, 35);
+	t1->setColor({ 0.f,0.f,0.f });
+	//int width = t1->get_width_of_string("hazard:heatwaveaa");
+	t1->setPosition({ screen.x / 2.f -75.f, screen.y / 2.f + 150.f });
+	text.emplace_back(t1);
+
+	// BUTTONS
 	TextRenderer* b1 = new TextRenderer(mainFont, 50);
 	TextRenderer* b2 = new TextRenderer(mainFont, 50);
 	TextRenderer* b3 = new TextRenderer(mainFont, 50);
@@ -272,9 +284,16 @@ void MainMenu::init_select_stage_buttons()
 	buttons.emplace_back(b1);
 	buttons.emplace_back(b2);
 	buttons.emplace_back(b3);
-
-
 }
+
+void MainMenu::init_stage_textures() {
+	TextureRenderer s1, s2;
+	s1.init(screen, &KITCHEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
+	s2.init(screen, &OVEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
+	stage_textures.emplace_back(s1);
+	stage_textures.emplace_back(s2);
+}
+
 
 GameMode MainMenu::set_selected_mode()
 {
@@ -319,7 +338,7 @@ Stage MainMenu::get_selected_stage()
 	case 1:
 		return OVEN;
 	case 2:
-		return VANILLA;
+		return MENUBORDER;
 	default:
 		return KITCHEN;
 	}
