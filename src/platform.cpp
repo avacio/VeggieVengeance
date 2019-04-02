@@ -9,6 +9,10 @@ Platform::Platform(float xpos, float ypos, float width, float height) : m_boundi
 	m_scale = { 1.0, 1.0 };
 }
 
+BoundingBox Platform::get_bounding_box() {
+	return m_bounding_box;
+}
+
 bool Platform::check_collision(BoundingBox b) {
 	return m_bounding_box.check_collision(b);
 }

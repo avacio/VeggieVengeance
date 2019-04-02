@@ -8,6 +8,7 @@ class Platform: public Renderable
 public:
 	static Texture platform_texture;
 	Platform(float xpos, float ypos, float width, float height);
+	BoundingBox get_bounding_box();
 	bool check_collision(BoundingBox b);
 	bool check_collision_outer_top(BoundingBox b);
 	bool check_collision_outer_bottom(BoundingBox b);

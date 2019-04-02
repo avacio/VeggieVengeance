@@ -55,8 +55,9 @@ class World
 	void draw_rectangle();
 
 	void set_heat_wave(bool on);
-	float get_heat_wave_time();
+	float get_stage_fx_time();
 	void apply_stage_fx_dmg();
+	void set_falling_knives(bool on);
 
   private:
 	// Generates a new fighter
@@ -105,7 +106,8 @@ class World
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 	std::vector<AI> m_char_select_ais;
 
-	Knife m_knife;
+	std::vector<Knife> m_knives;
+	//Knife m_knife;
 
 	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;
@@ -120,7 +122,8 @@ class World
 	bool m_game_over = false;
 	std::string m_winner_name;
 	bool m_heat_wave_on = false;
-	float m_heat_wave_time = -1;
+	float m_stage_fx_time = -1;
+	bool m_falling_knives_on = false;
 
 	/////////
 	FighterCharacter selectedP1 = POTATO; // POTATO
