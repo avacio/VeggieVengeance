@@ -138,7 +138,6 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 void Fighter::destroy()
 {
 	clear_emojis();
-
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
