@@ -170,9 +170,12 @@ class Fighter : public Renderable
 	// Helpers 
 	void charging_up_power_punch();
 	
-	
-
+	//Eggplant
+	void reset_eggplant_flags();
 	void clear_emojis();
+
+	//Yam
+	void reset_yam_flags();
 
   protected:
   	int MAX_HEALTH;

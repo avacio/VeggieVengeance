@@ -964,23 +964,10 @@ void Fighter::check_respawn(float ms) {
 			m_force.x = 0;
 			m_force.y = 0;
 
-			//yam reset
-			m_yam_is_healing = false;
-			m_yam_heal_cooldown_ms = 0;
-			m_yam_heal_animation_ms = 0.0;
-			m_yam_start_dashing = false;
-			m_yam_dash_cooldown_ms = 0.0;
-			m_yam_dash_timer_ms = 0.0;
-
-			//eggplant reset
-			m_eggplant_spawn_emoji = false;
-			m_eggplant_shoot_emoji = false;
-			m_eggplant_spawn_cooldown = 0.0;
-			clear_emojis();
 			if (m_fc == POTATO) reset_potato_flags();
 			if (m_fc == BROCCOLI) reset_broccoli_flags();
-			//if (m_fc == YAM) reset_broccoli_flags();
-			//if (m_fc == EGGPLANT) reset_broccoli_flags();
+			if (m_fc == YAM) reset_yam_flags();
+			if (m_fc == EGGPLANT) reset_eggplant_flags();
 		}
 	}
 }
@@ -1128,7 +1115,6 @@ void Fighter::reset()
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
-
 
 	//yam reset
 	m_yam_is_healing = false;
@@ -1387,7 +1373,6 @@ void Fighter::set_sprite(SpriteType st) const {
 
 
 void Fighter::clear_emojis() {
-	printf("made it into clear emojis\n");
 	if (m_eggplant_emojis.size() > 0) {
 		for (auto &eggplant_emoji : m_eggplant_emojis) {
 			eggplant_emoji->m_damageEffect->m_hit_fighter = true;
@@ -1437,4 +1422,22 @@ void Fighter::reset_broccoli_flags() {
 	m_broccoli_cauliflowers_on_cooldown = false;
 	m_broccoli_holding_cauliflowers_timer = 0;
 	m_broccoli_cauliflowers_cooldown = 0;
+}
+
+void Fighter::reset_yam_flags() {
+	//yam reset
+	m_yam_is_healing = false;
+	m_yam_heal_cooldown_ms = 0;
+	m_yam_heal_animation_ms = 0.0;
+	m_yam_start_dashing = false;
+	m_yam_dash_cooldown_ms = 0.0;
+	m_yam_dash_timer_ms = 0.0;
+}
+
+void Fighter::reset_eggplant_flags() {
+	//eggplant reset
+	m_eggplant_spawn_emoji = false;
+	m_eggplant_shoot_emoji = false;
+	m_eggplant_spawn_cooldown = 0.0;
+	clear_emojis();
 }

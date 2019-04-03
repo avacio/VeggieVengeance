@@ -36,7 +36,6 @@ Projectile::~Projectile() {
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
 	effect.release();
-	//printf("destroyed projectile\n");
 }
 
 bool Projectile::init() {
