@@ -320,7 +320,7 @@ bool World::update(float elapsed_ms)
 				if (m_falling_knives_on && get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
 					set_falling_knives(false);
 				}
-				else if (!m_falling_knives_on && m_knives.size() > 0) {
+		/*		else if (!m_falling_knives_on && m_knives.size() > 0) {
 					bool all_outside = true;
 					for (auto &k : m_knives) {
 						if (k.get_position().y >= 0.f) { all_outside = false; }
@@ -332,9 +332,9 @@ bool World::update(float elapsed_ms)
 						m_knives.clear();
 						printf("CLEARED KNIVES");
 					}
-				}
+				}*/
 				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
-					set_falling_knives(true);
+					//set_falling_knives(true);
 				}
 
 			}
@@ -781,12 +781,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 
 	//// Spawn mesh for testing purposes
-	//if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
-	//	set_falling_knives(true);
-	//}
-	//if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
-	//	set_falling_knives(false);
-	//}
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && m_mode == PVP && selected_stage == KITCHEN) {
+		set_falling_knives(true);
+	}
+	if (action == GLFW_PRESS && key == GLFW_KEY_Z && m_mode == PVP && selected_stage == KITCHEN) {
+		set_falling_knives(false);
+	}
 }
 
 
@@ -1119,14 +1119,14 @@ bool World::is_game_over() {
 
 void World::set_falling_knives(bool on) {
 	std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
-
+	if (on && m_knives.size() > 0) { return; } // TEST
 	if (m_falling_knives_on == on) { return; }
 	if (on) {
-		printf("knife");
-		for (auto &k : m_knives) {
-			k.destroy();
-		}
-		m_knives.clear();
+		//printf("knife");
+		//for (auto &k : m_knives) {
+		//	k.destroy();
+		//}
+		//m_knives.clear();
 		m_stage_fx_time = glfwGetTime();
 		Knife k0, k1, k2, k3;
 		k0.spawn_knife(10, { 400.f, -50.f });
