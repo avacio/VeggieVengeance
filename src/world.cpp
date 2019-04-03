@@ -839,6 +839,7 @@ bool World::set_mode(GameMode mode) {
 	m_bg.set_game_over(false, "");
 
 	clear_all_fighters();
+	m_attacks.clear();
 	for (auto &k : m_knives) {
 		k.destroy();
 	}

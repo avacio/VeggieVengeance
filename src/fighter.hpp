@@ -168,6 +168,8 @@ class Fighter : public Renderable
 	void potato_charging_up_fries();
 	void broccoli_charging_up_cauliflowers();
 
+	void clear_emojis();
+
   protected:
   	int MAX_HEALTH;
 	const int STARTING_LIVES = 3;
