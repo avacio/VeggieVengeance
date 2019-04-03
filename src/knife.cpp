@@ -114,6 +114,7 @@ void Knife::destroy()
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	effect.release();
 }
 
 // Called on each frame by World::update()

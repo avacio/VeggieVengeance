@@ -183,6 +183,7 @@ enum GameMode
 {
 	MENU = 0,
 	CHARSELECT,
+	STAGESELECT,
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
@@ -198,4 +199,4 @@ enum PauseMenuOption
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "CHARSELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "CHARSELECT", "STAGESELECT", "PVC", "PVP", "TUTORIAL", "DEV" };

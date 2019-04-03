@@ -1,3 +1,59 @@
+# ROBUST MILESTONE PROGRESS - Mar. 29
+
+
+
+Overview: For this milestone, we continued to introduce new features such as charcters, abiltiies and stages, while also fixing and optimizing the performance
+
+
+
+## Milestone Requirements
+
+
+- Provide complete playable prior-milestone implementation
+	- features from previous milestones are kept and improved upon (e.g. abilities rework)
+    
+    
+- Sustain progressive, non-repetitive gameplay for 6min or more including all new features. The game should not terminate early and should allow infinite even if repetitive gameplay
+	- Complete menu system, allowing for non-repetitive gameplay e.g. rematches, switching characters
+	- New Fighters
+		- Eggplant: Circling emojis, emoji bullets
+		- Yam: Self-healing, dash
+	- New fighting abilties
+		- Potato: Tater tot bomb, chargable bullets (fries)
+		- Broccoli: Uppercut, chargable projectiles (cauliflowers)
+	- balancing states
+		- introduced tired-out state if players are abusing the charged abilities (fighter tired out if holding abilities for too long) 
+	- more platforms (resembling battlefield in smash)
+
+- Support real-time response rate (i.e. lag-free input).
+	- gameplay are lag-free
+	- optimize loading and unloading resources -> reduced loading match time to under 1 sec
+
+- Include proper memory management (no excessive allocation or leaks). The game should not have any undefined behavior, memory leaks or random crashes. The game should not hog memory even after extended play time. 
+	- resources e.g. bomb, bullets, projectiles are destroyed
+	- memory usage usually plateaus at around 256MB
+
+- The game should robustly handle any user input. Unexpected inputs or environment settings should be correctly handled and reported
+	- 
+
+- The gameplay should be real-time (no lag). This included improving your collision handling using effective detection strategies. You should support dozens simultaneously moving main or background assets
+	- smooth collision detection for characters, platforms, spawned assets (bomb, bullets, projectiles)
+
+- The game should allow for some form of state saving for play “reload”. Users should be able to pause and restart in a graceful (if not perfect) manner. 
+	- matches can be paused and restart gracefully
+
+- The physical effects should be correctly integrated in time and should not be locked to the machine’s speed by correctly handling the simulation time step and integration.
+
+- Stable game code supporting continuing execution and graceful termination.
+
+
+Creative: You should implement one or more additional creative elements. These can include additional integrated assets or rendering effects or pre-emptive implementation of one or more features from subsequent milestones.
+	
+- Planned Work
+	- new animations:
+		- Charging, tired out, death for all fighters
+	- new fighter moves:
+		- 
 
 # PLAYABILITY MILESTONE PROGRESS - Mar. 8
 
