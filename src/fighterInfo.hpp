@@ -33,7 +33,7 @@ enum SpriteType
 	UPPERCUT
 };
 
-enum Stage
+ enum Stage
 {
 	KITCHEN = 0,
 	OVEN,

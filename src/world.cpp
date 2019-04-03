@@ -10,8 +10,8 @@
 #define HEAT_WAVE_RATE 75
 #define HEAT_WAVE_LENGTH 2
 
-#define FALLING_KNIVES_RATE 75
-#define FALLING_KNIVES_LENGTH 2.5
+#define FALLING_KNIVES_RATE 30
+#define FALLING_KNIVES_LENGTH 2
 
 // Same as static in c, local to compilation unit
 namespace
@@ -296,7 +296,7 @@ bool World::update(float elapsed_ms)
 		if (m_mode != MENU && m_mode != CHARSELECT && m_mode != STAGESELECT) {
 			// STAGE EFFECTS -- 1 per stage
 			// HEAT WAVE
-			if (selected_stage = OVEN) {
+			if (selected_stage == OVEN) {
 				if (get_stage_fx_time() > HEAT_WAVE_LENGTH) {
 					m_bg.warningText = "";
 					set_heat_wave(false);
@@ -313,21 +313,21 @@ bool World::update(float elapsed_ms)
 			}
 
 			// STAGE EFFECT: FALLING KNIVES
-			if (selected_stage == KITCHEN) {
-				if (get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
+			else if (selected_stage == KITCHEN) {
+				if (m_falling_knives_on && get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
 					set_falling_knives(false);
 				}
 				else if (!m_falling_knives_on && m_knives.size() > 0) {
 					bool all_outside = true;
 					for (auto &k : m_knives) {
-						if (k.get_position().y >= 0.f)
-							all_outside = false;
+						if (k.get_position().y >= 0.f) { all_outside = false; }
 					}
 					if (all_outside) {
 						for (auto &k : m_knives) {
 							k.destroy();
 						}
 						m_knives.clear();
+						printf("CLEARED KNIVES");
 					}
 				}
 				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
@@ -779,13 +779,13 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
 	}
 
-	// Spawn mesh for testing purposes
-	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
-		set_falling_knives(true);
-	}
-	if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
-		set_falling_knives(false);
-	}
+	//// Spawn mesh for testing purposes
+	//if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
+	//	set_falling_knives(true);
+	//}
+	//if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
+	//	set_falling_knives(false);
+	//}
 }
 
 
@@ -796,6 +796,7 @@ void World::reset()
 	m_bg.set_game_over(false, "");
 	set_heat_wave(false);
 	m_bg.warningText = "";
+	m_falling_knives_on = false;
 	for (auto &k : m_knives) {
 		k.destroy();
 	}
@@ -846,8 +847,8 @@ bool World::set_mode(GameMode mode) {
 	m_player2.set_in_play(false);
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
-
 	clear_all_fighters();
+	m_falling_knives_on = false;
 	for (auto &k : m_knives) {
 		k.destroy();
 	}
@@ -861,6 +862,7 @@ bool World::set_mode(GameMode mode) {
 
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
+	std::cout << "selected stage: " << selected_stage << std::endl;
 
 	switch (mode) {
 		case MENU:
@@ -1107,18 +1109,23 @@ bool World::is_game_over() {
 }
 
 void World::set_falling_knives(bool on) {
+	std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
+
 	if (m_falling_knives_on == on) { return; }
-	m_falling_knives_on = on;
 	if (on) {
 		printf("knife");
+		for (auto &k : m_knives) {
+			k.destroy();
+		}
+		m_knives.clear();
 		m_stage_fx_time = glfwGetTime();
 		Knife k0, k1, k2, k3;
 		k0.spawn_knife(10, { 400.f, -50.f });
-		if (m_ais.size() > 0) { k2.spawn_knife(10, { m_ais[0].get_position().x, -12.f }); }
+		if (m_ais.size() > 0) { k1.spawn_knife(10, { m_ais[0].get_position().x, -12.f }); }
 		else { k1.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
 		if (m_player1.get_in_play()) { k2.spawn_knife(10, { m_player1.get_position().x, 0.f }); }
 		else { k2.spawn_knife(10, { get_random_number(8)*100.f+50.f, 0.f }); }
-		if (m_player2.get_in_play()) { k3.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
+		if (m_mode == PVP) { k3.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
 		else { k3.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
 		m_knives.emplace_back(k0);
 		m_knives.emplace_back(k1);
@@ -1129,6 +1136,7 @@ void World::set_falling_knives(bool on) {
 			k.m_done = true;
 		}
 	}
+	m_falling_knives_on = on;
 }
 
 void World::set_heat_wave(bool on) {
