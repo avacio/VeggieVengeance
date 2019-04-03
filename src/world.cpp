@@ -214,10 +214,11 @@ bool World::update(float elapsed_ms)
 
 	if (m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) {
 		for (AI& ai : m_char_select_ais) {
-			ai.update(elapsed_ms, m_platforms, m_player1.get_position());
+			ai.update(elapsed_ms, m_platforms, m_player1.get_position(),
+				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
 		}
 	}
-
+	
 	if (!m_game_over && is_game_over()) {
 		m_game_over = is_game_over();
 		m_bg.set_game_over(true, m_winner_name);
@@ -286,7 +287,8 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				attack = ai.update(elapsed_ms, m_platforms, m_player1.get_position());
+				attack = ai.update(elapsed_ms, m_platforms, m_player1.get_position(), m_player1.get_facing_front(),
+					m_player1.get_health(), m_player1.is_blocking());
 				if (attack != NULL) {
 					attack->init();
 					m_attacks.push_back(attack);
@@ -333,6 +335,7 @@ bool World::update(float elapsed_ms)
 				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
 					set_falling_knives(true);
 				}
+
 			}
 		}
 	}
@@ -848,6 +851,7 @@ bool World::set_mode(GameMode mode) {
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
 	clear_all_fighters();
+	m_attacks.clear();
 	m_falling_knives_on = false;
 	for (auto &k : m_knives) {
 		k.destroy();

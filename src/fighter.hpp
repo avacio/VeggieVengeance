@@ -172,6 +172,8 @@ class Fighter : public Renderable
 	
 	
 
+	void clear_emojis();
+
   protected:
   	int MAX_HEALTH;
 	const int STARTING_LIVES = 3;

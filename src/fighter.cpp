@@ -137,6 +137,8 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 // Releases all graphics resources
 void Fighter::destroy()
 {
+	clear_emojis();
+
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteVertexArrays(1, &mesh.vao);
@@ -921,18 +923,7 @@ void Fighter::die() {
 			m_crouch_state = NOT_CROUCHING;
 		}
 
-		if (m_eggplant_emojis.size() > 0) {
-			for (auto &eggplant_emoji : m_eggplant_emojis) {
-				eggplant_emoji->m_damageEffect->m_hit_fighter = true;
-				eggplant_emoji->deincrement_pointer_references();
-				if (eggplant_emoji->get_pointer_references() == 0) {
-					delete eggplant_emoji;
-					eggplant_emoji = NULL;
-				}
-			}
-			m_eggplant_emojis.clear();
-			m_eggplant_emoji_count = 0;
-		}
+		clear_emojis();
 
 		if (m_lives > 0)
 		{
@@ -973,8 +964,24 @@ void Fighter::check_respawn(float ms) {
 			m_is_power_punching = false;
 			m_force.x = 0;
 			m_force.y = 0;
+
+			//yam reset
+			m_yam_is_healing = false;
+			m_yam_heal_cooldown_ms = 0;
+			m_yam_heal_animation_ms = 0.0;
+			m_yam_start_dashing = false;
+			m_yam_dash_cooldown_ms = 0.0;
+			m_yam_dash_timer_ms = 0.0;
+
+			//eggplant reset
+			m_eggplant_spawn_emoji = false;
+			m_eggplant_shoot_emoji = false;
+			m_eggplant_spawn_cooldown = 0.0;
+			clear_emojis();
 			if (m_fc == POTATO) reset_potato_flags();
 			if (m_fc == BROCCOLI) reset_broccoli_flags();
+			//if (m_fc == YAM) reset_broccoli_flags();
+			//if (m_fc == EGGPLANT) reset_broccoli_flags();
 		}
 	}
 }
@@ -1122,6 +1129,21 @@ void Fighter::reset()
 		m_crouch_state = CROUCH_RELEASED;
 		m_position.y += 25.f;
 	}
+
+
+	//yam reset
+	m_yam_is_healing = false;
+	m_yam_heal_cooldown_ms = 0;
+	m_yam_heal_animation_ms = 0.0;
+	m_yam_start_dashing = false;
+	m_yam_dash_cooldown_ms = 0.0;
+	m_yam_dash_timer_ms = 0.0;
+
+	//eggplant reset
+	m_eggplant_spawn_emoji = false;
+	m_eggplant_shoot_emoji = false;
+	m_eggplant_spawn_cooldown = 0.0;
+	clear_emojis();
 }
 
 Punch * Fighter::punch() {
@@ -1362,6 +1384,24 @@ void Fighter::set_sprite(SpriteType st) const {
 		case TIRED_2: f_texture = YAM_TIRED_2_TEXTURE; break;
 		}
 	}
+}
+
+
+void Fighter::clear_emojis() {
+	printf("made it into clear emojis\n");
+	if (m_eggplant_emojis.size() > 0) {
+		for (auto &eggplant_emoji : m_eggplant_emojis) {
+			eggplant_emoji->m_damageEffect->m_hit_fighter = true;
+			eggplant_emoji->deincrement_pointer_references();
+			if (eggplant_emoji->get_pointer_references() == 0) {
+				delete eggplant_emoji;
+			}
+			eggplant_emoji = NULL;
+		}
+		m_eggplant_emojis.clear();
+		m_eggplant_emoji_count = 0;
+	}
+
 }
 
 void Fighter::reset_potato_flags() {
