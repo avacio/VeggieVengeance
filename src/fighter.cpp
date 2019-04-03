@@ -107,6 +107,9 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_name = name;
 	m_force = { 0.f, 0.f };
 	m_friction = 1.f;
+
+	reset_eggplant_flags();
+	reset_yam_flags();
 	
 	switch (init_position) {
 	case 1:
