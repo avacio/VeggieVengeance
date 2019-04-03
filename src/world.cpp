@@ -139,9 +139,8 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	init_char_select_ais();
-	//init_stage_select_textures();
 	init_stage(MENUBORDER);
+	init_char_select_ais();
 
 	return m_water.init() && initSuccess;
 }
@@ -212,7 +211,7 @@ bool World::update(float elapsed_ms)
 		return true;
 	}
 
-	if (m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) {
+	if ((m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) && m_platforms.size() > 0) {
 		for (AI& ai : m_char_select_ais) {
 			ai.update(elapsed_ms, m_platforms, m_player1.get_position(),
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
@@ -398,15 +397,12 @@ void World::draw()
 		if (m_mode == MENU) {
 			m_char_select_ais[0].draw(projection_2D);
 		} else if (m_mode == CHARSELECT) {
-		//else {
 			FighterCharacter fc = m_menu.get_selected_char();
 			if (fc != BLANK) { m_char_select_ais[fc].draw(projection_2D); }
 			else { m_char_select_ais[0].draw(projection_2D);}
 		} else if (m_mode == STAGESELECT) {
-	/*		for (auto &platform : m_platforms)
-				platform.draw(projection_2D);*/
 			if (m_menu.get_selected_stage() != MENUBORDER) {
-				m_platforms[0].draw(projection_2D);
+				m_platforms[1].draw(projection_2D);
 			} else { m_char_select_ais[0].draw(projection_2D); }
 		}
 	} else {
@@ -945,13 +941,20 @@ bool World::set_mode(GameMode mode) {
 }
 
 void World::init_stage(Stage stage) {
-	for (auto &platform : m_platforms) {
-		platform.destroy();
+	//for (auto &platform : m_platforms) {
+	//	platform.destroy();
+	//}
+	//m_platforms.clear();
+	if (m_platforms.size() == 0) {
+		spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
 	}
-	m_platforms.clear();
+	while (m_platforms.size() > 1) {
+		m_platforms.pop_back(); // memory leak? should destruct on pop
+	}
+	
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 447, 155, 8); //left cupboard platform
@@ -960,7 +963,7 @@ void World::init_stage(Stage stage) {
 			break;
 			}
 		case OVEN: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 447, 155, 8); //left cupboard platform
@@ -969,13 +972,13 @@ void World::init_stage(Stage stage) {
 			break;
 		}
 		case MENUBORDER: {
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
 			//spawn_platform(0, 200, 1200, 8); //title underline
-			spawn_platform(0, 635, 1200, 8); //main platform
 			break;
 		}
 		default: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			break;
 		}
 	}
