@@ -318,6 +318,7 @@ bool World::update(float elapsed_ms)
 			// STAGE EFFECT: FALLING KNIVES
 			else if (selected_stage == KITCHEN) {
 				if (m_falling_knives_on && get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
+					m_bg.warningText = "";
 					set_falling_knives(false);
 				}
 		/*		else if (!m_falling_knives_on && m_knives.size() > 0) {
@@ -848,6 +849,7 @@ bool World::set_mode(GameMode mode) {
 	m_player2.set_in_play(false);
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
+	m_bg.warningText = "";
 	clear_all_fighters();
 	m_attacks.clear();
 	m_falling_knives_on = false;
@@ -864,7 +866,7 @@ bool World::set_mode(GameMode mode) {
 
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
-	std::cout << "selected stage: " << selected_stage << std::endl;
+	//std::cout << "selected stage: " << selected_stage << std::endl;
 
 	switch (mode) {
 		case MENU:
@@ -1118,7 +1120,7 @@ bool World::is_game_over() {
 }
 
 void World::set_falling_knives(bool on) {
-	std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
+	//std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
 	if (on && m_knives.size() > 0) { return; } // TEST
 	if (m_falling_knives_on == on) { return; }
 	if (on) {
@@ -1127,6 +1129,7 @@ void World::set_falling_knives(bool on) {
 		//	k.destroy();
 		//}
 		//m_knives.clear();
+
 		m_stage_fx_time = glfwGetTime();
 		Knife k0, k1, k2, k3;
 		k0.spawn_knife(10, { 400.f, -50.f });
@@ -1140,6 +1143,7 @@ void World::set_falling_knives(bool on) {
 		m_knives.emplace_back(k1);
 		m_knives.emplace_back(k2);
 		m_knives.emplace_back(k3);
+		m_bg.warningText = "!!!";
 	} else {
 		for (auto &k : m_knives) {
 			k.m_done = true;
