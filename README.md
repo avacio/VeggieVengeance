@@ -2,7 +2,7 @@
 
 
 
-Overview: For this milestone, we continued to introduce new features such as charcters, abiltiies and stages, while also fixing and optimizing the performance
+Overview: For this milestone, we continued to introduce new features such as characters, abiltiies and stages, while also fixing and optimizing the performance.
 
 
 
@@ -12,9 +12,8 @@ Overview: For this milestone, we continued to introduce new features such as cha
 - Provide complete playable prior-milestone implementation
 	- features from previous milestones are kept and improved upon (e.g. abilities rework)
     
-    
 - Sustain progressive, non-repetitive gameplay for 6min or more including all new features. The game should not terminate early and should allow infinite even if repetitive gameplay
-	- Complete menu system, allowing for non-repetitive gameplay e.g. rematches, switching characters
+	- Complete menu system, allowing for non-repetitive gameplay e.g. rematches, switching characters, stage select
 	- New Fighters
 		- Eggplant: Circling emojis, emoji bullets
 		- Yam: Self-healing, dash
@@ -34,7 +33,6 @@ Overview: For this milestone, we continued to introduce new features such as cha
 	- memory usage usually plateaus at around 256MB
 
 - The game should robustly handle any user input. Unexpected inputs or environment settings should be correctly handled and reported
-	- 
 
 - The gameplay should be real-time (no lag). This included improving your collision handling using effective detection strategies. You should support dozens simultaneously moving main or background assets
 	- smooth collision detection for characters, platforms, spawned assets (bomb, bullets, projectiles)
@@ -53,7 +51,20 @@ Creative: You should implement one or more additional creative elements. These c
 	- new animations:
 		- Charging, tired out, death for all fighters
 	- new fighter moves:
-		- 
+		- different projectile types
+        	- bouncy cauliflower
+            - circling emojis that you can fire
+        - tater tot bombs
+    - mesh
+    	- knives
+    - stage select
+    - eggplant character with sprites
+    - refined animations for player states
+- Unplanned Work
+	- stage effect of falling knives with collision and attack damage
+    - add yam character with sprites!
+    - fighters have a HP stat based on template character
+
 
 # PLAYABILITY MILESTONE PROGRESS - Mar. 8
 
