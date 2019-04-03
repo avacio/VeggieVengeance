@@ -257,7 +257,9 @@ bool World::update(float elapsed_ms)
 				}
 			}
 			for (auto &ai : m_ais) {
-				ai.apply_damage(k.m_damage);
+				if (k.collides_with(ai)) {
+					ai.apply_damage(k.m_damage);
+				}
 			}
 
 			for (auto &p : m_platforms) {

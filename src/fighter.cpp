@@ -958,7 +958,7 @@ void Fighter::check_respawn(float ms) {
 			m_scale.x = m_initial_scale_x;
 			m_crouch_state = NOT_CROUCHING;
 			m_blocking_tank = FULL_BLOCK_TANK;
-			m_is_blocking = false;
+			m_is_blocking = true;
 			m_tired_out = false;
 			m_is_jumping = false;
 			m_is_punching = false;
