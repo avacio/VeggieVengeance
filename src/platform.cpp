@@ -169,10 +169,14 @@ void Platform::destroy() {
 	glDeleteBuffers(1, &mesh.vbo);
 	glDeleteBuffers(1, &mesh.ibo);
 	glDeleteBuffers(1, &mesh.vao);
+	glDeleteVertexArrays(1, &mesh.vao);
+	glDisableVertexAttribArray(0);
 
 	glDeleteShader(effect.vertex);
 	glDeleteShader(effect.fragment);
 	glDeleteShader(effect.program);
+	//delete &m_bounding_box;
+	effect.release();
 }
 
 void Platform::draw(const mat3 &projection) {
