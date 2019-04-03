@@ -39,7 +39,7 @@ class Background : public Renderable, public Screen
 
 public:
 	// Creates all the associated render resources and default transform
-	bool init(vec2 screen, GameMode mode);
+	bool init(vec2 screen, GameMode mode, Stage stage);
 
 	// Releases all the associated resources
 	void destroy();

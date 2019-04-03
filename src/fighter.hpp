@@ -156,17 +156,21 @@ class Fighter : public Renderable
 	FighterCharacter m_fc;
 	// Potato
 	bool potato_is_holding_fries() const;
+	void potato_charging_up_fries();
+	void reset_potato_flags();
 
 	// Broccoli
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
 	bool broccoli_is_uppercut_on_cooldown();
 	bool broccoli_is_holding_cauliflowers() const;
+	void broccoli_charging_up_cauliflowers();
+	void reset_broccoli_flags();
 
 	// Helpers 
 	void charging_up_power_punch();
-	void potato_charging_up_fries();
-	void broccoli_charging_up_cauliflowers();
+	
+	
 
 	void clear_emojis();
 
@@ -186,6 +190,8 @@ class Fighter : public Renderable
 	vec2 m_sprite_appearance_size; //the apparent width and height of the sprite, without scaling (used for more intuitive bounding boxes)
 	float m_rotation; // in radians
 	vec2 m_initial_pos;
+	bool m_initial_dir;
+	float m_initial_scale_x;
 	
 	float m_speed; // each fighter has different speed and strength stats
 	int m_strength;

@@ -124,6 +124,8 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	}
 
 	m_initial_pos = m_position;
+	m_initial_dir = m_facing_front;
+	m_initial_scale_x = m_scale.x;
 
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
@@ -218,14 +220,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		// ABILTIY 1: Fries  (bullet) 
 		
 		if (m_potato_is_holding_fries) potato_charging_up_fries();
-		if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
+		else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
 			m_potato_fries_on_cooldown = true;
 			m_holding_too_much_timer = 0;
 			m_potato_holding_fries_timer = 0;
 			m_potato_is_shooting_charged_fries = false;
 		}
-		if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
+		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
 			attack = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
 			m_potato_fries_on_cooldown = true;
 		}
@@ -249,7 +251,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_potato_bomb_planted = false;
 			}
 		}
-		if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
+		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 			bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
 			attack = bomb_pointer;
 			bomb_pointer->increment_pointer_references();
@@ -294,7 +296,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			m_broccoli_is_double_jumping = false;
 		}
 		// Ability 1: Uppercut
-		if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 			attack = broccoliUppercut();
 			m_broccoli_uppercut_on_cooldown = true;
@@ -310,14 +312,14 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 
 		// ABILITY 2: Cauliflower (projectile)
 		if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
-		if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 			m_holding_too_much_timer = 0;
 			m_broccoli_holding_cauliflowers_timer = 0;
 			m_broccoli_is_shooting_charged_cauliflowers = false;
 		}
-		if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
 			m_broccoli_cauliflowers_on_cooldown = true;
 		}
@@ -400,10 +402,10 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_eggplant_emojis[i]->set_fighter_pos(m_position);
 			}
 		}
-		if (m_eggplant_spawn_emoji) {
+		if (m_eggplant_spawn_emoji) {				
 			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
 				Emoji * e = emoji();
-				attack = e;
+				attack = e;	
 				m_eggplant_emojis.push_back(e);
 				e->increment_pointer_references();
 				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
@@ -447,7 +449,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	
 	y_position_update(ms);
 	platform_collision(platforms, oldPos);
-	//printf("%i\n", m_broccoli_holding_cauliflowers_timer);
 	//return null if not attacking, or the collision object if attacking
 	return attack;
 }
@@ -951,9 +952,11 @@ void Fighter::check_respawn(float ms) {
 			m_health = MAX_HEALTH;
 			m_rotation = 0;
 			m_position = m_initial_pos;
+			m_facing_front = m_initial_dir;
+			m_scale.x = m_initial_scale_x;
 			m_crouch_state = NOT_CROUCHING;
 			m_blocking_tank = FULL_BLOCK_TANK;
-			m_is_blocking = true;
+			m_is_blocking = false;
 			m_tired_out = false;
 			m_is_jumping = false;
 			m_is_punching = false;
@@ -961,29 +964,6 @@ void Fighter::check_respawn(float ms) {
 			m_is_power_punching = false;
 			m_force.x = 0;
 			m_force.y = 0;
-			// Potato flags
-			m_potato_is_shooting_fries = false;
-			m_potato_is_holding_fries = false;
-			m_potato_fries_cooldown = 0;
-			m_potato_fries_on_cooldown = false;
-			m_potato_holding_fries_timer = 0;
-			m_potato_bomb_planted = false;
-			m_potato_bomb_selftimer = 0;
-			m_potato_bomb_ticking = 0;
-			m_potato_bomb_cooldown = 0;
-			m_potato_bomb_on_cooldown = false;
-			m_potato_explode_planted_bomb = false;
-			// Broccoli flags
-			m_broccoli_is_double_jumping = false;
-			m_broccoli_jump_left = 2;
-			m_broccoli_is_holding_cauliflowers = false;
-			m_broccoli_is_shooting_cauliflowers = false;
-			m_broccoli_cauliflowers_cooldown = 0;
-			m_broccoli_cauliflowers_on_cooldown = false;
-			m_broccoli_holding_cauliflowers_timer = 0;
-			m_broccoli_is_uppercutting = false;
-			m_broccoli_uppercut_on_cooldown = false;
-			m_broccoli_uppercut_cooldown = 0;
 
 			//yam reset
 			m_yam_is_healing = false;
@@ -998,6 +978,10 @@ void Fighter::check_respawn(float ms) {
 			m_eggplant_shoot_emoji = false;
 			m_eggplant_spawn_cooldown = 0.0;
 			clear_emojis();
+			if (m_fc == POTATO) reset_potato_flags();
+			if (m_fc == BROCCOLI) reset_broccoli_flags();
+			//if (m_fc == YAM) reset_broccoli_flags();
+			//if (m_fc == EGGPLANT) reset_broccoli_flags();
 		}
 	}
 }
@@ -1130,21 +1114,16 @@ void Fighter::reset()
 	m_rotation = 0;
 	m_is_jumping = false;
 	m_is_punching = false;
-	m_potato_is_shooting_fries = false;
-	m_broccoli_is_holding_cauliflowers = false;
-	m_broccoli_is_shooting_cauliflowers = false;
-	m_broccoli_is_double_jumping = false;
-	m_broccoli_jump_left = 2;
-	m_broccoli_is_uppercutting = false;
-	m_broccoli_uppercut_on_cooldown = false;
-	m_broccoli_uppercut_cooldown = 0;
+	if (m_fc == POTATO) reset_potato_flags();
+	if (m_fc == BROCCOLI) reset_broccoli_flags();
 	m_is_holding_power_punch = false;
 	m_is_power_punching = false;
 	m_velocity_y = 0.0;
 	m_moving_forward = false;
 	m_moving_backward = false;
 	m_position = m_initial_pos;
-
+	m_facing_front = m_initial_dir;
+	m_scale.x = m_initial_scale_x;
 
 	if (m_crouch_state == IS_CROUCHING || m_crouch_state == CROUCH_PRESSED) {
 		m_crouch_state = CROUCH_RELEASED;
@@ -1407,6 +1386,7 @@ void Fighter::set_sprite(SpriteType st) const {
 	}
 }
 
+
 void Fighter::clear_emojis() {
 	printf("made it into clear emojis\n");
 	if (m_eggplant_emojis.size() > 0) {
@@ -1421,4 +1401,41 @@ void Fighter::clear_emojis() {
 		m_eggplant_emojis.clear();
 		m_eggplant_emoji_count = 0;
 	}
+
+}
+
+void Fighter::reset_potato_flags() {
+	// ABILITY 1: Tater Tot (Bomb)
+	m_potato_is_planting_bomb = false;
+	m_potato_bomb_planted = false;
+	m_potato_explode_planted_bomb = false;
+	m_potato_bomb_ticking = false;
+	m_potato_bomb_on_cooldown = false;
+	m_potato_bomb_selftimer = 0;
+	m_potato_bomb_cooldown = 0;
+	bomb_pointer = NULL;
+	// ABILITY 2: Fries (Bullet)
+	m_potato_is_shooting_fries = false;
+	m_potato_is_holding_fries = false;
+	m_potato_is_shooting_charged_fries = false;
+	m_potato_fries_on_cooldown = false;
+	m_potato_holding_fries_timer = 0;
+	m_potato_fries_cooldown = 0;
+}
+
+void Fighter::reset_broccoli_flags() {
+	// PASSIVE: Double Jump
+	m_broccoli_is_double_jumping = false;
+	m_broccoli_jump_left = 2;
+	// ABILITY 1: Uppercut
+	m_broccoli_is_uppercutting = false;
+	m_broccoli_uppercut_on_cooldown = false;
+	m_broccoli_uppercut_cooldown = 0;
+	// ABILITY 2: Cauliflower (Projectile)
+	m_broccoli_is_shooting_cauliflowers = false;
+	m_broccoli_is_holding_cauliflowers = false;
+	m_broccoli_is_shooting_charged_cauliflowers = false;
+	m_broccoli_cauliflowers_on_cooldown = false;
+	m_broccoli_holding_cauliflowers_timer = 0;
+	m_broccoli_cauliflowers_cooldown = 0;
 }
