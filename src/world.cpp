@@ -139,9 +139,8 @@ bool World::init(vec2 screen, GameMode mode)
 	m_screen = screen; // to pass on screen size to renderables
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	init_char_select_ais();
-	//init_stage_select_textures();
 	init_stage(MENUBORDER);
+	init_char_select_ais();
 
 	return m_water.init() && initSuccess;
 }
@@ -212,7 +211,7 @@ bool World::update(float elapsed_ms)
 		return true;
 	}
 
-	if (m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) {
+	if ((m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) && m_platforms.size() > 0) {
 		for (AI& ai : m_char_select_ais) {
 			ai.update(elapsed_ms, m_platforms, m_player1.get_position(),
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
@@ -319,9 +318,10 @@ bool World::update(float elapsed_ms)
 			// STAGE EFFECT: FALLING KNIVES
 			else if (selected_stage == KITCHEN) {
 				if (m_falling_knives_on && get_stage_fx_time() > FALLING_KNIVES_LENGTH) {
+					m_bg.warningText = "";
 					set_falling_knives(false);
 				}
-				else if (!m_falling_knives_on && m_knives.size() > 0) {
+		/*		else if (!m_falling_knives_on && m_knives.size() > 0) {
 					bool all_outside = true;
 					for (auto &k : m_knives) {
 						if (k.get_position().y >= 0.f) { all_outside = false; }
@@ -333,9 +333,9 @@ bool World::update(float elapsed_ms)
 						m_knives.clear();
 						printf("CLEARED KNIVES");
 					}
-				}
+				}*/
 				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
-					set_falling_knives(true);
+					//set_falling_knives(true);
 				}
 
 			}
@@ -398,15 +398,12 @@ void World::draw()
 		if (m_mode == MENU) {
 			m_char_select_ais[0].draw(projection_2D);
 		} else if (m_mode == CHARSELECT) {
-		//else {
 			FighterCharacter fc = m_menu.get_selected_char();
 			if (fc != BLANK) { m_char_select_ais[fc].draw(projection_2D); }
 			else { m_char_select_ais[0].draw(projection_2D);}
 		} else if (m_mode == STAGESELECT) {
-	/*		for (auto &platform : m_platforms)
-				platform.draw(projection_2D);*/
 			if (m_menu.get_selected_stage() != MENUBORDER) {
-				m_platforms[0].draw(projection_2D);
+				m_platforms[1].draw(projection_2D);
 			} else { m_char_select_ais[0].draw(projection_2D); }
 		}
 	} else {
@@ -785,12 +782,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 
 	//// Spawn mesh for testing purposes
-	//if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
-	//	set_falling_knives(true);
-	//}
-	//if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
-	//	set_falling_knives(false);
-	//}
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && m_mode == PVP && selected_stage == KITCHEN) {
+		set_falling_knives(true);
+	}
+	if (action == GLFW_PRESS && key == GLFW_KEY_Z && m_mode == PVP && selected_stage == KITCHEN) {
+		set_falling_knives(false);
+	}
 }
 
 
@@ -852,6 +849,7 @@ bool World::set_mode(GameMode mode) {
 	m_player2.set_in_play(false);
 	m_game_over = false;
 	m_bg.set_game_over(false, "");
+	m_bg.warningText = "";
 	clear_all_fighters();
 	m_attacks.clear();
 	m_falling_knives_on = false;
@@ -868,7 +866,7 @@ bool World::set_mode(GameMode mode) {
 
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
-	std::cout << "selected stage: " << selected_stage << std::endl;
+	//std::cout << "selected stage: " << selected_stage << std::endl;
 
 	switch (mode) {
 		case MENU:
@@ -945,13 +943,20 @@ bool World::set_mode(GameMode mode) {
 }
 
 void World::init_stage(Stage stage) {
-	for (auto &platform : m_platforms) {
-		platform.destroy();
+	//for (auto &platform : m_platforms) {
+	//	platform.destroy();
+	//}
+	//m_platforms.clear();
+	if (m_platforms.size() == 0) {
+		spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
 	}
-	m_platforms.clear();
+	while (m_platforms.size() > 1) {
+		m_platforms.pop_back(); // memory leak? should destruct on pop
+	}
+	
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 447, 155, 8); //left cupboard platform
@@ -960,7 +965,7 @@ void World::init_stage(Stage stage) {
 			break;
 			}
 		case OVEN: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 447, 155, 8); //left cupboard platform
@@ -969,13 +974,13 @@ void World::init_stage(Stage stage) {
 			break;
 		}
 		case MENUBORDER: {
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
 			//spawn_platform(0, 200, 1200, 8); //title underline
-			spawn_platform(0, 635, 1200, 8); //main platform
 			break;
 		}
 		default: {
-			spawn_platform(0, 635, 1200, 8); //main platform
+			//spawn_platform(0, 635, 1200, 8); //main platform
 			break;
 		}
 	}
@@ -1115,15 +1120,16 @@ bool World::is_game_over() {
 }
 
 void World::set_falling_knives(bool on) {
-	std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
-
+	//std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
+	if (on && m_knives.size() > 0) { return; } // TEST
 	if (m_falling_knives_on == on) { return; }
 	if (on) {
-		printf("knife");
-		for (auto &k : m_knives) {
-			k.destroy();
-		}
-		m_knives.clear();
+		//printf("knife");
+		//for (auto &k : m_knives) {
+		//	k.destroy();
+		//}
+		//m_knives.clear();
+
 		m_stage_fx_time = glfwGetTime();
 		Knife k0, k1, k2, k3;
 		k0.spawn_knife(10, { 400.f, -50.f });
@@ -1137,6 +1143,7 @@ void World::set_falling_knives(bool on) {
 		m_knives.emplace_back(k1);
 		m_knives.emplace_back(k2);
 		m_knives.emplace_back(k3);
+		m_bg.warningText = "!!!";
 	} else {
 		for (auto &k : m_knives) {
 			k.m_done = true;

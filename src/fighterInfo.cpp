@@ -135,13 +135,13 @@ void FighterInfo::setInfo(FighterCharacter fc, int strength, int speed, int heal
 
 void load_fighter_templates() {
 	FighterInfo potato, broccoli, eggplant, yam;
-	potato.setInfo(POTATO, 5, 2, 100, "solanum tuberosum", { "Spud", "PoeTatum", "BabyTater", "TaterHater" }, "Fry bullets, wedge bombs");
+	potato.setInfo(POTATO, 5, 2, 100, "solanum tuberosum", { "Spud", "PoeTatum", "BabyTater", "TaterHater" }, "Fry bullets, Tater tot bombs");
 	fighterMap[POTATO] = potato;
-	broccoli.setInfo(BROCCOLI, 3, 3, 100, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" }, "Bouncy sprouts, uppercut, double-jump");
+	broccoli.setInfo(BROCCOLI, 3, 3, 100, "brassica oleracea", { "BrockLee", "Sprout", "BrockNRoll", "BroccOn" }, "Bouncy cauliflower, uppercut, double-jump");
 	fighterMap[BROCCOLI] = broccoli;
 	eggplant.setInfo(EGGPLANT, 4, 2, 100, "solanum melongena", { "Eggsy", "Aubergine", "PurpleCuke", "Thirsty" }, "Circling emojis, emoji bullets");
 	fighterMap[EGGPLANT] = eggplant;
-	yam.setInfo(YAM, 3, 5, 80, "ipomoea batatas", { "YamaJama", "MamaYama", "SweetzSpud", "SkinnyPotato" }, "Heal, gap closure");
+	yam.setInfo(YAM, 3, 5, 80, "ipomoea batatas", { "YamaJama", "MamaYama", "SweetzSpud", "SkinnyPotato" }, "Heal, dash");
 	fighterMap[YAM] = yam;
 	fprintf(stderr, "Loaded fighter templates\n");
 }
