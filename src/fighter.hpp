@@ -37,6 +37,8 @@ class Fighter : public Renderable
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
 
+	void block(float ms);
+
 	//get collision object for punch
 	Punch * punch();
 

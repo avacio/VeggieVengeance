@@ -18,8 +18,6 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	set_sprite(ORIGINAL);
 
 	// The position corresponds to the center of the texture
-	//float wr = fighter_texture.width * 3.5f;
-	//float hr = fighter_texture.height * 3.5f;
 	float wr = f_texture.width * 0.5f;
 	float hr = f_texture.height * 0.5f;
 
@@ -140,17 +138,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	vec2 oldPos = m_position;
 	Attack * attack = NULL;
 
-	//BLOCKING 
-	//Deplete blocking tank if blocking
-	if (m_is_blocking) {
-		m_blocking_tank -= ms;
-	}
-	//Stop blocking if blocking tank is empty
-	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
-	//Recharche blocking tank
-	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
-		m_blocking_tank += ms;
-	}
+	block(ms);
 
 	die();	
 	check_respawn(ms);
@@ -535,8 +523,6 @@ void Fighter::draw(const mat3 &projection)
 			}
 		}
 	}
-	
-
 	else if (!get_alive())
 	{
 		set_sprite(DEATH);
@@ -1427,4 +1413,17 @@ void Fighter::reset_eggplant_flags() {
 	m_eggplant_shoot_emoji = false;
 	m_eggplant_spawn_cooldown = 0.0;
 	clear_emojis();
+}
+
+void Fighter::block(float ms) {
+	//Deplete blocking tank if blocking
+	if (m_is_blocking) {
+		m_blocking_tank -= ms;
+	}
+	//Stop blocking if blocking tank is empty
+	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
+	//Recharche blocking tank
+	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
+		m_blocking_tank += ms;
+	}
 }
