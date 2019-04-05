@@ -20,7 +20,7 @@
 
 class Fighter : public Renderable
 {
-	// Shared between all bubbles, no need to load one for each instance
+	// Shared between all fighters, no need to load one for each instance
 	static Texture f_texture;
 
   public:
@@ -52,12 +52,13 @@ class Fighter : public Renderable
 	//get collision object for emoji
 	Emoji * emoji();
 
-	// Returns the current bubble position
+	// Returns the current fighter position
 	vec2 get_position() const;
 
-	// Sets the new bubble position
+	// Sets the new fighter position
 	void set_position(vec2 position);
 
+	// move current position by given offset
 	void move(vec2 off);
 
 	// Set fighter's movements
@@ -97,8 +98,6 @@ class Fighter : public Renderable
 	FighterCharacter get_fc() const;
 	void set_sprite(SpriteType st) const;
 
-
-	//void jump_update();
 	void apply_friction();
 
 	void x_position_update(float added_speed, float ms, std::vector<Platform> platforms);
@@ -241,10 +240,14 @@ class Fighter : public Renderable
 	bool m_potato_fries_on_cooldown = false;
 	float m_potato_holding_fries_timer = 0;
 	float m_potato_fries_cooldown = 0;
+	//CONSTANTS
+	const float POTATO_MAX_FRIES_COOLDOWN = 100.0;
+	const float POTATO_MAX_BOMB_COOLDOWN = 300.0;
+	const float POTATO_MAX_BOMB_TIMER = 500.0;
 	
 	
 
-	// broccoli states
+	// BROCCOLI states
 	// PASSIVE: Double Jump
 	bool m_broccoli_is_double_jumping = false;
 	int m_broccoli_jump_left = 2;
@@ -259,6 +262,13 @@ class Fighter : public Renderable
 	bool m_broccoli_cauliflowers_on_cooldown = false;
 	float m_broccoli_holding_cauliflowers_timer = 0;
 	float m_broccoli_cauliflowers_cooldown = 0;
+	// CONSTANTS
+	const float  BROCCOLI_MAX_UPPERCUT_COOLDOWN = 200.0;
+	const float BROCCOLI_UPPERCUT_VERT_VELO = 500.0;
+	const float BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN = 100.0;
+	const unsigned int BROCCOLI_MAX_CAULIFLOWERS_ON_SCREEN = 5;
+	const float MAX_CAULIFLOWERS_VELOCITY = 20;
+	const float CAULIFLOWERS_CHARGE_RATE = 0.5;
 
 	// yam states
 	bool m_yam_is_healing = false;
@@ -296,6 +306,12 @@ class Fighter : public Renderable
 	const float INITIAL_JUMP_VELOCITY = 400.0;
 	const float TERMINAL_VELOCITY_Y = 400.0;
 	const vec2 GRAVITY = {0.0, 800.0};
+	const int MAX_POWER_PUNCH_DMG = 49;		// +1 (original strength)  !!!FIX THIS, IT DOESNT TAKE INTO ACCOUNT THE FIGHTER TYPE
+	const float POWER_PUNCH_CHARGE_RATE = 0.5;
+	const float MAX_PUNCH_COOLDOWN = 20.0;
+	const int FULL_BLOCK_TANK = 4000;
+	const float STATUS_TIRED_OUT_TIME = 80.0;
+
 
 	const unsigned int m_id; //unique identifier given when created
 
