@@ -171,6 +171,9 @@ class Fighter : public Renderable
 	//Eggplant
 	void reset_eggplant_flags();
 	void clear_emojis();
+	void eggplant_emoji_update();
+	Emoji * eggplant_spawn_emoji_update(float ms);
+	void eggplant_projectile_update(float ms);
 
 	//Yam
 	void reset_yam_flags();

@@ -312,66 +312,19 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		if (dashPtr != NULL) {
 			attack = dashPtr;
 		}
-		
-		//YAM
 		//Ability 2: Heal
 		yam_heal_update(ms);
 
-
-		//EGGPLANT
-		//Ability 1: Circling emojis
-		for (int i = 0; i < m_eggplant_emojis.size(); i++) {
-			//emoji update function
-			// check for out-of-play emojis and remove
-			if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
-				// this means it has been removed in the collision loop and we should remove it too!
-				m_eggplant_emojis[i]->deincrement_pointer_references();
-				delete m_eggplant_emojis[i];
-				m_eggplant_emojis[i] = NULL;
-				m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
-				i--;
-				m_eggplant_emoji_count--;
-			}
-			else {
-				//otherwise, they are in play, and you will want to provide them your location
-				m_eggplant_emojis[i]->set_fighter_pos(m_position);
-			}
+		// EGGPLANT
+		// Emoji update loop
+		eggplant_emoji_update();
+		// Ability 1: Circling emojis
+		Emoji * emojiPtr = eggplant_spawn_emoji_update(ms);
+		if (emojiPtr != NULL) {
+			attack = emojiPtr;
 		}
-		if (m_eggplant_spawn_emoji) {				
-			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
-				Emoji * e = emoji();
-				attack = e;	
-				m_eggplant_emojis.push_back(e);
-				e->increment_pointer_references();
-				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
-				m_eggplant_emoji_count++;
-			}
-			m_eggplant_spawn_emoji = false;
-		}
-		if (m_eggplant_spawn_cooldown > 0.0) {
-			m_eggplant_spawn_cooldown -= ms;
-		}
-
-		//EGGPLANT
 		//Ability 2: Emoji projectile
-		if (m_eggplant_shoot_emoji) {
-			if (m_eggplant_emoji_count > 0) {
-				Emoji * e = NULL;
-				// search for the first circling emoji, if any
-				for (int i = 0; i < m_eggplant_emojis.size(); i++) {
-					if (m_eggplant_emojis[i]->is_circling()) {
-						e = m_eggplant_emojis[i];
-						break;
-					}
-				}
-				if (e != NULL) 
-					e->fire_emoji(m_facing_front);
-			}
-			m_eggplant_shoot_emoji = false;
-		}
-		if (m_eggplant_shoot_cooldown > 0.0) {
-			m_eggplant_shoot_cooldown -= ms;
-		}
+		eggplant_projectile_update(ms);
 
 	}
 	else
@@ -1439,5 +1392,65 @@ void Fighter::yam_heal_update(float ms) {
 	}
 	if (m_yam_heal_animation_ms > 0.0) {
 		m_yam_heal_animation_ms -= ms;
+	}
+}
+
+void Fighter::eggplant_emoji_update() {
+	for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+		//emoji update function
+		// check for out-of-play emojis and remove
+		if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
+			// this means it has been removed in the collision loop and we should remove it too!
+			m_eggplant_emojis[i]->deincrement_pointer_references();
+			delete m_eggplant_emojis[i];
+			m_eggplant_emojis[i] = NULL;
+			m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
+			i--;
+			m_eggplant_emoji_count--;
+		}
+		else {
+			//otherwise, they are in play, and you will want to provide them your location
+			m_eggplant_emojis[i]->set_fighter_pos(m_position);
+		}
+	}
+}
+
+Emoji * Fighter::eggplant_spawn_emoji_update(float ms) {
+	Emoji * e = NULL;
+	if (m_eggplant_spawn_emoji) {
+		if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
+			e = emoji();
+			m_eggplant_emojis.push_back(e);
+			e->increment_pointer_references();
+			m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
+			m_eggplant_emoji_count++;
+		}
+		m_eggplant_spawn_emoji = false;
+	}
+	if (m_eggplant_spawn_cooldown > 0.0) {
+		m_eggplant_spawn_cooldown -= ms;
+	}
+
+	return e;
+}
+
+void Fighter::eggplant_projectile_update(float ms) {
+	if (m_eggplant_shoot_emoji) {
+		if (m_eggplant_emoji_count > 0) {
+			Emoji * e = NULL;
+			// search for the first circling emoji, if any
+			for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+				if (m_eggplant_emojis[i]->is_circling()) {
+					e = m_eggplant_emojis[i];
+					break;
+				}
+			}
+			if (e != NULL)
+				e->fire_emoji(m_facing_front);
+		}
+		m_eggplant_shoot_emoji = false;
+	}
+	if (m_eggplant_shoot_cooldown > 0.0) {
+		m_eggplant_shoot_cooldown -= ms;
 	}
 }
