@@ -150,37 +150,11 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		x_position_update(added_speed, ms, platforms);
 
 		// GENERAL
-		// Punch
-		if (m_is_punching && !m_punch_on_cooldown)
-		{
-			//save collision object from punch
-			attack = punch();
-			m_punch_on_cooldown = true;
+		Attack * punchPtr = punch_update();
+		if (punchPtr != NULL) {
+			attack = punchPtr;
 		}
-		if (m_punch_on_cooldown) {
-			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
-				m_punch_on_cooldown = false;
-				punching_cooldown = 0;
-			}
-			else
-				punching_cooldown++;
-		}
-		// Power punch
-		else if (m_is_holding_power_punch) 
-			charging_up_power_punch();
-		else if (m_is_power_punching) {
-			attack = powerPunch();
-			m_holding_power_punch_timer = 0;
-		}
-		// Tired out status
-		if (m_tired_out) {
-			if (m_tired_out_timer < STATUS_TIRED_OUT_TIME)
-				m_tired_out_timer += 0.5;
-			else {
-				m_tired_out_timer = 0;
-				m_tired_out = false;
-			}
-		}
+		tired_status_update();
 
 		// POTATO UPDATE
 		Attack * potatoPtr = potato_update();
@@ -1515,4 +1489,43 @@ Bomb * Fighter::potato_bomb_update() {
 	}
 
 	return b;
+}
+
+void Fighter::tired_status_update() {
+	if (m_tired_out) {
+		if (m_tired_out_timer < STATUS_TIRED_OUT_TIME)
+			m_tired_out_timer += 0.5;
+		else {
+			m_tired_out_timer = 0;
+			m_tired_out = false;
+		}
+	}
+}
+
+Attack * Fighter::punch_update() {
+	Attack * attack = NULL;
+	// Punch
+	if (m_is_punching && !m_punch_on_cooldown)
+	{
+		//save collision object from punch
+		attack = punch();
+		m_punch_on_cooldown = true;
+	}
+	if (m_punch_on_cooldown) {
+		if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
+			m_punch_on_cooldown = false;
+			punching_cooldown = 0;
+		}
+		else
+			punching_cooldown++;
+	}
+	// Power punch
+	else if (m_is_holding_power_punch)
+		charging_up_power_punch();
+	else if (m_is_power_punching) {
+		attack = powerPunch();
+		m_holding_power_punch_timer = 0;
+	}
+
+	return attack;
 }

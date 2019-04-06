@@ -189,8 +189,10 @@ class Fighter : public Renderable
 	Dash * yam_dash_update(float ms);
 	void yam_heal_update(float ms);
 
-	// Helpers 
+	// Helpers
+	Attack * punch_update();
 	void charging_up_power_punch();
+	void tired_status_update();
 
   protected:
   	int MAX_HEALTH;
@@ -260,8 +262,6 @@ class Fighter : public Renderable
 	const float POTATO_MAX_FRIES_COOLDOWN = 100.0;
 	const float POTATO_MAX_BOMB_COOLDOWN = 300.0;
 	const float POTATO_MAX_BOMB_TIMER = 500.0;
-	
-	
 
 	// BROCCOLI states
 	// PASSIVE: Double Jump
