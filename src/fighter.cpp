@@ -252,50 +252,10 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_potato_bomb_cooldown++;
 		}
 
-		
-		// BROCCOLI
-		// Passive: Double Jump
-		if (m_broccoli_is_double_jumping && m_broccoli_jump_left == 1) {
-			m_velocity_y = -INITIAL_JUMP_VELOCITY;
-			m_is_jumping = false;
-			m_broccoli_jump_left = 0;
-			m_broccoli_is_double_jumping = false;
-		}
-		// Ability 1: Uppercut
-		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
-			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
-			attack = broccoliUppercut();
-			m_broccoli_uppercut_on_cooldown = true;
-		}
-		if (m_broccoli_uppercut_on_cooldown) {
-			if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
-				m_broccoli_uppercut_on_cooldown = false;
-				m_broccoli_uppercut_cooldown = 0;
-			}
-			else
-				m_broccoli_uppercut_cooldown++;
-		}
-
-		// ABILITY 2: Cauliflower (projectile)
-		if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
-		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
-			m_broccoli_cauliflowers_on_cooldown = true;
-			m_holding_too_much_timer = 0;
-			m_broccoli_holding_cauliflowers_timer = 0;
-			m_broccoli_is_shooting_charged_cauliflowers = false;
-		}
-		else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
-			m_broccoli_cauliflowers_on_cooldown = true;
-		}
-		if (m_broccoli_cauliflowers_on_cooldown) {
-			if (m_broccoli_cauliflowers_cooldown >= BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN) {
-				m_broccoli_cauliflowers_on_cooldown = false;
-				m_broccoli_cauliflowers_cooldown = 0;
-			}
-			else
-				m_broccoli_cauliflowers_cooldown++;
+		// BROCCOLI UPDATE
+		Attack * attackPtr = broccoli_update();
+		if (attackPtr != NULL) {
+			attack = attackPtr;
 		}
 
 		//YAM UPDATE
@@ -1453,4 +1413,76 @@ Dash * Fighter::yam_update(float ms) {
 	yam_heal_update(ms);
 
 	return dashPtr;
+}
+
+Attack * Fighter::broccoli_update() {
+	Attack * attack = NULL;
+	// Passive: Double Jump
+	broccoli_double_jump_update();
+	// Ability 1: Uppercut
+	Uppercut * uppercutPtr = broccoli_uppercut_update();
+	if (uppercutPtr != NULL) {
+		attack = uppercutPtr;
+	}
+	// ABILITY 2: Cauliflower (projectile)
+	Projectile * projectilePtr = broccoli_projectile_update();
+	if (projectilePtr != NULL) {
+		attack = projectilePtr;
+	}
+
+	return attack;
+}
+
+void Fighter::broccoli_double_jump_update() {
+	if (m_broccoli_is_double_jumping && m_broccoli_jump_left == 1) {
+		m_velocity_y = -INITIAL_JUMP_VELOCITY;
+		m_is_jumping = false;
+		m_broccoli_jump_left = 0;
+		m_broccoli_is_double_jumping = false;
+	}
+}
+
+Uppercut * Fighter::broccoli_uppercut_update() {
+	Uppercut * u = NULL;
+	if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+		m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
+		u = broccoliUppercut();
+		m_broccoli_uppercut_on_cooldown = true;
+	}
+	if (m_broccoli_uppercut_on_cooldown) {
+		if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
+			m_broccoli_uppercut_on_cooldown = false;
+			m_broccoli_uppercut_cooldown = 0;
+		}
+		else
+			m_broccoli_uppercut_cooldown++;
+	}
+
+	return u;
+}
+
+Projectile * Fighter::broccoli_projectile_update() {
+	Projectile * p = NULL;
+	if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
+	else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		p = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
+		m_broccoli_cauliflowers_on_cooldown = true;
+		m_holding_too_much_timer = 0;
+		m_broccoli_holding_cauliflowers_timer = 0;
+		m_broccoli_is_shooting_charged_cauliflowers = false;
+	}
+	else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		p = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
+		m_broccoli_cauliflowers_on_cooldown = true;
+	}
+	if (m_broccoli_cauliflowers_on_cooldown) {
+		if (m_broccoli_cauliflowers_cooldown >= BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN) {
+			m_broccoli_cauliflowers_on_cooldown = false;
+			m_broccoli_cauliflowers_cooldown = 0;
+		}
+		else
+			m_broccoli_cauliflowers_cooldown++;
+	}
+
+	return p;
 }

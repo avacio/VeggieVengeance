@@ -161,6 +161,10 @@ class Fighter : public Renderable
 	void reset_potato_flags();
 
 	// Broccoli
+	Attack * broccoli_update();
+	void broccoli_double_jump_update();
+	Uppercut * broccoli_uppercut_update();
+	Projectile * broccoli_projectile_update();
 	bool broccoli_get_jump_left();
 	void broccoli_set_double_jump();
 	bool broccoli_is_uppercut_on_cooldown();
