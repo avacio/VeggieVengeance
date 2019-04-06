@@ -182,80 +182,16 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 			}
 		}
 
-		// POTATO
-		// ABILTIY 1: Fries  (bullet) 
+		// POTATO UPDATE
+		Attack * potatoPtr = potato_update();
+		if (potatoPtr != NULL) {
+			attack = potatoPtr;
+		}
 		
-		if (m_potato_is_holding_fries) potato_charging_up_fries();
-		else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
-			m_potato_fries_on_cooldown = true;
-			m_holding_too_much_timer = 0;
-			m_potato_holding_fries_timer = 0;
-			m_potato_is_shooting_charged_fries = false;
-		}
-		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
-			m_potato_fries_on_cooldown = true;
-		}
-		if (m_potato_fries_on_cooldown) {
-			if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
-				m_potato_fries_on_cooldown = false;
-				m_potato_fries_cooldown = 0;
-			}
-			else
-				m_potato_fries_cooldown++;
-		}
-
-		// ABILITY 2: Tater Tot Bombs	
-		if (bomb_pointer != NULL) {
-			if (bomb_pointer->get_pointer_references() == 1) {
-				bomb_pointer->deincrement_pointer_references();
-				Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
-				delete bomb_pointer;
-				bomb_pointer = NULL;
-				m_potato_bomb_on_cooldown = true;
-				m_potato_bomb_planted = false;
-			}
-		}
-		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
-			bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
-			attack = bomb_pointer;
-			bomb_pointer->increment_pointer_references();
-			m_potato_bomb_ticking = true;
-			m_potato_bomb_planted = true;
-		}
-		if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
-			bomb_pointer->m_damageEffect->m_hit_fighter = true;
-			bomb_pointer->deincrement_pointer_references();
-			if (bomb_pointer->get_pointer_references() == 0) delete bomb_pointer;
-			bomb_pointer = NULL;
-			m_potato_bomb_on_cooldown = true;
-			m_potato_bomb_planted = false;
-			m_potato_bomb_ticking = false;
-			m_potato_bomb_selftimer = 0;
-		}	
-		if (m_potato_bomb_ticking) {
-			if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
-				m_potato_bomb_ticking = false;
-				m_potato_bomb_on_cooldown = true;
-				m_potato_bomb_selftimer = 0;
-			}
-			else
-				m_potato_bomb_selftimer++;
-		}
-		if (m_potato_bomb_on_cooldown) {
-			if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
-				m_potato_bomb_on_cooldown = false;
-				m_potato_bomb_cooldown = 0;
-			} else
-				m_potato_bomb_cooldown++;
-		}
-
 		// BROCCOLI UPDATE
-		Attack * attackPtr = broccoli_update();
-		if (attackPtr != NULL) {
-			attack = attackPtr;
+		Attack * broccoliPtr = broccoli_update();
+		if (broccoliPtr != NULL) {
+			attack = broccoliPtr;
 		}
 
 		//YAM UPDATE
@@ -1485,4 +1421,98 @@ Projectile * Fighter::broccoli_projectile_update() {
 	}
 
 	return p;
+}
+
+Attack * Fighter::potato_update() {
+	Attack * attack = NULL;
+	// ABILTIY 1: Fries  (bullet) 
+	Bullet * bulletPtr = potato_bullet_update();
+	if (bulletPtr != NULL) {
+		attack = bulletPtr;
+	}
+	// ABILITY 2: Tater Tot Bombs
+	Bomb * bombPtr = potato_bomb_update();
+	if (bombPtr != NULL) {
+		attack = bombPtr;
+	}
+
+	return attack;
+}
+
+Bullet * Fighter::potato_bullet_update() {
+	Bullet * b = NULL;
+
+	if (m_potato_is_holding_fries) potato_charging_up_fries();
+	else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
+		b = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
+		m_potato_fries_on_cooldown = true;
+		m_holding_too_much_timer = 0;
+		m_potato_holding_fries_timer = 0;
+		m_potato_is_shooting_charged_fries = false;
+	}
+	else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
+		b = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
+		m_potato_fries_on_cooldown = true;
+	}
+	if (m_potato_fries_on_cooldown) {
+		if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
+			m_potato_fries_on_cooldown = false;
+			m_potato_fries_cooldown = 0;
+		}
+		else
+			m_potato_fries_cooldown++;
+	}
+
+	return b;
+}
+
+Bomb * Fighter::potato_bomb_update() {
+	Bomb * b = NULL;
+	if (bomb_pointer != NULL) {
+		if (bomb_pointer->get_pointer_references() == 1) {
+			bomb_pointer->deincrement_pointer_references();
+			Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+			delete bomb_pointer;
+			bomb_pointer = NULL;
+			m_potato_bomb_on_cooldown = true;
+			m_potato_bomb_planted = false;
+		}
+	}
+	else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
+		bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
+		b = bomb_pointer;
+		bomb_pointer->increment_pointer_references();
+		m_potato_bomb_ticking = true;
+		m_potato_bomb_planted = true;
+	}
+	if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
+		Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+		bomb_pointer->m_damageEffect->m_hit_fighter = true;
+		bomb_pointer->deincrement_pointer_references();
+		if (bomb_pointer->get_pointer_references() == 0) delete bomb_pointer;
+		bomb_pointer = NULL;
+		m_potato_bomb_on_cooldown = true;
+		m_potato_bomb_planted = false;
+		m_potato_bomb_ticking = false;
+		m_potato_bomb_selftimer = 0;
+	}
+	if (m_potato_bomb_ticking) {
+		if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
+			m_potato_bomb_ticking = false;
+			m_potato_bomb_on_cooldown = true;
+			m_potato_bomb_selftimer = 0;
+		}
+		else
+			m_potato_bomb_selftimer++;
+	}
+	if (m_potato_bomb_on_cooldown) {
+		if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
+			m_potato_bomb_on_cooldown = false;
+			m_potato_bomb_cooldown = 0;
+		}
+		else
+			m_potato_bomb_cooldown++;
+	}
+
+	return b;
 }

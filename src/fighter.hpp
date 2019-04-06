@@ -156,6 +156,9 @@ class Fighter : public Renderable
 
 	FighterCharacter m_fc;
 	// Potato
+	Attack * potato_update();
+	Bullet * potato_bullet_update();
+	Bomb * potato_bomb_update();
 	bool potato_is_holding_fries() const;
 	void potato_charging_up_fries();
 	void reset_potato_flags();
