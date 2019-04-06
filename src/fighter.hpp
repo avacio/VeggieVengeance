@@ -169,6 +169,7 @@ class Fighter : public Renderable
 	void reset_broccoli_flags();
 	
 	//Eggplant
+	Emoji * eggplant_update(float ms);
 	void reset_eggplant_flags();
 	void clear_emojis();
 	void eggplant_emoji_update();
@@ -176,6 +177,7 @@ class Fighter : public Renderable
 	void eggplant_projectile_update(float ms);
 
 	//Yam
+	Dash * yam_update(float ms);
 	void reset_yam_flags();
 	Dash * yam_dash_update(float ms);
 	void yam_heal_update(float ms);

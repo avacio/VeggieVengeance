@@ -306,26 +306,18 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 				m_broccoli_cauliflowers_cooldown++;
 		}
 
-		//YAM
-		//Ability 1: Dash
-		Dash * dashPtr = yam_dash_update(ms);
+		//YAM UPDATE
+		Dash * dashPtr = yam_update(ms);
 		if (dashPtr != NULL) {
 			attack = dashPtr;
 		}
-		//Ability 2: Heal
-		yam_heal_update(ms);
 
-		// EGGPLANT
-		// Emoji update loop
-		eggplant_emoji_update();
-		// Ability 1: Circling emojis
-		Emoji * emojiPtr = eggplant_spawn_emoji_update(ms);
+		// EGGPLANT UPDATE
+		Emoji * emojiPtr = eggplant_update(ms);
 		if (emojiPtr != NULL) {
 			attack = emojiPtr;
 		}
-		//Ability 2: Emoji projectile
-		eggplant_projectile_update(ms);
-
+		
 	}
 	else
 	{
@@ -1453,4 +1445,25 @@ void Fighter::eggplant_projectile_update(float ms) {
 	if (m_eggplant_shoot_cooldown > 0.0) {
 		m_eggplant_shoot_cooldown -= ms;
 	}
+}
+
+Emoji * Fighter::eggplant_update(float ms) {
+	Emoji * emojiPtr = NULL;
+	// Emoji update loop
+	eggplant_emoji_update();
+	// Ability 1: Circling emojis
+	emojiPtr = eggplant_spawn_emoji_update(ms);
+	//Ability 2: Emoji projectile
+	eggplant_projectile_update(ms);
+	return emojiPtr;
+}
+
+Dash * Fighter::yam_update(float ms) {
+	Dash * dashPtr = NULL;
+	//Ability 1: Dash
+	dashPtr = yam_dash_update(ms);
+	//Ability 2: Heal
+	yam_heal_update(ms);
+
+	return dashPtr;
 }
