@@ -144,18 +144,10 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	check_respawn(ms);
 
 	if(m_is_alive){
-		if (m_crouch_state == CROUCH_PRESSED)
-		{
-			m_crouch_state = IS_CROUCHING;
-		}
-		if (m_crouch_state == CROUCH_RELEASED)
-		{
-			m_crouch_state = NOT_CROUCHING;
-		}
+		crouch_update();
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
 		x_position_update(added_speed, ms, platforms);
-		crouch_update();
 
 		// GENERAL
 		// Punch
@@ -317,7 +309,6 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		if (emojiPtr != NULL) {
 			attack = emojiPtr;
 		}
-		
 	}
 	else
 	{
@@ -770,14 +761,10 @@ void Fighter::x_position_update(float added_speed, float ms, std::vector<Platfor
 void Fighter::crouch_update() {
 	if (m_crouch_state == CROUCH_PRESSED)
 	{
-		m_scale.y = 0.1f;
-		m_position.y += 25.f;
 		m_crouch_state = IS_CROUCHING;
 	}
 	if (m_crouch_state == CROUCH_RELEASED)
 	{
-		m_scale.y = 0.2f;
-		m_position.y -= 25.f;
 		m_crouch_state = NOT_CROUCHING;
 	}
 }
