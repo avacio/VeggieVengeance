@@ -2,24 +2,6 @@
 #include "fighter.hpp"
 
 #define _USE_MATH_DEFINES
-#define MAX_POWER_PUNCH_DMG 49		// +1 (original strength)
-#define POWER_PUNCH_CHARGE_RATE 0.5
-#define MAX_PUNCH_COOLDOWN 20
-#define FULL_BLOCK_TANK 4000
-#define STATUS_TIRED_OUT_TIME 80
-// POTATO
-#define POTATO_MAX_FRIES_COOLDOWN 100
-#define POTATO_MAX_BOMB_COOLDOWN 300
-#define POTATO_MAX_BOMB_TIMER 500
-
-// BROCCOLI
-#define BROCCOLI_MAX_UPPERCUT_COOLDOWN 200
-#define BROCCOLI_UPPERCUT_VERT_VELO 500
-#define BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN 100
-#define BROCCOLI_MAX_CAULIFLOWERS_ON_SCREEN 5
-#define MAX_CAULIFLOWERS_VELOCITY 20
-#define CAULIFLOWERS_CHARGE_RATE 0.5
-
 
 #include <math.h>
 #include <cmath>
@@ -36,8 +18,6 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	set_sprite(ORIGINAL);
 
 	// The position corresponds to the center of the texture
-	//float wr = fighter_texture.width * 3.5f;
-	//float hr = fighter_texture.height * 3.5f;
 	float wr = f_texture.width * 0.5f;
 	float hr = f_texture.height * 0.5f;
 
@@ -158,290 +138,47 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	vec2 oldPos = m_position;
 	Attack * attack = NULL;
 
-	//BLOCKING 
-	//Deplete blocking tank if blocking
-	if (m_is_blocking) {
-		m_blocking_tank -= ms;
-	}
-	//Stop blocking if blocking tank is empty
-	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
-	//Recharche blocking tank
-	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
-		m_blocking_tank += ms;
-	}
+	block(ms);
 
 	die();	
 	check_respawn(ms);
 
 	if(m_is_alive){
-		if (m_crouch_state == CROUCH_PRESSED)
-		{
-			m_crouch_state = IS_CROUCHING;
-		}
-		if (m_crouch_state == CROUCH_RELEASED)
-		{
-			m_crouch_state = NOT_CROUCHING;
-		}
+		crouch_update();
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
 		x_position_update(added_speed, ms, platforms);
-		crouch_update();
 
 		// GENERAL
-		// Punch
-		if (m_is_punching && !m_punch_on_cooldown)
-		{
-			//save collision object from punch
-			attack = punch();
-			m_punch_on_cooldown = true;
+		Attack * punchPtr = punch_update();
+		if (punchPtr != NULL) {
+			attack = punchPtr;
 		}
-		if (m_punch_on_cooldown) {
-			if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
-				m_punch_on_cooldown = false;
-				punching_cooldown = 0;
-			}
-			else
-				punching_cooldown++;
-		}
-		// Power punch
-		else if (m_is_holding_power_punch) 
-			charging_up_power_punch();
-		else if (m_is_power_punching) {
-			attack = powerPunch();
-			m_holding_power_punch_timer = 0;
-		}
-		// Tired out status
-		if (m_tired_out) {
-			if (m_tired_out_timer < STATUS_TIRED_OUT_TIME)
-				m_tired_out_timer += 0.5;
-			else {
-				m_tired_out_timer = 0;
-				m_tired_out = false;
-			}
-		}
+		tired_status_update();
 
-		// POTATO
-		// ABILTIY 1: Fries  (bullet) 
+		// POTATO UPDATE
+		Attack * potatoPtr = potato_update();
+		if (potatoPtr != NULL) {
+			attack = potatoPtr;
+		}
 		
-		if (m_potato_is_holding_fries) potato_charging_up_fries();
-		else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
-			m_potato_fries_on_cooldown = true;
-			m_holding_too_much_timer = 0;
-			m_potato_holding_fries_timer = 0;
-			m_potato_is_shooting_charged_fries = false;
-		}
-		else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
-			attack = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
-			m_potato_fries_on_cooldown = true;
-		}
-		if (m_potato_fries_on_cooldown) {
-			if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
-				m_potato_fries_on_cooldown = false;
-				m_potato_fries_cooldown = 0;
-			}
-			else
-				m_potato_fries_cooldown++;
+		// BROCCOLI UPDATE
+		Attack * broccoliPtr = broccoli_update();
+		if (broccoliPtr != NULL) {
+			attack = broccoliPtr;
 		}
 
-		// ABILITY 2: Tater Tot Bombs	
-		if (bomb_pointer != NULL) {
-			if (bomb_pointer->get_pointer_references() == 1) {
-				bomb_pointer->deincrement_pointer_references();
-				Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
-				delete bomb_pointer;
-				bomb_pointer = NULL;
-				m_potato_bomb_on_cooldown = true;
-				m_potato_bomb_planted = false;
-			}
-		}
-		else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
-			bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
-			attack = bomb_pointer;
-			bomb_pointer->increment_pointer_references();
-			m_potato_bomb_ticking = true;
-			m_potato_bomb_planted = true;
-		}
-		if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
-			Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
-			bomb_pointer->m_damageEffect->m_hit_fighter = true;
-			bomb_pointer->deincrement_pointer_references();
-			if (bomb_pointer->get_pointer_references() == 0) delete bomb_pointer;
-			bomb_pointer = NULL;
-			m_potato_bomb_on_cooldown = true;
-			m_potato_bomb_planted = false;
-			m_potato_bomb_ticking = false;
-			m_potato_bomb_selftimer = 0;
-		}	
-		if (m_potato_bomb_ticking) {
-			if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
-				m_potato_bomb_ticking = false;
-				m_potato_bomb_on_cooldown = true;
-				m_potato_bomb_selftimer = 0;
-			}
-			else
-				m_potato_bomb_selftimer++;
-		}
-		if (m_potato_bomb_on_cooldown) {
-			if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
-				m_potato_bomb_on_cooldown = false;
-				m_potato_bomb_cooldown = 0;
-			} else
-				m_potato_bomb_cooldown++;
+		//YAM UPDATE
+		Dash * dashPtr = yam_update(ms);
+		if (dashPtr != NULL) {
+			attack = dashPtr;
 		}
 
-		
-		// BROCCOLI
-		// Passive: Double Jump
-		if (m_broccoli_is_double_jumping && m_broccoli_jump_left == 1) {
-			m_velocity_y = -INITIAL_JUMP_VELOCITY;
-			m_is_jumping = false;
-			m_broccoli_jump_left = 0;
-			m_broccoli_is_double_jumping = false;
+		// EGGPLANT UPDATE
+		Emoji * emojiPtr = eggplant_update(ms);
+		if (emojiPtr != NULL) {
+			attack = emojiPtr;
 		}
-		// Ability 1: Uppercut
-		else if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
-			m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
-			attack = broccoliUppercut();
-			m_broccoli_uppercut_on_cooldown = true;
-		}
-		if (m_broccoli_uppercut_on_cooldown) {
-			if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
-				m_broccoli_uppercut_on_cooldown = false;
-				m_broccoli_uppercut_cooldown = 0;
-			}
-			else
-				m_broccoli_uppercut_cooldown++;
-		}
-
-		// ABILITY 2: Cauliflower (projectile)
-		if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
-		else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
-			m_broccoli_cauliflowers_on_cooldown = true;
-			m_holding_too_much_timer = 0;
-			m_broccoli_holding_cauliflowers_timer = 0;
-			m_broccoli_is_shooting_charged_cauliflowers = false;
-		}
-		else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
-			attack = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
-			m_broccoli_cauliflowers_on_cooldown = true;
-		}
-		if (m_broccoli_cauliflowers_on_cooldown) {
-			if (m_broccoli_cauliflowers_cooldown >= BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN) {
-				m_broccoli_cauliflowers_on_cooldown = false;
-				m_broccoli_cauliflowers_cooldown = 0;
-			}
-			else
-				m_broccoli_cauliflowers_cooldown++;
-		}
-
-
-		//YAM
-		//Ability 1: Dash
-		if (m_yam_start_dashing) {
-			if (m_yam_dash_cooldown_ms <= 0.0) {
-				m_yam_dash_timer_ms = MAX_DASH_TIMER;
-			}
-			m_yam_start_dashing = false;
-		}
-		if (m_yam_dash_cooldown_ms > 0.0) {
-			m_yam_dash_cooldown_ms -= ms;
-		}
-		if (m_yam_dash_timer_ms > 0.0) {
-			float target_ms_per_frame = 1000.f / 60.f;
-			float speed_scale = ms / target_ms_per_frame;
-			if (!m_moving_backward && !m_moving_forward)
-				speed_scale *= 2.0;
-			if (m_facing_front && m_position.x < 1150.f) {
-				move({ m_speed * speed_scale, 0.0 });
-			}
-			else if (!m_facing_front && m_position.x > 50.f) {
-				move({ -m_speed * speed_scale, 0.0 });
-			}
-			m_yam_dash_timer_ms -= ms;
-			if (m_yam_dash_timer_ms <= 0.0) {
-				m_yam_dash_cooldown_ms = MAX_DASH_COOLDOWN;
-				attack = dash();
-			}
-		}
-
-		//YAM
-		//Ability 2: Heal
-		if (m_yam_is_healing) {
-			if (m_yam_heal_cooldown_ms <= 0.0) {
-				// heal, but don't go over the health cap
-				if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
-				else { m_health = MAX_HEALTH; }
-				//reset cooldown and state
-				m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
-				m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
-			}
-			m_yam_is_healing = false;
-		}
-		if (m_yam_heal_cooldown_ms > 0.0) {
-			m_yam_heal_cooldown_ms -= ms;
-		}
-		if(m_yam_heal_animation_ms > 0.0) {
-			m_yam_heal_animation_ms -= ms;
-		}
-
-
-		//EGGPLANT
-		//Ability 1: Circling emojis
-		for (int i = 0; i < m_eggplant_emojis.size(); i++) {
-			//emoji update function
-			// check for out-of-play emojis and remove
-			if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
-				// this means it has been removed in the collision loop and we should remove it too!
-				m_eggplant_emojis[i]->deincrement_pointer_references();
-				delete m_eggplant_emojis[i];
-				m_eggplant_emojis[i] = NULL;
-				m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
-				i--;
-				m_eggplant_emoji_count--;
-			}
-			else {
-				//otherwise, they are in play, and you will want to provide them your location
-				m_eggplant_emojis[i]->set_fighter_pos(m_position);
-			}
-		}
-		if (m_eggplant_spawn_emoji) {				
-			if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
-				Emoji * e = emoji();
-				attack = e;	
-				m_eggplant_emojis.push_back(e);
-				e->increment_pointer_references();
-				m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
-				m_eggplant_emoji_count++;
-			}
-			m_eggplant_spawn_emoji = false;
-		}
-		if (m_eggplant_spawn_cooldown > 0.0) {
-			m_eggplant_spawn_cooldown -= ms;
-		}
-
-		//EGGPLANT
-		//Ability 2: Emoji projectile
-		if (m_eggplant_shoot_emoji) {
-			if (m_eggplant_emoji_count > 0) {
-				Emoji * e = NULL;
-				// search for the first circling emoji, if any
-				for (int i = 0; i < m_eggplant_emojis.size(); i++) {
-					if (m_eggplant_emojis[i]->is_circling()) {
-						e = m_eggplant_emojis[i];
-						break;
-					}
-				}
-				if (e != NULL) 
-					e->fire_emoji(m_facing_front);
-			}
-			m_eggplant_shoot_emoji = false;
-		}
-		if (m_eggplant_shoot_cooldown > 0.0) {
-			m_eggplant_shoot_cooldown -= ms;
-		}
-
 	}
 	else
 	{
@@ -553,8 +290,6 @@ void Fighter::draw(const mat3 &projection)
 			}
 		}
 	}
-	
-
 	else if (!get_alive())
 	{
 		set_sprite(DEATH);
@@ -896,14 +631,10 @@ void Fighter::x_position_update(float added_speed, float ms, std::vector<Platfor
 void Fighter::crouch_update() {
 	if (m_crouch_state == CROUCH_PRESSED)
 	{
-		m_scale.y = 0.1f;
-		m_position.y += 25.f;
 		m_crouch_state = IS_CROUCHING;
 	}
 	if (m_crouch_state == CROUCH_RELEASED)
 	{
-		m_scale.y = 0.2f;
-		m_position.y -= 25.f;
 		m_crouch_state = NOT_CROUCHING;
 	}
 }
@@ -1445,4 +1176,356 @@ void Fighter::reset_eggplant_flags() {
 	m_eggplant_shoot_emoji = false;
 	m_eggplant_spawn_cooldown = 0.0;
 	clear_emojis();
+}
+
+void Fighter::block(float ms) {
+	//Deplete blocking tank if blocking
+	if (m_is_blocking) {
+		m_blocking_tank -= ms;
+	}
+	//Stop blocking if blocking tank is empty
+	if (m_is_blocking && m_blocking_tank <= 0) set_blocking(false);
+	//Recharche blocking tank
+	if (m_is_alive && m_blocking_tank < FULL_BLOCK_TANK && !m_is_blocking) {
+		m_blocking_tank += ms;
+	}
+}
+
+Dash * Fighter::yam_dash_update(float ms) {
+	Dash * dashPtr = NULL;
+
+	if (m_yam_start_dashing) {
+		if (m_yam_dash_cooldown_ms <= 0.0) {
+			m_yam_dash_timer_ms = MAX_DASH_TIMER;
+		}
+		m_yam_start_dashing = false;
+	}
+	if (m_yam_dash_cooldown_ms > 0.0) {
+		m_yam_dash_cooldown_ms -= ms;
+	}
+	if (m_yam_dash_timer_ms > 0.0) {
+		float target_ms_per_frame = 1000.f / 60.f;
+		float speed_scale = ms / target_ms_per_frame;
+		if (!m_moving_backward && !m_moving_forward)
+			speed_scale *= 2.0;
+		if (m_facing_front && m_position.x < 1150.f) {
+			move({ m_speed * speed_scale, 0.0 });
+		}
+		else if (!m_facing_front && m_position.x > 50.f) {
+			move({ -m_speed * speed_scale, 0.0 });
+		}
+		m_yam_dash_timer_ms -= ms;
+		if (m_yam_dash_timer_ms <= 0.0) {
+			m_yam_dash_cooldown_ms = MAX_DASH_COOLDOWN;
+			dashPtr = dash();
+		}
+	}
+
+	return dashPtr;
+}
+
+void Fighter::yam_heal_update(float ms) {
+	if (m_yam_is_healing) {
+		if (m_yam_heal_cooldown_ms <= 0.0) {
+			// heal, but don't go over the health cap
+			if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
+			else { m_health = MAX_HEALTH; }
+			//reset cooldown and state
+			m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
+			m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;
+		}
+		m_yam_is_healing = false;
+	}
+	if (m_yam_heal_cooldown_ms > 0.0) {
+		m_yam_heal_cooldown_ms -= ms;
+	}
+	if (m_yam_heal_animation_ms > 0.0) {
+		m_yam_heal_animation_ms -= ms;
+	}
+}
+
+void Fighter::eggplant_emoji_update() {
+	for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+		//emoji update function
+		// check for out-of-play emojis and remove
+		if (m_eggplant_emojis[i]->get_pointer_references() == 1) {
+			// this means it has been removed in the collision loop and we should remove it too!
+			m_eggplant_emojis[i]->deincrement_pointer_references();
+			delete m_eggplant_emojis[i];
+			m_eggplant_emojis[i] = NULL;
+			m_eggplant_emojis.erase(m_eggplant_emojis.begin() + i);
+			i--;
+			m_eggplant_emoji_count--;
+		}
+		else {
+			//otherwise, they are in play, and you will want to provide them your location
+			m_eggplant_emojis[i]->set_fighter_pos(m_position);
+		}
+	}
+}
+
+Emoji * Fighter::eggplant_spawn_emoji_update(float ms) {
+	Emoji * e = NULL;
+	if (m_eggplant_spawn_emoji) {
+		if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
+			e = emoji();
+			m_eggplant_emojis.push_back(e);
+			e->increment_pointer_references();
+			m_eggplant_spawn_cooldown = MAX_EMOJI_SPAWN_COOLDOWN;
+			m_eggplant_emoji_count++;
+		}
+		m_eggplant_spawn_emoji = false;
+	}
+	if (m_eggplant_spawn_cooldown > 0.0) {
+		m_eggplant_spawn_cooldown -= ms;
+	}
+
+	return e;
+}
+
+void Fighter::eggplant_projectile_update(float ms) {
+	if (m_eggplant_shoot_emoji) {
+		if (m_eggplant_emoji_count > 0) {
+			Emoji * e = NULL;
+			// search for the first circling emoji, if any
+			for (int i = 0; i < m_eggplant_emojis.size(); i++) {
+				if (m_eggplant_emojis[i]->is_circling()) {
+					e = m_eggplant_emojis[i];
+					break;
+				}
+			}
+			if (e != NULL)
+				e->fire_emoji(m_facing_front);
+		}
+		m_eggplant_shoot_emoji = false;
+	}
+	if (m_eggplant_shoot_cooldown > 0.0) {
+		m_eggplant_shoot_cooldown -= ms;
+	}
+}
+
+Emoji * Fighter::eggplant_update(float ms) {
+	Emoji * emojiPtr = NULL;
+	// Emoji update loop
+	eggplant_emoji_update();
+	// Ability 1: Circling emojis
+	emojiPtr = eggplant_spawn_emoji_update(ms);
+	//Ability 2: Emoji projectile
+	eggplant_projectile_update(ms);
+	return emojiPtr;
+}
+
+Dash * Fighter::yam_update(float ms) {
+	Dash * dashPtr = NULL;
+	//Ability 1: Dash
+	dashPtr = yam_dash_update(ms);
+	//Ability 2: Heal
+	yam_heal_update(ms);
+
+	return dashPtr;
+}
+
+Attack * Fighter::broccoli_update() {
+	Attack * attack = NULL;
+	// Passive: Double Jump
+	broccoli_double_jump_update();
+	// Ability 1: Uppercut
+	Uppercut * uppercutPtr = broccoli_uppercut_update();
+	if (uppercutPtr != NULL) {
+		attack = uppercutPtr;
+	}
+	// ABILITY 2: Cauliflower (projectile)
+	Projectile * projectilePtr = broccoli_projectile_update();
+	if (projectilePtr != NULL) {
+		attack = projectilePtr;
+	}
+
+	return attack;
+}
+
+void Fighter::broccoli_double_jump_update() {
+	if (m_broccoli_is_double_jumping && m_broccoli_jump_left == 1) {
+		m_velocity_y = -INITIAL_JUMP_VELOCITY;
+		m_is_jumping = false;
+		m_broccoli_jump_left = 0;
+		m_broccoli_is_double_jumping = false;
+	}
+}
+
+Uppercut * Fighter::broccoli_uppercut_update() {
+	Uppercut * u = NULL;
+	if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
+		m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
+		u = broccoliUppercut();
+		m_broccoli_uppercut_on_cooldown = true;
+	}
+	if (m_broccoli_uppercut_on_cooldown) {
+		if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
+			m_broccoli_uppercut_on_cooldown = false;
+			m_broccoli_uppercut_cooldown = 0;
+		}
+		else
+			m_broccoli_uppercut_cooldown++;
+	}
+
+	return u;
+}
+
+Projectile * Fighter::broccoli_projectile_update() {
+	Projectile * p = NULL;
+	if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
+	else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		p = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
+		m_broccoli_cauliflowers_on_cooldown = true;
+		m_holding_too_much_timer = 0;
+		m_broccoli_holding_cauliflowers_timer = 0;
+		m_broccoli_is_shooting_charged_cauliflowers = false;
+	}
+	else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
+		p = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
+		m_broccoli_cauliflowers_on_cooldown = true;
+	}
+	if (m_broccoli_cauliflowers_on_cooldown) {
+		if (m_broccoli_cauliflowers_cooldown >= BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN) {
+			m_broccoli_cauliflowers_on_cooldown = false;
+			m_broccoli_cauliflowers_cooldown = 0;
+		}
+		else
+			m_broccoli_cauliflowers_cooldown++;
+	}
+
+	return p;
+}
+
+Attack * Fighter::potato_update() {
+	Attack * attack = NULL;
+	// ABILTIY 1: Fries  (bullet) 
+	Bullet * bulletPtr = potato_bullet_update();
+	if (bulletPtr != NULL) {
+		attack = bulletPtr;
+	}
+	// ABILITY 2: Tater Tot Bombs
+	Bomb * bombPtr = potato_bomb_update();
+	if (bombPtr != NULL) {
+		attack = bombPtr;
+	}
+
+	return attack;
+}
+
+Bullet * Fighter::potato_bullet_update() {
+	Bullet * b = NULL;
+
+	if (m_potato_is_holding_fries) potato_charging_up_fries();
+	else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
+		b = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
+		m_potato_fries_on_cooldown = true;
+		m_holding_too_much_timer = 0;
+		m_potato_holding_fries_timer = 0;
+		m_potato_is_shooting_charged_fries = false;
+	}
+	else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
+		b = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
+		m_potato_fries_on_cooldown = true;
+	}
+	if (m_potato_fries_on_cooldown) {
+		if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
+			m_potato_fries_on_cooldown = false;
+			m_potato_fries_cooldown = 0;
+		}
+		else
+			m_potato_fries_cooldown++;
+	}
+
+	return b;
+}
+
+Bomb * Fighter::potato_bomb_update() {
+	Bomb * b = NULL;
+	if (bomb_pointer != NULL) {
+		if (bomb_pointer->get_pointer_references() == 1) {
+			bomb_pointer->deincrement_pointer_references();
+			Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+			delete bomb_pointer;
+			bomb_pointer = NULL;
+			m_potato_bomb_on_cooldown = true;
+			m_potato_bomb_planted = false;
+		}
+	}
+	else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
+		bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
+		b = bomb_pointer;
+		bomb_pointer->increment_pointer_references();
+		m_potato_bomb_ticking = true;
+		m_potato_bomb_planted = true;
+	}
+	if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
+		Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
+		bomb_pointer->m_damageEffect->m_hit_fighter = true;
+		bomb_pointer->deincrement_pointer_references();
+		if (bomb_pointer->get_pointer_references() == 0) delete bomb_pointer;
+		bomb_pointer = NULL;
+		m_potato_bomb_on_cooldown = true;
+		m_potato_bomb_planted = false;
+		m_potato_bomb_ticking = false;
+		m_potato_bomb_selftimer = 0;
+	}
+	if (m_potato_bomb_ticking) {
+		if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
+			m_potato_bomb_ticking = false;
+			m_potato_bomb_on_cooldown = true;
+			m_potato_bomb_selftimer = 0;
+		}
+		else
+			m_potato_bomb_selftimer++;
+	}
+	if (m_potato_bomb_on_cooldown) {
+		if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
+			m_potato_bomb_on_cooldown = false;
+			m_potato_bomb_cooldown = 0;
+		}
+		else
+			m_potato_bomb_cooldown++;
+	}
+
+	return b;
+}
+
+void Fighter::tired_status_update() {
+	if (m_tired_out) {
+		if (m_tired_out_timer < STATUS_TIRED_OUT_TIME)
+			m_tired_out_timer += 0.5;
+		else {
+			m_tired_out_timer = 0;
+			m_tired_out = false;
+		}
+	}
+}
+
+Attack * Fighter::punch_update() {
+	Attack * attack = NULL;
+	// Punch
+	if (m_is_punching && !m_punch_on_cooldown)
+	{
+		//save collision object from punch
+		attack = punch();
+		m_punch_on_cooldown = true;
+	}
+	if (m_punch_on_cooldown) {
+		if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
+			m_punch_on_cooldown = false;
+			punching_cooldown = 0;
+		}
+		else
+			punching_cooldown++;
+	}
+	// Power punch
+	else if (m_is_holding_power_punch)
+		charging_up_power_punch();
+	else if (m_is_power_punching) {
+		attack = powerPunch();
+		m_holding_power_punch_timer = 0;
+	}
+
+	return attack;
 }
