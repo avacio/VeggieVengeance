@@ -167,9 +167,6 @@ class Fighter : public Renderable
 	bool broccoli_is_holding_cauliflowers() const;
 	void broccoli_charging_up_cauliflowers();
 	void reset_broccoli_flags();
-
-	// Helpers 
-	void charging_up_power_punch();
 	
 	//Eggplant
 	void reset_eggplant_flags();
@@ -177,6 +174,11 @@ class Fighter : public Renderable
 
 	//Yam
 	void reset_yam_flags();
+	Dash * yam_dash_update(float ms);
+	void yam_heal_update(float ms);
+
+	// Helpers 
+	void charging_up_power_punch();
 
   protected:
   	int MAX_HEALTH;
