@@ -1,3 +1,16 @@
 Grade: 75/100
 
 The progress from the previous milestone was distributely evenly between the members, but time was spent on extra creative features rather than the requirements or more pressing issues. For the final milestone my biggest concern are the enemy behaviors. The possibilities in actions feel limited for a 2-player experience, but the computer controlled characters are also not particularly challenging. I would decide to focus on one of the two aspects and spent a good amount of time to play the game as a team (and ideally have other people play it), think which elements should be tweaked, which are not compatible with each other and especially how the enemy player could make life difficult for you. You can go wild with the AI, for example have it be driven by a state machine which uses prerecorded actions of different types (defend, dodge, attack, …) blended with the current position/health of the players. The team members contributed equally to the milestone.
+
+## Milestone Requirements (50):
++ 0/15 Geometry: No polygonal asset
++ 10/20 Collisions: The collision detection method still uses the approximate naive shapes
++ 15/15 Physics: Force-based motion
++ 15/15 Non-linear motion: Projectiles follow a parabolic trajectory 
++ 10/10 Stable game code
+
+## Milestone creative (25):
++ 5 More spritesheet animations
++ 10 Scene visual effect heatwave
++ 10 Player visual effects for super-punching and shield
+
