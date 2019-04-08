@@ -16,6 +16,7 @@
 #include "mainMenu.hpp"
 #include "platform.hpp"
 #include "knife.hpp"
+#include "particleEmitter.hpp"
 
 // stlib
 #include <vector>
@@ -83,6 +84,7 @@ class World
 	void clear_all_fighters();
 	void init_char_select_ais();
 	void init_stage_select_textures();
+	void emit_particles(vec2 position, vec3 color);
 
 	// Window handle
 	GLFWwindow *m_window;
@@ -110,6 +112,8 @@ class World
 	std::vector<AI> m_char_select_ais;
 
 	std::vector<Knife> m_knives;
+
+	std::vector<ParticleEmitter*> m_particle_emitters;
 
 	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;
