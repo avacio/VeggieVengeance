@@ -148,8 +148,6 @@ bool World::init(vec2 screen, GameMode mode)
 	init_stage(MENUBORDER);
 	init_char_select_ais();
 
-	
-
 	return m_water.init() && initSuccess;
 }
 
@@ -641,7 +639,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player1.is_tired_out()) {
 					Mix_PlayChannel(1, m_charging_up_audio, 0);
-					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 1);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3);
 				}
 			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
@@ -698,7 +696,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player2.is_tired_out()) {
 					Mix_PlayChannel(2, m_charging_up_audio, 0);
-					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 1);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3);
 				}
 			}
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
@@ -916,11 +914,9 @@ bool World::set_mode(GameMode mode) {
 
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
-	//std::cout << "selected stage: " << selected_stage << std::endl;
 
 	switch (mode) {
 		case MENU:
-			init_stage(MENUBORDER); // platform for menu AI
 			m_player1.set_in_play(true); // needed to make AI respond
 			set_paused(false);
 			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(MENU);
@@ -1001,10 +997,9 @@ void World::init_stage(Stage stage) {
 	}
 	
 	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
-	
+	std::cout << "Init stage to: " << stage << std::endl;
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
-			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 400, 155, 8); //left cupboard platform
@@ -1013,7 +1008,6 @@ void World::init_stage(Stage stage) {
 			break;
 			}
 		case OVEN: {
-			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
 			spawn_platform(225, 400, 155, 8); //left cupboard platform
@@ -1022,7 +1016,6 @@ void World::init_stage(Stage stage) {
 			break;
 		}
 		case MENUBORDER: {
-			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
 			//spawn_platform(0, 200, 1200, 8); //title underline
 			break;

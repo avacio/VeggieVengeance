@@ -3,6 +3,8 @@
 
 #define _USE_MATH_DEFINES
 
+#define FIGHTER_SPRITE_SCALE 1.7f // 1.2f originally, 1.5 stable TODO
+
 #include <math.h>
 #include <cmath>
 
@@ -70,9 +72,10 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_is_blocking = false;
 	m_blocking_tank = FULL_BLOCK_TANK;
 
-	m_scale.x = 1.2f;
-	m_scale.y = 1.2f;
-	m_sprite_appearance_size = {f_texture.width /2.0f, f_texture.height / 1.4f };
+	m_scale.x = FIGHTER_SPRITE_SCALE;
+	m_scale.y = FIGHTER_SPRITE_SCALE;
+	//m_sprite_appearance_size = { f_texture.width / 2.0f, f_texture.height / 1.4f }; // works for original scale and for 1.5f
+	m_sprite_appearance_size = { f_texture.width / 2.1f, f_texture.height / 1.42f };
 	m_rotation = 0.f;
 
 	// initialized in fighterInfo.cpp
