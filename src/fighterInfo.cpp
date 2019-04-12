@@ -172,7 +172,7 @@ vec3 get_particle_color_for_fc(FighterCharacter fc) {
 		return { 0.8f,0.8f,0.8f };
 		break;
 	case POTATO:
-		return { 1.f,0.7f,0.2f };
+		return { 0.8f,0.5f,0.2f };
 		break;
 	case BROCCOLI:
 		return { 0.f,1.f,0.f };

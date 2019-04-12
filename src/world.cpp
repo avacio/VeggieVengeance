@@ -13,6 +13,8 @@
 #define FALLING_KNIVES_RATE 30
 #define FALLING_KNIVES_LENGTH 2
 
+#define POWER_PUNCH_PARTICLES 150
+
 // Same as static in c, local to compilation unit
 namespace
 {
@@ -626,12 +628,17 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING) {
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
-				Mix_PlayChannel(1, m_charging_up_audio, 0);
+				if (!m_player1.is_tired_out()) {
+					Mix_PlayChannel(1, m_charging_up_audio, 0);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 1);
+				}
 			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
-				Mix_PlayChannel(1, m_charged_punch_audio, 0);
-				emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc));
+				if (!m_player1.is_tired_out()) {
+					Mix_PlayChannel(1, m_charged_punch_audio, 0);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES);
+				}
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(BLOCKING);
@@ -678,12 +685,17 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING) {
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-				Mix_PlayChannel(2, m_charging_up_audio, 0);
+				if (!m_player2.is_tired_out()) {
+					Mix_PlayChannel(2, m_charging_up_audio, 0);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 1);
+				}
 			}
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
 				m_player2.set_movement(POWER_PUNCHING);			
-				Mix_PlayChannel(2, m_charged_punch_audio, 0);
-				emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc));
+				if (!m_player2.is_tired_out()) {
+					Mix_PlayChannel(2, m_charged_punch_audio, 0);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES);
+				}
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -1253,10 +1265,10 @@ void World::init_char_select_ais() {
 	}
 }
 
-void World::emit_particles(vec2 position, vec3 color) {
+void World::emit_particles(vec2 position, vec3 color, int maxParticles) {
 	auto pe = new ParticleEmitter(
 		position,
-		100,
+		maxParticles,
 		false, 
 		color);
 	pe->init();

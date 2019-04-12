@@ -83,8 +83,7 @@ class World
 
 	void clear_all_fighters();
 	void init_char_select_ais();
-	void init_stage_select_textures();
-	void emit_particles(vec2 position, vec3 color);
+	void emit_particles(vec2 position, vec3 color, int maxParticles);
 
 	// Window handle
 	GLFWwindow *m_window;
