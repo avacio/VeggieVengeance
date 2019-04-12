@@ -195,7 +195,7 @@ bool Knife::collides_with(const Fighter& f)
 	float dx = m_position.x - f.get_position().x;
 	float dy = m_position.y - f.get_position().y;
 	float d_sq = dx * dx + dy * dy;
-	float other_r = std::max(f.get_bounding_box()->xpos, f.get_bounding_box()->ypos);
+	float other_r = std::max(f.get_bounding_box().xpos, f.get_bounding_box().ypos);
 	float my_r = std::max(m_scale.x, m_scale.y);
 	float r = std::max(other_r, my_r);
 	//r *= 0.6f;

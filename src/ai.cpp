@@ -30,7 +30,7 @@ void AI::set_in_play(bool value)
     in_play = value;
 }
 
-Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Position, bool player1FacingFront, int player1HP, bool player1isBlocking)
+Attack * AI::update(float ms, QuadTree* platform_tree, vec2 player1Position, bool player1FacingFront, int player1HP, bool player1isBlocking)
 {
 	Attack * attack = NULL;
 	switch (aitype) {
@@ -46,7 +46,7 @@ Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Posit
 			this->set_movement(MOVING_BACKWARD);
 		}
 
-		attack = Fighter::update(ms, platforms);
+		attack = Fighter::update(ms, platform_tree);
 		this->set_movement(STOP_MOVING_FORWARD);
 		this->set_movement(STOP_MOVING_BACKWARD);
 	}
@@ -78,7 +78,7 @@ Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Posit
 			this->set_movement(ABILITY_2);
 		}
 
-		attack = Fighter::update(ms, platforms);
+		attack = Fighter::update(ms, platform_tree);
 		this->set_movement(STOP_MOVING_FORWARD);
 		this->set_movement(STOP_MOVING_BACKWARD);
 
@@ -89,7 +89,7 @@ Attack * AI::update(float ms, std::vector<Platform> platforms, vec2 player1Posit
 	{
 		move_Randomly();
 
-		attack = Fighter::update(ms, platforms);
+		attack = Fighter::update(ms, platform_tree);
 		this->set_movement(STOP_MOVING_FORWARD);
 		this->set_movement(STOP_MOVING_BACKWARD);
 	}

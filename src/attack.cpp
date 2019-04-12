@@ -3,7 +3,7 @@
 Attack::~Attack() {
 }
 
-BoundingBox Attack::get_bounding_box() const {
+BoundingBox Attack::get_bounding_box() {
 	return this->m_damageEffect->m_bounding_box;
 }
 

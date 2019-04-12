@@ -32,7 +32,7 @@ class Fighter : public Renderable
 	void destroy();
 
 	// ms represents the number of milliseconds elapsed from the previous update() call
-	Attack * update(float ms, std::vector<Platform> platforms);
+	Attack * update(float ms, QuadTree* platform_tree);
 
 	// projection is the 2D orthographic projection matrix
 	void draw(const mat3 &projection) override;
@@ -85,7 +85,7 @@ class Fighter : public Renderable
 	bool get_facing_front() const;
 
 	// Returns the bubble' bounding box for collision detection, called by collides_with()
-	BoundingBox * get_bounding_box() const;
+	BoundingBox get_bounding_box() const;
 
 	// Returns the current fighter scale
 	vec2 get_scale() const;
@@ -102,7 +102,7 @@ class Fighter : public Renderable
 
 	void apply_friction();
 
-	void x_position_update(float added_speed, float ms, std::vector<Platform> platforms);
+	void x_position_update(float added_speed, float ms, QuadTree* platform_tree);
 
 	void y_position_update(float ms);
 	
@@ -148,9 +148,9 @@ class Fighter : public Renderable
 
 	void reset();
 
-	void platform_collision(std::vector<Platform> platforms, vec2 oldPosition);
+	void platform_collision(QuadTree* platform_tree, vec2 oldPosition);
 
-	void platform_pass_through(std::vector<Platform> platforms, vec2 oldPosition);
+	void platform_pass_through(QuadTree* platform_tree, vec2 oldPosition);
 
 	float get_heal_animation();
 

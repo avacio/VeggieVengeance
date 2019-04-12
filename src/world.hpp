@@ -86,7 +86,7 @@ class World
 
 	// Window handle
 	GLFWwindow *m_window;
-
+	BoundingBox m_screenBoundingBox = BoundingBox(0.f, 0.f, 1200.f, 800.f);
 	vec2 m_screen; // screen vector
 
 	// Screen texture
@@ -104,7 +104,8 @@ class World
 	Player2 m_player2;
 	std::vector<AI> m_ais;
 	std::vector<Attack*> m_attacks;
-	std::vector<Platform> m_platforms;
+	QuadTree *m_attacks_tree;
+	QuadTree *m_platforms_tree;
 	//float m_current_speed;
 	std::vector<Fighter> m_fighters; // all fighters including AIs
 	std::vector<AI> m_char_select_ais;

@@ -8,7 +8,7 @@ public:
 	virtual ~Attack() = 0;
 	virtual bool init() = 0;
 	virtual void update(float ms) = 0;
-	BoundingBox get_bounding_box() const;
+	BoundingBox get_bounding_box();
 	DamageEffect * get_damage_effect() const;
 	virtual void draw(const mat3 &projection) override = 0;
 	vec2 getPosition();
