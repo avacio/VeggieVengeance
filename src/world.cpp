@@ -138,9 +138,15 @@ bool World::init(vec2 screen, GameMode mode)
 
 	m_screen = screen; // to pass on screen size to renderables
 
+	m_screenBoundingBox = BoundingBox(0.f, 0.f, 1200.f, 800.f);
+	m_platforms_tree = new QuadTree(m_screenBoundingBox);
+	m_attacks_tree = new QuadTree(m_screenBoundingBox);
+
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
 	init_stage(MENUBORDER);
 	init_char_select_ais();
+
+	
 
 	return m_water.init() && initSuccess;
 }
@@ -177,10 +183,8 @@ void World::destroy()
 
 	clear_all_fighters();
 
-	for (auto &platform : m_platforms) {
-		platform.destroy();
-	}
-	m_platforms.clear();
+	m_platforms_tree->clear();
+	m_attacks_tree->clear();
 
 	for (auto &k : m_knives) {
 		k.destroy();
@@ -211,9 +215,9 @@ bool World::update(float elapsed_ms)
 		return true;
 	}
 
-	if ((m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) && m_platforms.size() > 0) {
+	if ((m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) && m_platforms_tree->size() > 0) {
 		for (AI& ai : m_char_select_ais) {
-			ai.update(elapsed_ms, m_platforms, m_player1.get_position(),
+			ai.update(elapsed_ms, m_platforms_tree, m_player1.get_position(),
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
 		}
 	}
@@ -238,6 +242,7 @@ bool World::update(float elapsed_ms)
 		}
 
 		attack_collision();
+		m_attacks_tree->clear();
 		//damage effect removal loop
 		attack_deletion();
 
@@ -261,8 +266,9 @@ bool World::update(float elapsed_ms)
 				}
 			}
 
-			for (auto &p : m_platforms) {
-				if (p.check_collision(*k.boundingBox)) { k.m_is_on_ground = true; }
+			for (Renderable *renderable : m_platforms_tree->retrieve(*k.boundingBox, {})) {
+				Platform* platform = static_cast<Platform*>(renderable);
+				if (platform->check_collision(*k.boundingBox)) { k.m_is_on_ground = true; }
 			}
 		}
 		
@@ -270,7 +276,7 @@ bool World::update(float elapsed_ms)
 		Attack * attack = NULL;
 		if (m_player1.get_in_play())
 		{
-			attack = m_player1.update(elapsed_ms, m_platforms);
+			attack = m_player1.update(elapsed_ms, m_platforms_tree);
 			if (attack != NULL) {
 				attack->init();
 				m_attacks.push_back(attack);
@@ -278,7 +284,7 @@ bool World::update(float elapsed_ms)
 		}
 		if (m_player2.get_in_play())
 		{
-			attack = m_player2.update(elapsed_ms, m_platforms);
+			attack = m_player2.update(elapsed_ms, m_platforms_tree);
 			if (attack != NULL) {
 				attack->init();
 				m_attacks.push_back(attack);
@@ -288,7 +294,7 @@ bool World::update(float elapsed_ms)
 		if (m_player1.get_in_play())
 		{
 			for (auto &ai : m_ais) {
-				attack = ai.update(elapsed_ms, m_platforms, m_player1.get_position(), m_player1.get_facing_front(),
+				attack = ai.update(elapsed_ms, m_platforms_tree, m_player1.get_position(), m_player1.get_facing_front(),
 					m_player1.get_health(), m_player1.is_blocking());
 				if (attack != NULL) {
 					attack->init();
@@ -296,6 +302,11 @@ bool World::update(float elapsed_ms)
 				}
 			}
 		}
+
+		for (Attack *attack : m_attacks) {
+			m_attacks_tree->insert(attack);
+		}
+
 		if (m_mode != MENU && m_mode != CHARSELECT && m_mode != STAGESELECT) {
 			// STAGE EFFECTS -- 1 per stage
 			// HEAT WAVE
@@ -403,7 +414,7 @@ void World::draw()
 			else { m_char_select_ais[0].draw(projection_2D);}
 		} else if (m_mode == STAGESELECT) {
 			if (m_menu.get_selected_stage() != MENUBORDER) {
-				m_platforms[1].draw(projection_2D);
+				m_platforms_tree->retrieve(m_screenBoundingBox, {})[1]->draw(projection_2D);
 			} else { m_char_select_ais[0].draw(projection_2D); }
 		}
 	} else {
@@ -426,8 +437,8 @@ void World::draw()
 		for (auto &attack : m_attacks)
 			attack->draw(projection_2D);
 
-		for (auto &platform : m_platforms)
-			platform.draw(projection_2D);
+		for (auto *platform : m_platforms_tree->retrieve(m_screenBoundingBox, {}))
+			platform->draw(projection_2D);
 
 	}
 	/////////////////////
@@ -492,10 +503,10 @@ bool World::spawn_ai(AIType type, FighterCharacter fc)
 // Creates a platform and if successful, adds it to the list of platform
 bool World::spawn_platform(float xpos, float ypos, float width, float height)
 {
-	Platform platform(xpos, ypos, width, height);
-	if (platform.init())
+	Platform* platform = new Platform(xpos, ypos, width, height);
+	if (platform->init())
 	{
-		m_platforms.emplace_back(platform);
+		m_platforms_tree->insert(platform);
 		return true;
 	}
 	fprintf(stderr, "Failed to spawn platform");
@@ -946,21 +957,19 @@ void World::init_stage(Stage stage) {
 	//for (auto &platform : m_platforms) {
 	//	platform.destroy();
 	//}
-	//m_platforms.clear();
-	if (m_platforms.size() == 0) {
-		spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
+	if (m_platforms_tree && m_platforms_tree->size() > 0) {
+		m_platforms_tree->clear();
 	}
-	while (m_platforms.size() > 1) {
-		m_platforms.pop_back(); // memory leak? should destruct on pop
-	}
+	
+	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
 	
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
 			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
-			spawn_platform(225, 447, 155, 8); //left cupboard platform
-			spawn_platform(820, 447, 155, 8); //right cupboard platform
+			spawn_platform(225, 400, 155, 8); //left cupboard platform
+			spawn_platform(820, 400, 155, 8); //right cupboard platform
 			spawn_platform(400, 328, 405, 8); //middle cupboard platform
 			break;
 			}
@@ -968,8 +977,8 @@ void World::init_stage(Stage stage) {
 			//spawn_platform(0, 635, 1200, 8); //main platform
 			spawn_platform(14, 546, 100, 8); //toaster platform
 			spawn_platform(1109, 546, 115, 8); //ricecooker platform
-			spawn_platform(225, 447, 155, 8); //left cupboard platform
-			spawn_platform(820, 447, 155, 8); //right cupboard platform
+			spawn_platform(225, 400, 155, 8); //left cupboard platform
+			spawn_platform(820, 400, 155, 8); //right cupboard platform
 			spawn_platform(400, 328, 405, 8); //middle cupboard platform
 			break;
 		}
@@ -1027,37 +1036,50 @@ void World::clear_all_fighters() {
 
 void World::attack_collision() {
 	//damage effect collision loop
-	for (int i = 0; i < m_attacks.size(); i++) {
-		if (m_player1.get_in_play() && m_player1.get_alive()) {
-			BoundingBox* b1 = m_player1.get_bounding_box();
-			if (m_attacks[i]->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b1)) {
+	std::vector<Renderable*> renderables;
+	if (m_player1.get_in_play() && m_player1.get_alive()) {
+		BoundingBox b1 = m_player1.get_bounding_box();
+		renderables = m_attacks_tree->retrieve(b1, {});
+
+		for (Renderable* renderable : renderables) {
+			Attack* attack = static_cast<Attack*>(renderable);
+			if (attack->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b1)) {
 				//incur damage
-				m_player1.apply_damage(m_attacks[i]->m_damageEffect);
+				m_player1.apply_damage(attack->m_damageEffect);
 				m_player1.set_hurt(true);
-				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+				attack->m_damageEffect->m_hit_fighter = true;
 			}
-			delete b1;
 		}
-		if (m_player2.get_in_play() && m_player2.get_alive()) {
-			BoundingBox* b2 = m_player2.get_bounding_box();
-			if (m_attacks[i]->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b2)) {
+	}
+
+	if (m_player2.get_in_play() && m_player2.get_alive()) {
+		BoundingBox b2 = m_player2.get_bounding_box();
+		renderables = m_attacks_tree->retrieve(b2, {});
+
+		for (Renderable* renderable : renderables) {
+			Attack* attack = static_cast<Attack*>(renderable);
+			if (attack->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b2)) {
 				//incur damage
-				m_player2.apply_damage(m_attacks[i]->m_damageEffect);
+				m_player2.apply_damage(attack->m_damageEffect);
 				m_player2.set_hurt(true);
-				m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+				attack->m_damageEffect->m_hit_fighter = true;
 			}
-			delete b2;
 		}
-		for (int j = 0; j < m_ais.size(); j++) {
-			if (m_ais[j].get_alive()) {
-				BoundingBox* b3 = m_ais[j].get_bounding_box();
-				if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(*b3)) {
+	}
+
+	for (AI ai : m_ais) {
+		if (ai.get_alive()) {
+			BoundingBox b3 = ai.get_bounding_box();
+			renderables = m_attacks_tree->retrieve(b3, {});
+
+			for (Renderable* renderable : renderables) {
+				Attack* attack = static_cast<Attack*>(renderable);
+				if (attack->m_fighter_id != ai.get_id() && ai.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b3)) {
 					//incur damage
-					m_ais[j].apply_damage(m_attacks[i]->m_damageEffect);
-					m_ais[j].set_hurt(true);
-					m_attacks[i]->m_damageEffect->m_hit_fighter = true;
+					ai.apply_damage(attack->m_damageEffect);
+					ai.set_hurt(true);
+					attack->m_damageEffect->m_hit_fighter = true;
 				}
-				delete b3;
 			}
 		}
 	}

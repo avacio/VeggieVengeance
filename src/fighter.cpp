@@ -133,7 +133,7 @@ void Fighter::destroy()
 	effect.release();
 }
 
-Attack * Fighter::update(float ms, std::vector<Platform> platforms)
+Attack * Fighter::update(float ms, QuadTree* platform_tree)
 {
 	vec2 oldPos = m_position;
 	Attack * attack = NULL;
@@ -147,7 +147,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 		crouch_update();
 		float added_speed = m_force.x / m_mass;
 		apply_friction();
-		x_position_update(added_speed, ms, platforms);
+		x_position_update(added_speed, ms, platform_tree);
 
 		// GENERAL
 		Attack * punchPtr = punch_update();
@@ -189,7 +189,7 @@ Attack * Fighter::update(float ms, std::vector<Platform> platforms)
 	}
 	
 	y_position_update(ms);
-	platform_collision(platforms, oldPos);
+	platform_collision(platform_tree, oldPos);
 	//return null if not attacking, or the collision object if attacking
 	return attack;
 }
@@ -345,7 +345,7 @@ void Fighter::move(vec2 off)
 }
 
 //// Returns the local bounding coordinates scaled by the current size of the bubble
-BoundingBox * Fighter::get_bounding_box() const
+BoundingBox Fighter::get_bounding_box() const
 {
 	// fabs is to avoid negative scale due to the facing direction
 	float width = std::fabs(m_scale.x) * m_sprite_appearance_size.x;
@@ -353,7 +353,7 @@ BoundingBox * Fighter::get_bounding_box() const
 	// get position gets center of texture, but we want top left corner position for bounding box
 	float topLeftXpos = get_position().x - (width / 2);
 	float topLeftYpos = get_position().y - (height / 2);
-	return new BoundingBox(topLeftXpos, topLeftYpos, width, height);
+	return BoundingBox(topLeftXpos, topLeftYpos, width, height);
 }
 
 // set fighter's movements
@@ -579,7 +579,7 @@ void Fighter::apply_friction() {
 	}
 }
 
-void Fighter::x_position_update(float added_speed, float ms, std::vector<Platform> platforms) {
+void Fighter::x_position_update(float added_speed, float ms, QuadTree* platform_tree) {
 
 	//!!! need to include this before merge
 	//if (m_is_holding_power_punch)
@@ -624,7 +624,7 @@ void Fighter::x_position_update(float added_speed, float ms, std::vector<Platfor
 	if (m_position.x > 50.f && m_position.x < 1150.f) {
 		vec2 oldPosition = m_position;
 		move({ added_speed * speed_scale, 0.f });
-		platform_pass_through(platforms, oldPosition);
+		platform_pass_through(platform_tree, oldPosition);
 	}
 }
 
@@ -870,117 +870,120 @@ void Fighter::reset()
 Punch * Fighter::punch() {
 	//create the bounding box based on fighter position
 	float sizeMultiplier = 1.75;
-	BoundingBox* b = get_bounding_box();
+	BoundingBox b = get_bounding_box();
 	Punch* punch;
 	if (get_facing_front()) {
 		//right facing
-		float xpos = b->xpos + (b->width / 2.0);
-		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, true);
+		float xpos = b.xpos + (b.width / 2.0);
+		float width = sizeMultiplier * (b.width / 2.0);
+		punch = new Punch(get_id(), { xpos, b.ypos }, { width, b.height }, m_strength, true);
 	}
 	else {
 		//left facing
-		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
-		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength, false);
+		float xpos = b.xpos - ((sizeMultiplier - 1) * (b.width / 2.0));
+		float width = sizeMultiplier * (b.width / 2.0);
+		punch = new Punch(get_id(), { xpos, b.ypos }, { width, b.height }, m_strength, false);
 	}
-	delete b;
 	return punch;
 }
 
 Punch * Fighter::powerPunch() {
 	//create the bounding box based on fighter position
 	float sizeMultiplier = 1.75;
-	BoundingBox* b = get_bounding_box();
+	BoundingBox b = get_bounding_box();
 	Punch* punch;
 	if (get_facing_front()) {
 		//right facing
-		float xpos = b->xpos + (b->width / 2.0);
-		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, true);
+		float xpos = b.xpos + (b.width / 2.0);
+		float width = sizeMultiplier * (b.width / 2.0);
+		punch = new Punch(get_id(), { xpos, b.ypos }, { width, b.height }, m_strength + m_holding_power_punch_timer, true);
 	}
 	else {
 		//left facing
-		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
-		float width = sizeMultiplier * (b->width / 2.0);
-		punch = new Punch(get_id(), { xpos, b->ypos }, { width, b->height }, m_strength + m_holding_power_punch_timer, false);
+		float xpos = b.xpos - ((sizeMultiplier - 1) * (b.width / 2.0));
+		float width = sizeMultiplier * (b.width / 2.0);
+		punch = new Punch(get_id(), { xpos, b.ypos }, { width, b.height }, m_strength + m_holding_power_punch_timer, false);
 	}
 
-	delete b;
 	return punch;
 }
 
 Uppercut * Fighter::broccoliUppercut() {
 	//create the bounding box based on fighter position
 	float sizeMultiplier = 1.75;
-	BoundingBox* b = get_bounding_box();
+	BoundingBox b = get_bounding_box();
 	Uppercut* uppercut;
 	if (get_facing_front()) {
 		//right facing
-		float xpos = b->xpos + (b->width / 2.0);
-		float width = sizeMultiplier * (b->width / 2.0);
-		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, true, BROCCOLI_UPPERCUT_VERT_VELO, 20);
+		float xpos = b.xpos + (b.width / 2.0);
+		float width = sizeMultiplier * (b.width / 2.0);
+		uppercut = new Uppercut(get_id(), { xpos, b.ypos }, { width, b.height }, 1, true, BROCCOLI_UPPERCUT_VERT_VELO, 20);
 	}
 	else {
 		//left facing
-		float xpos = b->xpos - ((sizeMultiplier - 1) * (b->width / 2.0));
-		float width = sizeMultiplier * (b->width / 2.0);
-		uppercut = new Uppercut(get_id(), { xpos, b->ypos }, { width, b->height }, 15, false, BROCCOLI_UPPERCUT_VERT_VELO, 20);
+		float xpos = b.xpos - ((sizeMultiplier - 1) * (b.width / 2.0));
+		float width = sizeMultiplier * (b.width / 2.0);
+		uppercut = new Uppercut(get_id(), { xpos, b.ypos }, { width, b.height }, 1, false, BROCCOLI_UPPERCUT_VERT_VELO, 20);
 	}
-
-	delete b;
 	return uppercut;
 }
 
 //revert to old position if new position causes a collision with platforms
-void Fighter::platform_collision(std::vector<Platform> platforms, vec2 oldPosition) {
+void Fighter::platform_collision(QuadTree* platform_tree, vec2 oldPosition) {
+	BoundingBox b = get_bounding_box();
+	std::vector<Renderable*> platforms = platform_tree->retrieve(b, {});;
+	
 	for (int i = 0; i < platforms.size(); i++) {
-		BoundingBox* b = get_bounding_box();
-		if (platforms[i].check_collision(*b)) {
-			if (platforms[i].check_collision_outer_left(*b)) {
+
+		Platform* platform = static_cast<Platform*>(platforms[i]);
+		
+		if (platform->check_collision(b)) {
+			if (platform->check_collision_outer_left(b)) {
 				m_position = oldPosition;
 				m_velocity_y = 0.0;
 				m_is_jumping = false;
 			}
-			else if (platforms[i].check_collision_outer_right(*b)) {
+			else if (platform->check_collision_outer_right(b)) {
 				m_position = oldPosition;
 				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 			}
 
-			if (platforms[i].check_collision_outer_top(*b)) {
+			if (platform->check_collision_outer_top(b)) {
 				m_position.y = oldPosition.y;
 				m_velocity_y = 0.0f;
 				m_is_jumping = false;
 				m_broccoli_jump_left = 2;
 			}
-			else if (platforms[i].check_collision_outer_bottom(*b)) {
+			else if (platform->check_collision_outer_bottom(b)) {
 				m_position.y = oldPosition.y;
 				m_velocity_y = 0.0f;
 			}
 
-			if (!platforms[i].check_collision_outer_left(*b) && !platforms[i].check_collision_outer_right(*b) &&
-				!platforms[i].check_collision_outer_top(*b) && !platforms[i].check_collision_outer_bottom(*b)) {
+			if (!platform->check_collision_outer_left(b) && !platform->check_collision_outer_right(b) &&
+				!platform->check_collision_outer_top(b) && !platform->check_collision_outer_bottom(b)) {
 				m_position = oldPosition;
 				m_velocity_y = 0.0;
 				m_is_jumping = false;
 			}
 		}
-		delete b;
 	}
 }
 
 //revert to old position if new position passes through one of the platforms
-void Fighter::platform_pass_through(std::vector<Platform> platforms, vec2 oldPosition) {
+void Fighter::platform_pass_through(QuadTree* platform_tree, vec2 oldPosition) {
+	BoundingBox b = get_bounding_box();
+	std::vector<Renderable*> platforms = platform_tree->retrieve(b, {});
+
 	for (int i = 0; i < platforms.size(); i++) {
-		BoundingBox platform_bounding_box = platforms[i].get_bounding_box();
+		Platform* platform = static_cast<Platform*>(platforms[i]);
+		BoundingBox platform_bounding_box = platform->get_bounding_box();
 
 		if ((m_position.x > platform_bounding_box.xpos && oldPosition.x < platform_bounding_box.xpos) || 
 			(oldPosition.x > platform_bounding_box.xpos && m_position.x < platform_bounding_box.xpos)) {
 			m_position = oldPosition;
 			break;
 		}
-
 	}		
 }
 
@@ -1037,9 +1040,8 @@ float Fighter::get_heal_animation() {
 }
 
 Dash * Fighter::dash() {
-	BoundingBox* b = get_bounding_box();
-	Dash* dash = new Dash(get_id(), { b->xpos, b->ypos }, { b->width, b->height }, m_strength, 0);
-	delete b;
+	BoundingBox b = get_bounding_box();
+	Dash* dash = new Dash(get_id(), { b.xpos, b.ypos }, { b.width, b.height }, m_strength, 0);
 	return dash;
 }
 

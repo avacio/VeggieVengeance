@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boundingBox.hpp>
+
 // stlib
 #include <fstream> // stdout, stderr..
 #include <sstream>
@@ -127,8 +129,45 @@ struct Renderable
 	void transform_rotate(float radians);
 	void transform_translate(vec2 pos);
 	void transform_end();
+
+	virtual BoundingBox get_bounding_box();
+	virtual void destroy();
 };
 
+enum Quadrant
+{
+	TOP_LEFT,
+	TOP_RIGHT,
+	BOTTOM_LEFT,
+	BOTTOM_RIGHT,
+	NONE
+};
+
+class QuadTree 
+{
+	const int MAX_OBJECTS = 2;
+	int m_size;
+    BoundingBox m_boundingBox = BoundingBox(0, 0, 0, 0);
+	std::vector<Renderable*> m_objects;
+  
+    // Children of this tree 
+    QuadTree *m_topLeftTree; 
+    QuadTree *m_topRightTree; 
+    QuadTree *m_botLeftTree; 
+    QuadTree *m_botRightTree; 
+  
+public: 
+	QuadTree(BoundingBox b);
+
+	int size();
+	void clear();
+	void split();
+	Quadrant getQuadrant(BoundingBox boundingBox);
+    void insert(Renderable* renderable); 
+	void insertIntoSubtree(Quadrant quadrant, Renderable* renderable);
+    std::vector<Renderable*> retrieve(BoundingBox boundingBox, std::vector<Renderable*> returnObjs);
+}; 
+  
 enum AIType
 {
 	CHASE,

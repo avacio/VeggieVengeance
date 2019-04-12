@@ -300,3 +300,204 @@ void Renderable::transform_end()
 {
 	//
 }
+
+BoundingBox Renderable::get_bounding_box()
+{
+	return BoundingBox(0, 0, 0, 0);
+}
+
+void Renderable::destroy()
+{
+
+}
+
+int QuadTree::size()
+{
+	return m_size;
+}
+
+/*
+ * Clears the quadtree
+ */
+void QuadTree::clear() 
+{
+	m_size = 0;
+	for (auto* object : m_objects) {
+		object->destroy();
+		//delete object;
+	}
+	m_objects.clear();
+
+	if (m_topLeftTree != NULL) {
+		m_topLeftTree->clear();
+		delete m_topLeftTree;
+		m_topLeftTree = NULL;
+	}
+
+	if (m_topRightTree != NULL) {
+		m_topRightTree->clear();
+		delete m_topRightTree;
+		m_topRightTree = NULL;
+	}
+
+	if (m_botLeftTree != NULL) {
+		m_botLeftTree->clear();
+		delete m_botLeftTree;
+		m_botLeftTree = NULL;
+	}
+
+	if (m_botRightTree != NULL) {
+		m_botRightTree->clear();
+		delete m_botRightTree;
+		m_botRightTree = NULL;
+	}
+}
+
+QuadTree::QuadTree(BoundingBox b) {
+	m_topLeftTree = NULL;
+	m_topRightTree = NULL;
+	m_botLeftTree = NULL;
+	m_botRightTree = NULL;
+	m_boundingBox = b;
+	m_objects = {};
+	m_size = 0;
+}
+
+/*
+ * Splits the node into 4 subnodes
+ */
+void QuadTree::split() 
+{
+	int subWidth = (int)(m_boundingBox.width / 2);
+	int subHeight = (int)(m_boundingBox.height / 2);
+	int x = (int)m_boundingBox.xpos;
+	int y = (int)m_boundingBox.ypos;
+
+	m_topRightTree = new QuadTree(BoundingBox(x + subWidth, y, subWidth, subHeight));
+	m_topLeftTree = new QuadTree(BoundingBox(x, y, subWidth, subHeight));
+	m_botLeftTree = new QuadTree(BoundingBox(x, y + subHeight, subWidth, subHeight));
+	m_botRightTree = new QuadTree(BoundingBox(x + subWidth, y + subHeight, subWidth, subHeight));
+}
+
+/*
+ * Determine which node the object belongs to. -1 means
+ * object cannot completely fit within a child node and is part
+ * of the parent node
+ */
+Quadrant QuadTree::getQuadrant(BoundingBox boundingBox)
+{
+	float verticalMidpoint = m_boundingBox.xpos + (m_boundingBox.width / 2);
+	float horizontalMidpoint = m_boundingBox.ypos + (m_boundingBox.height / 2);
+
+	// Object can completely fit within the top quadrants
+	bool topQuadrant = (boundingBox.ypos < horizontalMidpoint && boundingBox.ypos + boundingBox.height < horizontalMidpoint);
+	// Object can completely fit within the bottom quadrants
+	bool bottomQuadrant = (boundingBox.ypos > horizontalMidpoint);
+
+	// Object can completely fit within the left quadrants
+	if (boundingBox.xpos < verticalMidpoint && boundingBox.xpos + boundingBox.width < verticalMidpoint) {
+		if (topQuadrant) {
+			return TOP_LEFT;
+		}
+		else if (bottomQuadrant) {
+			return BOTTOM_LEFT;
+		}
+	}
+	// Object can completely fit within the right quadrants
+	else if (boundingBox.xpos > verticalMidpoint) {
+		if (topQuadrant) {
+			return TOP_RIGHT;
+		}
+		else if (bottomQuadrant) {
+			return BOTTOM_RIGHT;
+		}
+	}
+ 
+	return NONE;
+}
+
+void QuadTree::insert(Renderable* renderable) 
+{
+	m_size++;
+	if (m_topLeftTree != NULL) {
+		Quadrant quadrant = getQuadrant(renderable->get_bounding_box());
+
+		if (quadrant != NONE) {
+			insertIntoSubtree(quadrant, renderable);
+			return;
+		}
+	}
+
+	this->m_objects.push_back(renderable);
+
+	if (this->m_objects.size() > MAX_OBJECTS) {
+		if (this->m_botLeftTree == NULL) {
+			split();
+		}
+
+		int i = 0;
+
+		while (i < m_objects.size()) {
+			BoundingBox b = m_objects[i]->get_bounding_box();
+			Quadrant quadrant = getQuadrant(b);
+			if (quadrant != NONE) {
+				Renderable* r = m_objects[i];
+				insertIntoSubtree(quadrant, r);
+				m_objects.erase(m_objects.begin() + i);
+			} else {
+				i++;
+			}
+		}
+	}
+}
+
+void QuadTree::insertIntoSubtree(Quadrant quadrant, Renderable* renderable) 
+{
+	switch(quadrant) {
+		case TOP_LEFT:
+			m_topLeftTree->insert(renderable);
+			break;
+		case TOP_RIGHT:
+			m_topRightTree->insert(renderable);
+			break;
+		case BOTTOM_LEFT:
+			m_botLeftTree->insert(renderable);
+			break;
+		case BOTTOM_RIGHT:
+			m_botRightTree->insert(renderable);
+			break;
+	}
+}
+
+/*
+ * Return all objects that could collide with the given BoundingBox
+ */
+std::vector<Renderable*> QuadTree::retrieve(BoundingBox boundingBox, std::vector<Renderable*> returnObjs) 
+{
+	Quadrant quadrant = getQuadrant(boundingBox);
+	if (quadrant != NONE && m_botLeftTree != NULL) {
+		std::vector<Renderable*> platforms;
+		switch(quadrant) {
+			case TOP_LEFT:
+				platforms = m_topLeftTree->retrieve(boundingBox, {});
+				returnObjs.insert(returnObjs.end(), platforms.begin(), platforms.end());
+				break;
+			case TOP_RIGHT:
+				platforms = m_topRightTree->retrieve(boundingBox, {});
+				returnObjs.insert(returnObjs.end(), platforms.begin(), platforms.end());
+				break;
+			case BOTTOM_LEFT:
+				platforms = m_botLeftTree->retrieve(boundingBox, {});
+				returnObjs.insert(returnObjs.end(), platforms.begin(), platforms.end());
+				break;
+			case BOTTOM_RIGHT:
+				platforms = m_botRightTree->retrieve(boundingBox, {});
+				returnObjs.insert(returnObjs.end(), platforms.begin(), platforms.end());
+				break;
+			}
+	}
+
+	returnObjs.insert(returnObjs.end(), m_objects.begin(), m_objects.end());
+
+	return returnObjs;
+}
