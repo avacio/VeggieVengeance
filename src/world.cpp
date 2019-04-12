@@ -1083,38 +1083,6 @@ void World::attack_collision() {
 			}
 		}
 	}
-
-	//for (int i = 0; i < m_attacks.size(); i++) {
-	//	//if (m_player1.get_in_play() && m_player1.get_alive()) {
-	//	//	BoundingBox b1 = m_player1.get_bounding_box();
-	//	//	if (m_attacks[i]->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(b1)) {
-	//	//		//incur damage
-	//	//		m_player1.apply_damage(m_attacks[i]->m_damageEffect);
-	//	//		m_player1.set_hurt(true);
-	//	//		m_attacks[i]->m_damageEffect->m_hit_fighter = true;
-	//	//	}
-	//	//}
-	//	//if (m_player2.get_in_play() && m_player2.get_alive()) {
-	//	//	BoundingBox b2 = m_player2.get_bounding_box();
-	//	//	if (m_attacks[i]->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(b2)) {
-	//	//		//incur damage
-	//	//		m_player2.apply_damage(m_attacks[i]->m_damageEffect);
-	//	//		m_player2.set_hurt(true);
-	//	//		m_attacks[i]->m_damageEffect->m_hit_fighter = true;
-	//	//	}
-	//	//}
-	//	//for (int j = 0; j < m_ais.size(); j++) {
-	//	//	if (m_ais[j].get_alive()) {
-	//	//		BoundingBox b3 = m_ais[j].get_bounding_box();
-	//	//		if (m_attacks[i]->m_fighter_id != m_ais[j].get_id() && m_ais[j].is_blocking() == false && m_attacks[i]->m_damageEffect->m_bounding_box.check_collision(b3)) {
-	//	//			//incur damage
-	//	//			m_ais[j].apply_damage(m_attacks[i]->m_damageEffect);
-	//	//			m_ais[j].set_hurt(true);
-	//	//			m_attacks[i]->m_damageEffect->m_hit_fighter = true;
-	//	//		}
-	//	//	}
-	//	//}
-	//}
 }
 
 void World::attack_deletion() {
