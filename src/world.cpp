@@ -222,6 +222,10 @@ bool World::update(float elapsed_ms)
 			ai.update(elapsed_ms, m_platforms_tree, m_player1.get_position(),
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
 		}
+		if (m_mode == FIGHTINTRO) {
+			emit_particles({ screen.x * .3f, (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP1), 1, false, 0.f);
+			emit_particles({ screen.x * .6f , (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP2), 1, false,180.f);
+		}
 	}
 	
 	if (!m_game_over && is_game_over()) {
@@ -645,14 +649,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player1.is_tired_out()) {
 					Mix_PlayChannel(1, m_charging_up_audio, 0);
-					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3, true, 0.f);
 				}
 			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
 				if (!m_player1.is_tired_out()) {
 					Mix_PlayChannel(1, m_charged_punch_audio, 0);
-					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f);
 				}
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
@@ -702,14 +706,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player2.is_tired_out()) {
 					Mix_PlayChannel(2, m_charging_up_audio, 0);
-					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3, true, 0.f);
 				}
 			}
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
 				m_player2.set_movement(POWER_PUNCHING);			
 				if (!m_player2.is_tired_out()) {
 					Mix_PlayChannel(2, m_charged_punch_audio, 0);
-					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f);
 				}
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
@@ -1010,9 +1014,21 @@ void World::init_stage(Stage stage) {
 	//for (auto &platform : m_platforms) {
 	//	platform.destroy();
 	//}
+
+	//if (m_platforms_tree && m_platforms_tree->size() > 0) {
+	//	m_platforms_tree->clear();
+	//}
 	if (m_platforms_tree && m_platforms_tree->size() > 0) {
 		m_platforms_tree->clear();
 	}
+	//TODO: cannot remove main platform or else a menu AI will fall (they always exist)
+
+	//if (m_platforms.size() == 0) {
+	//	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
+	//}
+	//while (m_platforms.size() > 1) {
+	//	m_platforms.pop_back(); // memory leak? should destruct on pop
+	//}
 	
 	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
 	std::cout << "Init stage to: " << stage << std::endl;
@@ -1304,12 +1320,13 @@ bool World::is_ui_mode() {
 }
 
 
-void World::emit_particles(vec2 position, vec3 color, int maxParticles) {
+void World::emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle) {
 	auto pe = new ParticleEmitter(
 		position,
 		maxParticles,
-		false, 
-		color);
+		color,
+		isRandom,
+		angle);
 	pe->init();
 	m_particle_emitters.emplace_back(pe);
 }
