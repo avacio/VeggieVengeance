@@ -24,6 +24,8 @@
 #define audio_path(name) data_path "/audio/" name
 #define mesh_path(name) data_path "/meshes/" name
 
+#define PI 3.14159265
+
 std::string fonts_path(std::string name);
 static const std::string mainFont = "HABESHAPIXELS.ttf";
 static const std::string mainFontBold = "HABESHAPIXELS-Bold.ttf";

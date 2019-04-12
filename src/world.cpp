@@ -13,6 +13,8 @@
 #define FALLING_KNIVES_RATE 30
 #define FALLING_KNIVES_LENGTH 2
 
+#define POWER_PUNCH_PARTICLES 150
+
 // Same as static in c, local to compilation unit
 namespace
 {
@@ -190,7 +192,10 @@ void World::destroy()
 		k.destroy();
 	}
 	m_knives.clear();
-
+	for (auto pe_it = m_particle_emitters.begin(); pe_it != m_particle_emitters.end();) {
+		delete *pe_it;
+		pe_it = m_particle_emitters.erase(pe_it);
+	}
 	if (m_bg.m_initialized) {
 		m_bg.destroy();
 	}
@@ -245,6 +250,21 @@ bool World::update(float elapsed_ms)
 		m_attacks_tree->clear();
 		//damage effect removal loop
 		attack_deletion();
+
+		// PARTICLE EMISSION
+		for (auto& particleEmitter : m_particle_emitters) {
+			particleEmitter->update(elapsed_ms);
+		}
+
+		for (auto pe_it = m_particle_emitters.begin(); pe_it != m_particle_emitters.end();) {
+			if ((*pe_it)->get_alive_particles() == 0) {
+				delete *pe_it;
+				pe_it = m_particle_emitters.erase(pe_it);
+			}
+			else {
+				++pe_it;
+			}
+		}
 
 		// KNIVES STAGE EFFECT
 		for (auto &k : m_knives) {
@@ -441,6 +461,11 @@ void World::draw()
 			platform->draw(projection_2D);
 
 	}
+
+	for (auto& particleEmitter : m_particle_emitters) {
+		particleEmitter->draw(projection_2D);
+	}
+
 	/////////////////////
 	// Truly render to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -564,12 +589,10 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 					} else {
 						selectedP2 = result;
 						m_menu.is_player_1_chosen = false;
-						//set_mode(selMode);
 						set_mode(STAGESELECT);
 					}
 				} else {
 					selectedP1 = m_menu.get_selected_char();
-					//set_mode(m_menu.get_selected_mode());
 					if (result == BLANK) {
 						set_mode(MENU);
 					} else {
@@ -616,11 +639,17 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING) {
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
-				Mix_PlayChannel(1, m_charging_up_audio, 0);
+				if (!m_player1.is_tired_out()) {
+					Mix_PlayChannel(1, m_charging_up_audio, 0);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 1);
+				}
 			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
-				Mix_PlayChannel(1, m_charged_punch_audio, 0);
+				if (!m_player1.is_tired_out()) {
+					Mix_PlayChannel(1, m_charged_punch_audio, 0);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES);
+				}
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(BLOCKING);
@@ -667,11 +696,17 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(CHARGED_ABILITY_2);
 			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING) {
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
-				Mix_PlayChannel(2, m_charging_up_audio, 0);
+				if (!m_player2.is_tired_out()) {
+					Mix_PlayChannel(2, m_charging_up_audio, 0);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 1);
+				}
 			}
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
 				m_player2.set_movement(POWER_PUNCHING);			
-				Mix_PlayChannel(2, m_charged_punch_audio, 0);
+				if (!m_player2.is_tired_out()) {
+					Mix_PlayChannel(2, m_charged_punch_audio, 0);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES);
+				}
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
@@ -704,7 +739,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 
 			for (auto &fighter : m_ais)
 				fighter.set_movement(PAUSED);
-
 
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP))
 			{
@@ -792,13 +826,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
 	}
 
-	//// Spawn mesh for testing purposes
+	//// TODO Spawn mesh for testing purposes
 	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && m_mode == PVP && selected_stage == KITCHEN) {
 		set_falling_knives(true);
 	}
-	if (action == GLFW_PRESS && key == GLFW_KEY_Z && m_mode == PVP && selected_stage == KITCHEN) {
-		set_falling_knives(false);
-	}
+	////// TODO test particle emitters
+	//if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
+	//	emit_particles({ m_screen.x / 2.f, m_screen.y / 2.f }, { 1.f,0,0 });
+	//}
 }
 
 
@@ -868,6 +903,10 @@ bool World::set_mode(GameMode mode) {
 		k.destroy();
 	}
 	m_knives.clear();
+	for (auto pe_it = m_particle_emitters.begin(); pe_it != m_particle_emitters.end();) {
+		delete *pe_it;
+		pe_it = m_particle_emitters.erase(pe_it);
+	}
 	if (m_bg.m_initialized) {
 		m_bg.destroy();
 	}
@@ -1246,4 +1285,14 @@ void World::init_char_select_ais() {
 		ai_yam.set_position({ 250.f, m_screen.y*.85f });
 		m_char_select_ais.emplace_back(ai_yam);
 	}
+}
+
+void World::emit_particles(vec2 position, vec3 color, int maxParticles) {
+	auto pe = new ParticleEmitter(
+		position,
+		maxParticles,
+		false, 
+		color);
+	pe->init();
+	m_particle_emitters.emplace_back(pe);
 }

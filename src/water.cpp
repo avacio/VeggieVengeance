@@ -33,13 +33,6 @@ bool Water::init() {
 	if (!effect.load_from_file(shader_path("water.vs.glsl"), shader_path("water.fs.glsl")))
 		return false;
 
-	////// TEXT
-	//title = new TextRenderer(mainFontBold, 80);
-	//title->setColor({ 1.f,0.7f,0.7f });
-	////int width = title->get_width_of_string("WINNER!");
-	////title->setPosition({ screen.x/2.f - width/2.f, 180.f });
-	//title->setPosition({ 80.f, 200.f });
-
 	return true;
 }
 
@@ -88,10 +81,9 @@ void Water::draw(const mat3& projection) {
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 	glDisableVertexAttribArray(0);
-
-	//title->renderString(projection, "VEGGIES BOW DOWN TO " + m_winner_name);
 }
 
+// TODO NOT USED
 void Water::set_game_over(std::string winnerName) {
 	//m_game_over_time = glfwGetTime();
 	m_winner_name = winnerName;
