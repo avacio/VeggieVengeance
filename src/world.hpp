@@ -83,6 +83,7 @@ class World
 
 	void clear_all_fighters();
 	void init_char_select_ais();
+	bool is_ui_mode();
 	void emit_particles(vec2 position, vec3 color, int maxParticles);
 
 	// Window handle
@@ -134,6 +135,8 @@ class World
 	/////////
 	FighterCharacter selectedP1 = POTATO; // POTATO
 	FighterCharacter selectedP2 = POTATO; // POTATO
+	std::string p1name; // FOR FIGHT INTRO
+	std::string p2name; // FOR FIGHT INTRO
 	Stage selected_stage = KITCHEN;
 	GameMode selected_fight_mode = PVP;
 

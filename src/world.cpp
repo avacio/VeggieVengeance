@@ -145,7 +145,6 @@ bool World::init(vec2 screen, GameMode mode)
 	m_attacks_tree = new QuadTree(m_screenBoundingBox);
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	init_stage(MENUBORDER);
 	init_char_select_ais();
 
 	return m_water.init() && initSuccess;
@@ -218,7 +217,7 @@ bool World::update(float elapsed_ms)
 		return true;
 	}
 
-	if ((m_mode == CHARSELECT || m_mode == MENU || m_mode == STAGESELECT) && m_platforms_tree->size() > 0) {
+	if (is_ui_mode() && m_platforms_tree->size() > 0) {
 		for (AI& ai : m_char_select_ais) {
 			ai.update(elapsed_ms, m_platforms_tree, m_player1.get_position(),
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
@@ -325,7 +324,7 @@ bool World::update(float elapsed_ms)
 			m_attacks_tree->insert(attack);
 		}
 
-		if (m_mode != MENU && m_mode != CHARSELECT && m_mode != STAGESELECT) {
+		if (!is_ui_mode()) {
 			// STAGE EFFECTS -- 1 per stage
 			// HEAT WAVE
 			if (selected_stage == OVEN) {
@@ -422,7 +421,7 @@ void World::draw()
 	mat3 projection_2D{{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 
 	// Drawing entities
-	if (m_mode == MENU || m_mode == CHARSELECT || m_mode == STAGESELECT) {
+	if (is_ui_mode()) {
 		m_menu.draw(projection_2D); // m_char_select_ais are never deleted throughout the game but are only initialized once
 		if (m_mode == MENU) {
 			m_char_select_ais[0].draw(projection_2D);
@@ -434,6 +433,8 @@ void World::draw()
 			if (m_menu.get_selected_stage() != MENUBORDER) {
 				m_platforms_tree->retrieve(m_screenBoundingBox, {})[1]->draw(projection_2D);
 			} else { m_char_select_ais[0].draw(projection_2D); }
+		} else if (m_mode == FIGHTINTRO) {
+			m_platforms_tree->retrieve(m_screenBoundingBox, {})[2]->draw(projection_2D);
 		}
 	} else {
 		m_bg.draw(projection_2D);
@@ -562,7 +563,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 	//////////////////////
 	// MAIN MENU CONTROLS
-	if (m_mode == MENU || m_mode == CHARSELECT || m_mode == STAGESELECT)
+	if (is_ui_mode())
 	{
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
 			m_menu.change_selection(false);
@@ -601,7 +602,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				selected_stage = m_menu.get_selected_stage();
 				if (selected_stage == MENUBORDER) { // RETURN OPTION
 					set_mode(CHARSELECT);
-				} else { set_mode(selected_fight_mode); }
+				} else {
+					set_mode(FIGHTINTRO);
+				}
+			}
+			else if (m_mode == FIGHTINTRO) {
+				set_mode(selected_fight_mode);
 			}
 		}
 	}
@@ -917,6 +923,7 @@ bool World::set_mode(GameMode mode) {
 
 	switch (mode) {
 		case MENU:
+			init_stage(MENUBORDER);
 			m_player1.set_in_play(true); // needed to make AI respond
 			set_paused(false);
 			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(MENU);
@@ -930,8 +937,20 @@ bool World::set_mode(GameMode mode) {
 		case STAGESELECT:
 		{
 			//m_player1.set_in_play(true);
-			//init_stage(selected_stage); // DO IN KEY CONTROL?
 			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(STAGESELECT);
+			break;
+		}
+		case FIGHTINTRO: {
+			p1name = fighterMap[selectedP1].getFCName();
+			if (selected_fight_mode == PVP) {
+				p2name = fighterMap[selectedP2].getFCName();
+			}
+			else {
+				p2name = "AI";
+				selectedP2 = BROCCOLI;
+			}
+			m_menu.init(m_screen);
+			m_menu.init_fight_intro(p1name, selectedP1, p2name, selectedP2);
 			break;
 		}
 		case DEV: {
@@ -959,32 +978,31 @@ bool World::set_mode(GameMode mode) {
 			init_stage(selected_stage); // DO IN KEY CONTROL?
 			m_player1.set_in_play(true);
 			m_player2.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && m_player2.init(2, fighterMap[selectedP2].getFCName(), selectedP2) && m_bg.init(m_screen, mode, selected_stage);
+			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && m_player2.init(2, p2name, selectedP2) && m_bg.init(m_screen, mode, selected_stage);
 			m_fighters.emplace_back(m_player1);
 			m_fighters.emplace_back(m_player2);
 			break;
 		case PVC: // single player
 			init_stage(selected_stage); // DO IN KEY CONTROL?
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
+			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
 			m_fighters.emplace_back(m_player1);
 			break;
 		case TUTORIAL:
 			init_stage(selected_stage); // DO IN KEY CONTROL?
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, fighterMap[selectedP1].getFCName(), selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
+			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
 			m_fighters.emplace_back(m_player1);
 			break;
 		default:
 			break;
 	}
 
-	if (mode != MENU && mode != CHARSELECT && mode != STAGESELECT) {
+	m_mode = mode;
+	if (!is_ui_mode()) {
 		for (Fighter &f : m_fighters)
 			m_bg.addNameplate(f.get_nameplate(), f.get_name());
 	}
-
-	m_mode = mode;
 	return initSuccess;
 }
 
@@ -1017,6 +1035,7 @@ void World::init_stage(Stage stage) {
 		}
 		case MENUBORDER: {
 			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
+			spawn_platform(400, 725, 380, 3); //vs.
 			//spawn_platform(0, 200, 1200, 8); //title underline
 			break;
 		}
@@ -1279,6 +1298,11 @@ void World::init_char_select_ais() {
 		m_char_select_ais.emplace_back(ai_yam);
 	}
 }
+
+bool World::is_ui_mode() {
+	return m_mode == MENU || m_mode == CHARSELECT || m_mode == STAGESELECT || m_mode == FIGHTINTRO;
+}
+
 
 void World::emit_particles(vec2 position, vec3 color, int maxParticles) {
 	auto pe = new ParticleEmitter(
