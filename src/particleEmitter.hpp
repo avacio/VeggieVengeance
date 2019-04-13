@@ -4,7 +4,7 @@
 
 class ParticleEmitter : public Renderable {
 public:
-	ParticleEmitter(vec2 position, int max_particles, vec3 m_color, bool random, float angle);
+	ParticleEmitter(vec2 position, int max_particles, vec3 m_color, bool random, float angle, float scale);
 	~ParticleEmitter();
 
 	bool init();
@@ -20,4 +20,5 @@ private:
 	vec3 m_color;
 	bool m_is_random;
 	float m_set_angle;
+	float m_p_scale;
 };
