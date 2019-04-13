@@ -71,11 +71,17 @@ public:
 	void init_stage_textures();
 	Stage get_selected_stage();
 
+	//////// FIGHT INTRO
+	void init_fight_intro(std::string p1name, FighterCharacter p1fc, std::string p2name, FighterCharacter p2fc);
+
 	FighterCharacter selectedP1 = BLANK;
 	bool is_player_1_chosen = false; // for picking PVP
 	GameMode m_selected_mode = MENU;
 
 	bool m_initialized = false;
+
+	std::string p1name;
+	std::string p2name;
 
 private:
 	vec2 screen;
@@ -83,12 +89,9 @@ private:
 	vec2 m_scale; // 1.f in each dimension. 1.f is as big as the associated texture
 	float m_rotation; // in radians
 
-	//// STAGE TEXTURES
-	//vec2 m_stage_position; // Window coordinates
-	//vec2 m_stage_scale; // 1.f in each dimension. 1.f is as big as the associated texture
-
 	GameMode m_mode = MENU;
 
 	std::vector<TextRenderer*> text;
 	std::vector<TextureRenderer> stage_textures;
+	std::vector<TextureRenderer> fi_textures;
 };

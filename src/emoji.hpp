@@ -5,8 +5,6 @@
 #include "attack.hpp"
 #include "fighterInfo.hpp"
 
-#define PI 3.14159265
-
 enum EmojiState {
 	CIRCLING = 0,
 	FIRED = 1

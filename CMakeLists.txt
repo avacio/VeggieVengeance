@@ -56,6 +56,8 @@ set(SOURCE_FILES
 	src/fighterInfo.cpp
 	src/emoji.cpp
 	src/knife.cpp
+	src/particle.cpp
+	src/particleEmitter.cpp
 
     	src/project_path.hpp
 	src/common.hpp
@@ -82,6 +84,8 @@ set(SOURCE_FILES
 	src/fighterInfo.hpp
 	src/emoji.hpp
 	src/knife.hpp
+	src/particle.hpp
+	src/particleEmitter.hpp
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})

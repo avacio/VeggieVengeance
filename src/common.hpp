@@ -24,6 +24,8 @@
 #define audio_path(name) data_path "/audio/" name
 #define mesh_path(name) data_path "/meshes/" name
 
+#define PI 3.14159265
+
 std::string fonts_path(std::string name);
 static const std::string mainFont = "HABESHAPIXELS.ttf";
 static const std::string mainFontBold = "HABESHAPIXELS-Bold.ttf";
@@ -223,6 +225,7 @@ enum GameMode
 	MENU = 0,
 	CHARSELECT,
 	STAGESELECT,
+	FIGHTINTRO,
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
@@ -238,4 +241,4 @@ enum PauseMenuOption
 };
 
 // For console log printing
-static const char* ModeMap[] = { "MENU", "CHARSELECT", "STAGESELECT", "PVC", "PVP", "TUTORIAL", "DEV" };
+static const char* ModeMap[] = { "MENU", "CHARSELECT", "STAGESELECT", "FIGHTINTRO", "PVC", "PVP", "TUTORIAL", "DEV" };

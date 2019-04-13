@@ -63,6 +63,7 @@ protected:
 
 bool load_all_sprites_from_file();
 void load_fighter_templates();
+vec3 get_particle_color_for_fc(FighterCharacter fc);
 
 extern std::map<FighterCharacter, FighterInfo> fighterMap;
 

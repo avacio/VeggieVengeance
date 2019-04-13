@@ -172,6 +172,15 @@ void MainMenu::draw(const mat3& projection)
 			else if (s == OVEN) { text[0]->renderString(projection, "HAZARD: Heat wave"); }
 		}
 	}
+	else if (m_mode == FIGHTINTRO) {
+		for (int i = 0; i < fi_textures.size(); i++) {
+			fi_textures[i].draw(projection);
+		}
+		text[0]->renderString(projection, p1name);
+		text[1]->renderString(projection, p2name);
+		text[2]->renderString(projection, "VS.");
+		text[3]->renderString(projection, "PRESS ENTER TO START");
+	}
 }
 
 vec2 MainMenu::get_position()const
@@ -294,6 +303,69 @@ void MainMenu::init_stage_textures() {
 	stage_textures.emplace_back(s2);
 }
 
+void MainMenu::init_fight_intro(std::string p1name, FighterCharacter p1fc, std::string p2name, FighterCharacter p2fc) {
+	reset();
+	m_mode = FIGHTINTRO;
+	TextureRenderer s1, s2;
+	vec2 p1posn = { screen.x * .15f, 200.f };
+	vec2 p2posn = { screen.x * .85f , screen.y -300.f };
+	switch (p1fc) {
+	case POTATO:
+		s1.init(screen, &POTATO_CHARGING_TEXTURE, { .4f, .4f }, p1posn);
+		break;
+	case BROCCOLI:
+		s1.init(screen, &BROCCOLI_CHARGING_TEXTURE, { .4f, .4f }, p1posn);
+		break;
+	case EGGPLANT:
+		s1.init(screen, &EGGPLANT_CHARGING_TEXTURE, { .4f, .4f }, p1posn);
+		break;
+	case YAM:
+		s1.init(screen, &YAM_CHARGING_TEXTURE, { 0.4f, 0.4f }, p1posn);
+		break;
+	}
+
+	switch (p2fc) {
+	case POTATO:
+		s2.init(screen, &POTATO_POWER_PUNCH_TEXTURE, { -0.4f, 0.4f }, p2posn);
+		break;
+	case BROCCOLI:
+		s2.init(screen, &BROCCOLI_POWER_PUNCH_TEXTURE, { -0.4f, 0.4f }, p2posn);
+		break;
+	case EGGPLANT:
+		s2.init(screen, &EGGPLANT_POWER_PUNCH_TEXTURE, { -0.4f, 0.4f }, p2posn);
+		break;
+	case YAM:
+		s2.init(screen, &YAM_POWER_PUNCH_TEXTURE, { -0.4f, 0.4f }, p2posn);
+		break;
+	}
+	fi_textures.emplace_back(s1);
+	fi_textures.emplace_back(s2);
+
+	///////// TEXT
+	TextRenderer* t1 = new TextRenderer(mainFont, 70);
+	TextRenderer* t2 = new TextRenderer(mainFont, 70);
+	TextRenderer* t3 = new TextRenderer(mainFontBold, 60);
+	TextRenderer* t4 = new TextRenderer(mainFont, 30);
+
+	t1->setColor({ 0.f,0.f,0.f });
+	t2->setColor({ 0.f,0.f,0.f });
+	t4->setColor(defaultColor);
+
+	int width = t1->get_width_of_string(p2name);
+	int vWidth = t3->get_width_of_string("vs.");
+	int pWidth = t4->get_width_of_string("PRESS ENTER TO START");
+	t1->setPosition({ p1posn.x + 150.f, p1posn.y });
+	t2->setPosition({ p2posn.x - 150.f - width, p2posn.y});
+	t3->setPosition({ screen.x / 2.f - vWidth, (screen.y / 2.f) -40.f });
+	t4->setPosition({ screen.x / 2.f - pWidth*.5f, (screen.y - 100.f) });
+
+	text.emplace_back(t1);
+	text.emplace_back(t2);
+	text.emplace_back(t3);
+	text.emplace_back(t4);
+	this->p1name = p1name;
+	this->p2name = p2name;
+}
 
 GameMode MainMenu::set_selected_mode()
 {
@@ -394,6 +466,10 @@ void MainMenu::reset() {
 		delete t;
 	}
 	text.clear();
+	for (auto &t : fi_textures) {
+		t.destroy();
+	}
+	fi_textures.clear();
 	selectedButtonIndex = 0;
 	is_player_1_chosen = false;
 }
