@@ -5,7 +5,7 @@ class Particle : public Renderable {
 	static Texture bomb_texture;
 public:
 	Particle();
-	void init(vec2 position, float lifespan, float angle, float speed, vec3 color);
+	void init(vec2 position, float lifespan, float angle, float speed, vec3 color, float scale);
 	void update(float ms);
 	vec2 get_position();
 	bool get_is_alive();
@@ -21,5 +21,4 @@ private:
 	float m_lifespan;
 	float m_scale;
 	vec3 m_color;
-	//float m_color[];
 };

@@ -124,6 +124,7 @@ bool World::init(vec2 screen, GameMode mode)
 	m_charging_up_audio->volume *= 0.3;
 	m_charged_punch_audio = Mix_LoadWAV(audio_path("charged_punch.wav"));
 	m_broccoli_uppercut_audio = Mix_LoadWAV(audio_path("uppercut.wav"));
+	m_fight_audio = Mix_LoadWAV(audio_path("fight.wav"));
 
 	if (m_bgms[m_background_track] == nullptr)
 	{
@@ -223,8 +224,8 @@ bool World::update(float elapsed_ms)
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
 		}
 		if (m_mode == FIGHTINTRO) {
-			emit_particles({ screen.x * .3f, (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP1), 1, false, 0.f);
-			emit_particles({ screen.x * .6f , (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP2), 1, false,180.f);
+			emit_particles({ screen.x * .3f, (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP1), 1, false, 0.f, 25.f);
+			emit_particles({ screen.x * .6f , (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP2), 1, false,180.f, 25.f);
 		}
 	}
 	
@@ -608,9 +609,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 					set_mode(CHARSELECT);
 				} else {
 					set_mode(FIGHTINTRO);
+					play_grunt_audio();
+					play_grunt_audio();
 				}
 			}
 			else if (m_mode == FIGHTINTRO) {
+				Mix_PlayChannel(1, m_fight_audio, 0);
 				set_mode(selected_fight_mode);
 			}
 		}
@@ -649,14 +653,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player1.is_tired_out()) {
 					Mix_PlayChannel(1, m_charging_up_audio, 0);
-					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3, true, 0.f);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3, true, 0.f, 5.f);
 				}
 			}	
 			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
 				m_player1.set_movement(POWER_PUNCHING);
 				if (!m_player1.is_tired_out()) {
 					Mix_PlayChannel(1, m_charged_punch_audio, 0);
-					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 				}
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
@@ -706,14 +710,14 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.set_movement(HOLDING_POWER_PUNCH);
 				if (!m_player2.is_tired_out()) {
 					Mix_PlayChannel(2, m_charging_up_audio, 0);
-					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3, true, 0.f);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3, true, 0.f, 5.f);
 				}
 			}
 			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
 				m_player2.set_movement(POWER_PUNCHING);			
 				if (!m_player2.is_tired_out()) {
 					Mix_PlayChannel(2, m_charged_punch_audio, 0);
-					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 				}
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
@@ -764,6 +768,7 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 					set_paused(!m_paused);
 				}
 				else if (selectedOption == MAINMENU) {
+					m_bg.setHelp(false);
 					set_mode(MENU);
 				}
 				else if (selectedOption == QUIT) {
@@ -1320,13 +1325,14 @@ bool World::is_ui_mode() {
 }
 
 
-void World::emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle) {
+void World::emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle, float particleScale) {
 	auto pe = new ParticleEmitter(
 		position,
 		maxParticles,
 		color,
 		isRandom,
-		angle);
+		angle,
+		particleScale);
 	pe->init();
 	m_particle_emitters.emplace_back(pe);
 }

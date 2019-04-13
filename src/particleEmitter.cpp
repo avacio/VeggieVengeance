@@ -1,6 +1,6 @@
 #include "particleEmitter.hpp"
 
-ParticleEmitter::ParticleEmitter(vec2 position, int max_particles, vec3 color, bool random, float angle)
+ParticleEmitter::ParticleEmitter(vec2 position, int max_particles, vec3 color, bool random, float angle, float scale)
 {
 	m_max_particles = max_particles;
 	m_num_alive_particles = 0;
@@ -9,6 +9,7 @@ ParticleEmitter::ParticleEmitter(vec2 position, int max_particles, vec3 color, b
 	m_color = color;
 	m_is_random = random;
 	m_set_angle = angle;
+	m_p_scale = scale;
 }
 
 ParticleEmitter::~ParticleEmitter() {
@@ -47,10 +48,10 @@ bool ParticleEmitter::init() {
 
 	int i = 0;
 	while (i < m_max_particles) {
-		if (m_is_random) {particle_pool[i++].init(m_position, 500, (rand() % 35999) / 100.f, (rand() % 3000) / 1000.f + 3.f, m_color); // TODO vary the shades of color?
+		if (m_is_random) {particle_pool[i++].init(m_position, 500, (rand() % 35999) / 100.f, (rand() % 3000) / 1000.f + 3.f, m_color, m_p_scale); // TODO vary the shades of color?
 		}
 		else {
-			particle_pool[i++].init(m_position, 500, m_set_angle, (rand() % 3000) / 1000.f + 3.f, m_color); // TODO vary the shades of color?
+			particle_pool[i++].init(m_position, 500, m_set_angle, (rand() % 3000) / 1000.f + 3.f, m_color, m_p_scale); // TODO vary the shades of color?
 		}
 		m_num_alive_particles++;
 	}

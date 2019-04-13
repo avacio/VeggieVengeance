@@ -9,13 +9,13 @@ Particle::Particle() {
 	m_color = { 0.0,0.0,0.0 };
 }
 
-void Particle::init(vec2 position, float lifespan, float angle, float speed, vec3 color) {
+void Particle::init(vec2 position, float lifespan, float angle, float speed, vec3 color, float scale) {
 	m_position = position;
 	m_lifespan = lifespan;
 	float radians = angle * PI / 180.f;
 	m_velocity.x = speed * cos(radians);
 	m_velocity.y = -speed * sin(radians);
-	m_scale = 5.f;
+	m_scale = scale; //5.F
 	m_color = color;
 }
 

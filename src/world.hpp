@@ -85,7 +85,7 @@ class World
 	void init_char_select_ais();
 	bool is_ui_mode();
 	//void emit_particles(vec2 position, vec3 color, int maxParticles);
-	void emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle);
+	void emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle, float particleScale);
 
 	// Window handle
 	GLFWwindow *m_window;
@@ -123,6 +123,7 @@ class World
 	Mix_Chunk *m_broccoli_uppercut_audio;
 	Mix_Chunk *m_charging_up_audio;
 	Mix_Chunk *m_charged_punch_audio;
+	Mix_Chunk *m_fight_audio;
 
 	GameMode m_mode;
 	bool m_paused;
