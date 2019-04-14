@@ -146,7 +146,6 @@ bool World::init(vec2 screen, GameMode mode)
 	m_attacks_tree = new QuadTree(m_screenBoundingBox);
 
 	bool initSuccess = load_all_sprites_from_file() && set_mode(mode);
-	init_char_select_ais();
 
 	return m_water.init() && initSuccess;
 }
@@ -224,7 +223,7 @@ bool World::update(float elapsed_ms)
 				m_player1.get_facing_front(), m_player1.get_health(), m_player1.is_blocking());
 		}
 		if (m_mode == FIGHTINTRO) {
-			emit_particles({ screen.x * .3f, (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP1), 1, false, 0.f, 25.f);
+			emit_particles({ screen.x * .28f, (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP1), 1, false, 0.f, 25.f);
 			emit_particles({ screen.x * .6f , (screen.y / 2.f) - 60.f }, get_particle_color_for_fc(selectedP2), 1, false,180.f, 25.f);
 		}
 	}
@@ -936,6 +935,7 @@ bool World::set_mode(GameMode mode) {
 			m_player1.set_in_play(true); // needed to make AI respond
 			set_paused(false);
 			initSuccess = initSuccess && m_menu.init(m_screen) && m_menu.set_mode(MENU);
+			init_char_select_ais();
 			break;
 		case CHARSELECT:
 		{
@@ -1016,26 +1016,10 @@ bool World::set_mode(GameMode mode) {
 }
 
 void World::init_stage(Stage stage) {
-	//for (auto &platform : m_platforms) {
-	//	platform.destroy();
-	//}
-
-	//if (m_platforms_tree && m_platforms_tree->size() > 0) {
-	//	m_platforms_tree->clear();
-	//}
 	if (m_platforms_tree && m_platforms_tree->size() > 0) {
 		m_platforms_tree->clear();
-	}
-	//TODO: cannot remove main platform or else a menu AI will fall (they always exist)
-
-	//if (m_platforms.size() == 0) {
-	//	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
-	//}
-	//while (m_platforms.size() > 1) {
-	//	m_platforms.pop_back(); // memory leak? should destruct on pop
-	//}
-	
-	spawn_platform(0, 635, 1200, 8); //main platform never gets deleted (for menu)
+	}	
+	spawn_platform(0, 635, 1200, 8); //main platform
 	std::cout << "Init stage to: " << stage << std::endl;
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
@@ -1061,7 +1045,6 @@ void World::init_stage(Stage stage) {
 			break;
 		}
 		default: {
-			//spawn_platform(0, 635, 1200, 8); //main platform
 			break;
 		}
 	}
@@ -1290,6 +1273,10 @@ void World::apply_stage_fx_dmg() {
 }
 
 void World::init_char_select_ais() {
+	for (AI& ai : m_char_select_ais) {
+		ai.destroy();
+	}
+	m_char_select_ais.clear();
 	AI ai_potato(idCounter, RANDOM);
 	if (ai_potato.init(3, "AI", POTATO))
 	{

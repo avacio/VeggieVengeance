@@ -84,7 +84,6 @@ class World
 	void clear_all_fighters();
 	void init_char_select_ais();
 	bool is_ui_mode();
-	//void emit_particles(vec2 position, vec3 color, int maxParticles);
 	void emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle, float particleScale);
 
 	// Window handle
