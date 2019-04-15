@@ -1,0 +1,28 @@
+# Team 9
+Grades: 84/100
+
+The game now has four playable characters and each has two special abilities. The next step I suggest is to improve on the game AI. The current AI does random movement when it’s far to the player and switches to be aggressive when being close. It is slightly more complicated than before since the AI knows to use special abilities now. I suggest implementing better dodging scheme so the AI behavior can feel more human-like.
+
+Apart from the AI, one can also improve the visual effect (fighting games all come with over-the-top effects). For instance, adding halos or flickering colors to the power punch.
+
+In terms of gameplace comments, I feel it is hard to regain the distance once the AI is close to the player. In the current version, the AI can “stick” to the player and keep punching. A more reasonable fighting game should avoid this situation. Some solutions are (1) forbidding characters to overlap; (2) making the character fly after being hit by a combo (a certain number of punches).
+
+## Milestone requirements (64)
+
++10/10 Gameplay (6 min): The game has enough contents.
++15/15 Performance & Robust Playing: The game runs without lag or crash and terminates gracefully.
++5/5 Correct Time Step.
++15/20 Memory: The game leaks.
+Visual Leak Detector detected 1038 memory leaks (62684 bytes).
+Fighter::update(), TextRenderer::TextRenderer().
++10/10 Reloadable: The game doesn’t support regular save & load due to its genre. But it supports resetting with the same name, positions, and status.
++9/15 Bugs & Glitches:
+- -4 The knife texture is incorrect.
+- -2 Characters can hang on the platform edge by jumping toward it.
+(A minor issue, no point reduced) The player can’t quit the game from the main menu.
+
+## Milestone creative (20)
+
++15 New characters (eggplant, yam) with new special abilities.
++5 Changeable music.
+
