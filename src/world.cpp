@@ -66,9 +66,13 @@ bool World::init(vec2 screen, GameMode mode)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	is_fullscreen = false;
+	m_monitor = glfwGetPrimaryMonitor();
+	m_vidmode = glfwGetVideoMode(m_monitor);
+	printf("width: %i\n", m_vidmode->width);
+	printf("height: %i\n", m_vidmode->height);
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "VEGGIE VENGEANCE", nullptr, nullptr);
-	if (m_window == nullptr)
-		return false;
+	if (m_window == nullptr) return false;
 
 	glfwMakeContextCurrent(m_window);
 	glfwSwapInterval(1); // vsync
@@ -837,6 +841,20 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		m_background_track = get_random_number(m_bgms.size() - 1);
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
 	}
+
+	// Fullscreen 
+	/*
+	if (action == GLFW_PRESS && key == GLFW_KEY_F11) {
+		if (!is_fullscreen) {
+			//glfwSetWindowMonitor(m_window, m_monitor, 0, 0, 1200, 800, m_vidmode->refreshRate);
+			glfwSetWindowMonitor(m_window, m_monitor, 0, 0, 1080, 720, GLFW_DONT_CARE);
+			is_fullscreen = true;
+		} else {
+			glfwSetWindowMonitor(m_window, NULL, 0, 0, 1200, 800, GLFW_DONT_CARE);
+			is_fullscreen = false;
+		}
+	}
+	*/
 
 	//// TODO Spawn mesh for testing purposes
 	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && m_mode == PVP && selected_stage == KITCHEN) {

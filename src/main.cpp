@@ -8,7 +8,6 @@
 // stlib
 #include <chrono>
 #include <iostream>
-
 #include <SDL.h>
 
 using Clock = std::chrono::high_resolution_clock;
@@ -22,6 +21,7 @@ const char* title = "VEGGIE VENGEANCE";
 // Entry point
 int main(int argc, char* argv[])
 {
+
 	// Initializing world (after renderer.init().. sorry)
 	if (!world.init({ (float)width, (float)height }, MENU))
 	{

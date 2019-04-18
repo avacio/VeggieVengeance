@@ -87,6 +87,9 @@ class World
 	void emit_particles(vec2 position, vec3 color, int maxParticles, bool isRandom, float angle, float particleScale);
 
 	// Window handle
+	const GLFWvidmode* m_vidmode;
+	bool is_fullscreen;
+	GLFWmonitor* m_monitor;
 	GLFWwindow *m_window;
 	BoundingBox m_screenBoundingBox = BoundingBox(0.f, 0.f, 1200.f, 800.f);
 	vec2 m_screen; // screen vector

@@ -26,5 +26,5 @@ public:
 	int m_height;
 	DeletionTime m_delete_when;
 	unsigned int m_pointer_references = 1;
-
+	bool m_on_the_ground = false;
 };

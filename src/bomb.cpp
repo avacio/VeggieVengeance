@@ -83,6 +83,9 @@ bool Bomb::init() {
 }
 void Bomb::update(float ms) {
 	m_damageEffect->m_time_remain--;
+	float s = ms / 1000;
+	m_position.y += m_velocity_y * s;
+	m_velocity_y += gravity.y * s;
 }
 
 void Bomb::draw(const mat3 &projection){
