@@ -1098,7 +1098,7 @@ void World::attack_collision() {
 
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b1)) {
+			if (attack->m_fighter_id != m_player1.get_id() && !m_player1.is_blocking() && attack->m_damageEffect->m_bounding_box.check_collision(b1)) {
 				//incur damage
 				m_player1.apply_damage(attack->m_damageEffect);
 				m_player1.set_hurt(true);
@@ -1113,7 +1113,7 @@ void World::attack_collision() {
 
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b2)) {
+			if (attack->m_fighter_id != m_player2.get_id() && !m_player2.is_blocking() && attack->m_damageEffect->m_bounding_box.check_collision(b2)) {
 				//incur damage
 				m_player2.apply_damage(attack->m_damageEffect);
 				m_player2.set_hurt(true);
@@ -1122,16 +1122,17 @@ void World::attack_collision() {
 		}
 	}
 
-	for (AI ai : m_ais) {
+	for (AI &ai : m_ais) {
 		if (ai.get_alive()) {
 			BoundingBox b3 = ai.get_bounding_box();
 			renderables = m_attacks_tree->retrieve(b3, {});
 
 			for (Renderable* renderable : renderables) {
 				Attack* attack = static_cast<Attack*>(renderable);
-				if (attack->m_fighter_id != ai.get_id() && ai.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b3)) {
+				if (attack->m_fighter_id != ai.get_id() && !ai.is_blocking() && attack->m_damageEffect->m_bounding_box.check_collision(b3)) {
 					//incur damage
 					ai.apply_damage(attack->m_damageEffect);
+					
 					ai.set_hurt(true);
 					attack->m_damageEffect->m_hit_fighter = true;
 				}
