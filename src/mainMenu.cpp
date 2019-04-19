@@ -378,7 +378,8 @@ GameMode MainMenu::set_selected_mode()
 		break; }
 	case 2: {
 		m_selected_mode = TUTORIAL;
-		break; }
+		break; 
+		}
 	}
 	return m_selected_mode;
 }
