@@ -391,7 +391,7 @@ void Fighter::set_movement(int mov)
 			else m_potato_explode_planted_bomb = true;
 			m_is_idle = false;
 		}
-		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out) {
+		else if (m_fc == BROCCOLI && !m_is_blocking && !m_tired_out && !m_broccoli_uppercut_on_cooldown) {
 			m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
 		}

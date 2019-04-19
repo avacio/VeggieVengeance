@@ -1113,14 +1113,19 @@ void World::attack_collision() {
 	if (m_player1.get_in_play() && m_player1.get_alive()) {
 		BoundingBox b1 = m_player1.get_bounding_box();
 		renderables = m_attacks_tree->retrieve(b1, {});
-
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b1)) {
+			BoundingBox b = attack->get_bounding_box();
+			if (attack->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && b.check_collision(b1)) {
 				//incur damage
 				m_player1.apply_damage(attack->m_damageEffect);
 				m_player1.set_hurt(true);
 				attack->m_damageEffect->m_hit_fighter = true;
+			}
+			// check attack collision with platforms
+			for (Renderable *renderable : m_platforms_tree->retrieve(b, {})) {
+				Platform* platform = static_cast<Platform*>(renderable);
+				if (b.check_collision(platform->get_bounding_box())) { attack->m_on_the_ground = true; }
 			}
 		}
 	}
@@ -1128,14 +1133,19 @@ void World::attack_collision() {
 	if (m_player2.get_in_play() && m_player2.get_alive()) {
 		BoundingBox b2 = m_player2.get_bounding_box();
 		renderables = m_attacks_tree->retrieve(b2, {});
-
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && attack->m_damageEffect->m_bounding_box.check_collision(b2)) {
+			BoundingBox b = attack->get_bounding_box();
+			if (attack->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && b.check_collision(b2)) {
 				//incur damage
 				m_player2.apply_damage(attack->m_damageEffect);
 				m_player2.set_hurt(true);
 				attack->m_damageEffect->m_hit_fighter = true;
+			}
+			// check attack collision with platforms
+			for (Renderable *renderable : m_platforms_tree->retrieve(b, {})) {
+				Platform* platform = static_cast<Platform*>(renderable);
+				if (b.check_collision(platform->get_bounding_box())) { attack->m_on_the_ground = true; }
 			}
 		}
 	}
