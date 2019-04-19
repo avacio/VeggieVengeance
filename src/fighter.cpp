@@ -511,21 +511,22 @@ void Fighter::set_hurt(bool hurt) {
 void Fighter::apply_damage(DamageEffect * damage_effect) {
 	if (damage_effect->m_damage <= m_health) {
 		m_health -= damage_effect->m_damage;
-
 		if (damage_effect->m_bounding_box.xpos + (damage_effect->m_bounding_box.width / 2) > m_position.x) {
 			if (damage_effect->m_vert_force > 0) {
 				m_force.x -= 0.3f * damage_effect->m_damage;
 				m_velocity_y = -damage_effect->m_vert_force;
-			} else 
+			} else {
 				m_force.x -= 1.f * damage_effect->m_damage;
+			}
 		}
 		else {
 			if (damage_effect->m_vert_force > 0) {
 				m_force.x += 0.3f * damage_effect->m_damage;
 				m_velocity_y = -damage_effect->m_vert_force;
 			}
-			else
+			else {
 				m_force.x += 1.f * damage_effect->m_damage;
+			}
 		}
 	} else {
 		m_health = 0;
@@ -1234,7 +1235,9 @@ void Fighter::yam_heal_update(float ms) {
 		if (m_yam_heal_cooldown_ms <= 0.0) {
 			// heal, but don't go over the health cap
 			if (RECOVERY_POINTS + m_health < MAX_HEALTH) { m_health += RECOVERY_POINTS; }
-			else { m_health = MAX_HEALTH; }
+			else { 
+				m_health = MAX_HEALTH; 
+			}
 			//reset cooldown and state
 			m_yam_heal_cooldown_ms = MAX_HEAL_COOLDOWN;
 			m_yam_heal_animation_ms = MAX_HEAL_ANIMATION;

@@ -135,6 +135,7 @@ class World
 	bool m_heat_wave_on = false;
 	float m_stage_fx_time = -1;
 	bool m_falling_knives_on = false;
+	int knife_fall_count = 0;
 
 	/////////
 	FighterCharacter selectedP1 = POTATO; // POTATO

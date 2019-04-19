@@ -148,6 +148,7 @@ void MainMenu::draw(const mat3& projection)
 		buttons[0]->renderString(projection, "ONE-PLAYER");
 		buttons[1]->renderString(projection, "TWO-PLAYER");
 		buttons[2]->renderString(projection, "TUTORIAL");
+		buttons[3]->renderString(projection, "QUIT");
 	} else if (m_mode == CHARSELECT) {
 		if (m_selected_mode == PVP) {
 			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
@@ -198,18 +199,22 @@ void MainMenu::init_menu_buttons()
 	TextRenderer* b1 = new TextRenderer(mainFont, 50);
 	TextRenderer* b2 = new TextRenderer(mainFont, 50);
 	TextRenderer* b3 = new TextRenderer(mainFont, 50);
+	TextRenderer* b4 = new TextRenderer(mainFont, 50);
 
 	b1->setColor(selectedColor);
 	b2->setColor(defaultColor);
 	b3->setColor(defaultColor);
+	b4->setColor(defaultColor);
 
 	int width = b1->get_width_of_string("POTATO");
 	b1->setPosition({ width / 3.f, screen.y / 2.f-100.f });
 	b2->setPosition({ width / 3.f, (screen.y/2.f) -25.f});
 	b3->setPosition({ width / 3.f, (screen.y / 2.f) + 50.f });
+	b4->setPosition({ width / 3.f, (screen.y / 2.f) + 125.f });
 	buttons.emplace_back(b1);
 	buttons.emplace_back(b2);
 	buttons.emplace_back(b3);
+	buttons.emplace_back(b4);
 }
 
 void MainMenu::init_select_char_buttons() {
@@ -219,7 +224,7 @@ void MainMenu::init_select_char_buttons() {
 	TextRenderer* t3 = new TextRenderer(mainFont, 35);
 	TextRenderer* t4 = new TextRenderer(mainFont, 35);
 	TextRenderer* t5 = new TextRenderer(mainFontBold, 35);
-	TextRenderer* t6 = new TextRenderer(mainFont, 35);
+	TextRenderer* t6 = new TextRenderer(mainFont, 30);
 
 	t1->setColor({0.f,0.f,0.f});
 	t2->setColor({ 0.f,0.f,0.f });
@@ -297,8 +302,8 @@ void MainMenu::init_select_stage_buttons()
 
 void MainMenu::init_stage_textures() {
 	TextureRenderer s1, s2;
-	s1.init(screen, &KITCHEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
-	s2.init(screen, &OVEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
+	s1.init(screen, &KITCHEN_BACKGROUND_TEXTURE, { 0.028f, 0.028f }, { screen.x / 2.f + 125.f, 370.f });
+	s2.init(screen, &OVEN_BACKGROUND_TEXTURE, { 0.028f, 0.028f }, { screen.x / 2.f + 125.f, 370.f });
 	stage_textures.emplace_back(s1);
 	stage_textures.emplace_back(s2);
 }
@@ -380,6 +385,10 @@ GameMode MainMenu::set_selected_mode()
 		m_selected_mode = TUTORIAL;
 		break; 
 		}
+	case 3: {
+		m_selected_mode = MENU; // quit
+		break;
+	}
 	}
 	return m_selected_mode;
 }
