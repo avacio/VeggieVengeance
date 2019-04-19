@@ -219,7 +219,7 @@ void MainMenu::init_select_char_buttons() {
 	TextRenderer* t3 = new TextRenderer(mainFont, 35);
 	TextRenderer* t4 = new TextRenderer(mainFont, 35);
 	TextRenderer* t5 = new TextRenderer(mainFontBold, 35);
-	TextRenderer* t6 = new TextRenderer(mainFont, 35);
+	TextRenderer* t6 = new TextRenderer(mainFont, 30);
 
 	t1->setColor({0.f,0.f,0.f});
 	t2->setColor({ 0.f,0.f,0.f });
@@ -297,8 +297,8 @@ void MainMenu::init_select_stage_buttons()
 
 void MainMenu::init_stage_textures() {
 	TextureRenderer s1, s2;
-	s1.init(screen, &KITCHEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
-	s2.init(screen, &OVEN_BACKGROUND_TEXTURE, { 0.035f, 0.035f }, { screen.x / 2.f + 125.f, 370.f });
+	s1.init(screen, &KITCHEN_BACKGROUND_TEXTURE, { 0.028f, 0.028f }, { screen.x / 2.f + 125.f, 370.f });
+	s2.init(screen, &OVEN_BACKGROUND_TEXTURE, { 0.028f, 0.028f }, { screen.x / 2.f + 125.f, 370.f });
 	stage_textures.emplace_back(s1);
 	stage_textures.emplace_back(s2);
 }
