@@ -1,4 +1,4 @@
-// Header
+﻿// Header
 #include "background.hpp"
 
 Texture Background::bg_texture;
@@ -57,7 +57,7 @@ bool Background::init(vec2 screen, GameMode mode, Stage stage)
 	m_scale.x = 0.36f;
 	m_scale.y = 0.36f;
 	m_rotation = 0.f;
-	m_position = { 600.f, 425.f };
+	m_position = { 600.f, 371.f };
 
 	m_initialized = true;
 
