@@ -10,7 +10,7 @@
 #define HEAT_WAVE_RATE 75
 #define HEAT_WAVE_LENGTH 2
 
-#define FALLING_KNIVES_RATE 30
+#define FALLING_KNIVES_RATE 45
 #define FALLING_KNIVES_LENGTH 2
 
 #define POWER_PUNCH_PARTICLES 150
@@ -366,8 +366,8 @@ bool World::update(float elapsed_ms)
 						printf("CLEARED KNIVES");
 					}
 				}*/
-				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0) { //&& !m_heat_wave_on
-					//set_falling_knives(true);
+				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0 && m_mode == PVP && knife_fall_count <2) { //&& !m_heat_wave_on
+					set_falling_knives(true);
 				}
 
 			}
@@ -546,40 +546,46 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 {
 	
 	////////////// TEST MODES
-	if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
-	{
-		set_mode(DEV);
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_2) // TEST
-	{
-		set_mode(PVC);
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_3) // TEST
-	{
-		set_mode(PVP);
-	}
-	if (action == GLFW_RELEASE && key == GLFW_KEY_4) // TEST
-	{
-		m_player1.set_in_play(false);
-		m_player2.set_in_play(false);
-		m_ais.clear();
-		set_mode(TUTORIAL);
-	}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_1) // TEST
+	//{
+	//	set_mode(DEV);
+	//}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_2) // TEST
+	//{
+	//	set_mode(PVC);
+	//}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_3) // TEST
+	//{
+	//	set_mode(PVP);
+	//}
+	//if (action == GLFW_RELEASE && key == GLFW_KEY_4) // TEST
+	//{
+	//	m_player1.set_in_play(false);
+	//	m_player2.set_in_play(false);
+	//	m_ais.clear();
+	//	set_mode(TUTORIAL);
+	//}
 	//////////////////////
 	// MAIN MENU CONTROLS
 	if (is_ui_mode())
 	{
-		if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
-			m_menu.change_selection(false);
-		}
-		if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) {
-			m_menu.change_selection(true);
+		if (m_mode != FIGHTINTRO) {
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
+				m_menu.change_selection(false);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) {
+				m_menu.change_selection(true);
+			}
 		}
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
 			if (m_mode == MENU) {
-				m_menu.set_selected_mode();
-				set_mode(CHARSELECT);
+				GameMode m = m_menu.set_selected_mode();
+				if (m != MENU) {
+					set_mode(CHARSELECT);
+				} else {
+					m_over = true;
+				}
 			} else if (m_mode == CHARSELECT) {
 				FighterCharacter result = m_menu.get_selected_char();
 				selected_fight_mode = m_menu.get_selected_mode();
@@ -839,13 +845,9 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 	}
 
 	//// TODO Spawn mesh for testing purposes
-	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && m_mode == PVP && selected_stage == KITCHEN) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && selected_stage == KITCHEN) {
 		set_falling_knives(true);
 	}
-	////// TODO test particle emitters
-	//if (action == GLFW_PRESS && key == GLFW_KEY_Z) {
-	//	emit_particles({ m_screen.x / 2.f, m_screen.y / 2.f }, { 1.f,0,0 });
-	//}
 }
 
 
@@ -911,6 +913,7 @@ bool World::set_mode(GameMode mode) {
 	clear_all_fighters();
 	m_attacks.clear();
 	m_falling_knives_on = false;
+	knife_fall_count = 0;
 	for (auto &k : m_knives) {
 		k.destroy();
 	}
@@ -1199,29 +1202,31 @@ bool World::is_game_over() {
 
 void World::set_falling_knives(bool on) {
 	//std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
-	if (on && m_knives.size() > 0) { return; } // TEST
-	if (m_falling_knives_on == on) { return; }
+	//if (on && m_knives.size() > 0) { return; } // TEST
+	//if (m_falling_knives_on == on) { return; }
 	if (on) {
-		//printf("knife");
-		//for (auto &k : m_knives) {
-		//	k.destroy();
-		//}
-		//m_knives.clear();
+		for (auto &k : m_knives) {
+			k.destroy();
+		}
+		m_knives.clear();
 
 		m_stage_fx_time = glfwGetTime();
-		Knife k0, k1, k2, k3;
-		k0.spawn_knife(10, { 400.f, -50.f });
-		if (m_ais.size() > 0) { k1.spawn_knife(10, { m_ais[0].get_position().x, -12.f }); }
-		else { k1.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
-		if (m_player1.get_in_play()) { k2.spawn_knife(10, { m_player1.get_position().x, 0.f }); }
+		//Knife k0, k1, k2, k3;
+		Knife k1, k2;
+		//k0.spawn_knife(10, { 400.f, -50.f });
+		if (m_ais.size() > 0) { k1.spawn_knife(10, { m_ais[0].get_position().x, -50.f }); }
+		//else { k1.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
+		else { k1.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
+		if (m_player1.get_in_play()) { k2.spawn_knife(10, { m_player1.get_position().x, -50.f }); }
 		else { k2.spawn_knife(10, { get_random_number(8)*100.f+50.f, 0.f }); }
-		if (m_mode == PVP) { k3.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
-		else { k3.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }
-		m_knives.emplace_back(k0);
+		/*if (m_mode == PVP) { k3.spawn_knife(10, { m_player2.get_position().x, 0.f }); }
+		else { k3.spawn_knife(10, { get_random_number(8)*100.f + 50.f, 0.f }); }*/
+		//m_knives.emplace_back(k0);
 		m_knives.emplace_back(k1);
 		m_knives.emplace_back(k2);
-		m_knives.emplace_back(k3);
+		//m_knives.emplace_back(k3);
 		m_bg.warningText = "!!!";
+		knife_fall_count++;
 	} else {
 		for (auto &k : m_knives) {
 			k.m_done = true;
