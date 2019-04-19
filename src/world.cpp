@@ -581,10 +581,6 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		{
 			if (m_mode == MENU) {
 				m_menu.set_selected_mode();
-				if (m_menu.get_selected_mode() == QUITGAME) {
-					m_over = true;
-					return;
-				}
 				set_mode(CHARSELECT);
 			} else if (m_mode == CHARSELECT) {
 				FighterCharacter result = m_menu.get_selected_char();

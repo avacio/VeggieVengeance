@@ -148,7 +148,6 @@ void MainMenu::draw(const mat3& projection)
 		buttons[0]->renderString(projection, "ONE-PLAYER");
 		buttons[1]->renderString(projection, "TWO-PLAYER");
 		buttons[2]->renderString(projection, "TUTORIAL");
-		buttons[3]->renderString(projection, "QUIT");
 	} else if (m_mode == CHARSELECT) {
 		if (m_selected_mode == PVP) {
 			if (!is_player_1_chosen) { title->renderString(projection, "P1 CHARACTER SELECT"); }
@@ -199,22 +198,18 @@ void MainMenu::init_menu_buttons()
 	TextRenderer* b1 = new TextRenderer(mainFont, 50);
 	TextRenderer* b2 = new TextRenderer(mainFont, 50);
 	TextRenderer* b3 = new TextRenderer(mainFont, 50);
-	TextRenderer* b4 = new TextRenderer(mainFont, 50);
 
 	b1->setColor(selectedColor);
 	b2->setColor(defaultColor);
 	b3->setColor(defaultColor);
-	b4->setColor(defaultColor);
 
 	int width = b1->get_width_of_string("POTATO");
 	b1->setPosition({ width / 3.f, screen.y / 2.f-100.f });
 	b2->setPosition({ width / 3.f, (screen.y/2.f) -25.f});
 	b3->setPosition({ width / 3.f, (screen.y / 2.f) + 50.f });
-	b4->setPosition({ width / 3.f, (screen.y / 2.f) + 125.f });
 	buttons.emplace_back(b1);
 	buttons.emplace_back(b2);
 	buttons.emplace_back(b3);
-	buttons.emplace_back(b4);
 }
 
 void MainMenu::init_select_char_buttons() {
@@ -384,10 +379,6 @@ GameMode MainMenu::set_selected_mode()
 	case 2: {
 		m_selected_mode = TUTORIAL;
 		break; }
-	case 3: {
-		m_selected_mode = QUITGAME;
-		break;
-	}
 	}
 	return m_selected_mode;
 }
