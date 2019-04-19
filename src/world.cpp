@@ -578,8 +578,12 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		if (action == GLFW_RELEASE && (key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)) // TODO UX okay?
 		{
 			if (m_mode == MENU) {
-				m_menu.set_selected_mode();
-				set_mode(CHARSELECT);
+				GameMode m = m_menu.set_selected_mode();
+				if (m != MENU) {
+					set_mode(CHARSELECT);
+				} else {
+					m_over = true;
+				}
 			} else if (m_mode == CHARSELECT) {
 				FighterCharacter result = m_menu.get_selected_char();
 				selected_fight_mode = m_menu.get_selected_mode();
