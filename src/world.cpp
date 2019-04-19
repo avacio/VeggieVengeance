@@ -66,9 +66,11 @@ bool World::init(vec2 screen, GameMode mode)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	is_fullscreen = false;
+	m_monitor = glfwGetPrimaryMonitor();
+	m_vidmode = glfwGetVideoMode(m_monitor);
 	m_window = glfwCreateWindow((int)screen.x, (int)screen.y, "VEGGIE VENGEANCE", nullptr, nullptr);
-	if (m_window == nullptr)
-		return false;
+	if (m_window == nullptr) return false;
 
 	glfwMakeContextCurrent(m_window);
 	glfwSwapInterval(1); // vsync
@@ -844,6 +846,21 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 		Mix_FadeInMusic(m_bgms[m_background_track], -1, 1000);
 	}
 
+	// Fullscreen 
+	/*
+	if (action == GLFW_PRESS && key == GLFW_KEY_F11) {
+		if (!is_fullscreen) {
+			glfwSetWindowMonitor(m_window, m_monitor, 0, 1080, 1920, 1080, m_vidmode->refreshRate);
+			//glfwSetWindowMonitor(m_window, m_monitor, 0, 0, 1920, 720, GLFW_DONT_CARE);
+			is_fullscreen = true;
+		} else {
+			glfwSetWindowMonitor(m_window, NULL, 0, 40, 1200, 800, GLFW_DONT_CARE);
+			is_fullscreen = false;
+		}
+	}
+	*/
+	
+
 	//// TODO Spawn mesh for testing purposes
 	if (action == GLFW_PRESS && key == GLFW_KEY_TAB && selected_stage == KITCHEN) {
 		set_falling_knives(true);
@@ -1098,14 +1115,19 @@ void World::attack_collision() {
 	if (m_player1.get_in_play() && m_player1.get_alive()) {
 		BoundingBox b1 = m_player1.get_bounding_box();
 		renderables = m_attacks_tree->retrieve(b1, {});
-
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player1.get_id() && !m_player1.is_blocking() && attack->m_damageEffect->m_bounding_box.check_collision(b1)) {
+			BoundingBox b = attack->get_bounding_box();
+			if (attack->m_fighter_id != m_player1.get_id() && m_player1.is_blocking() == false && b.check_collision(b1)) {
 				//incur damage
 				m_player1.apply_damage(attack->m_damageEffect);
 				m_player1.set_hurt(true);
 				attack->m_damageEffect->m_hit_fighter = true;
+			}
+			// check attack collision with platforms
+			for (Renderable *renderable : m_platforms_tree->retrieve(b, {})) {
+				Platform* platform = static_cast<Platform*>(renderable);
+				if (b.check_collision(platform->get_bounding_box())) { attack->m_on_the_ground = true; }
 			}
 		}
 	}
@@ -1113,14 +1135,19 @@ void World::attack_collision() {
 	if (m_player2.get_in_play() && m_player2.get_alive()) {
 		BoundingBox b2 = m_player2.get_bounding_box();
 		renderables = m_attacks_tree->retrieve(b2, {});
-
 		for (Renderable* renderable : renderables) {
 			Attack* attack = static_cast<Attack*>(renderable);
-			if (attack->m_fighter_id != m_player2.get_id() && !m_player2.is_blocking() && attack->m_damageEffect->m_bounding_box.check_collision(b2)) {
+			BoundingBox b = attack->get_bounding_box();
+			if (attack->m_fighter_id != m_player2.get_id() && m_player2.is_blocking() == false && b.check_collision(b2)) {
 				//incur damage
 				m_player2.apply_damage(attack->m_damageEffect);
 				m_player2.set_hurt(true);
 				attack->m_damageEffect->m_hit_fighter = true;
+			}
+			// check attack collision with platforms
+			for (Renderable *renderable : m_platforms_tree->retrieve(b, {})) {
+				Platform* platform = static_cast<Platform*>(renderable);
+				if (b.check_collision(platform->get_bounding_box())) { attack->m_on_the_ground = true; }
 			}
 		}
 	}

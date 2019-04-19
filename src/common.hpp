@@ -229,7 +229,7 @@ enum GameMode
 	PVC, // single player
 	PVP, // 2 player
 	TUTORIAL,
-	DEV
+	DEV,
 };
 
 enum PauseMenuOption
