@@ -322,7 +322,7 @@ class Fighter : public Renderable
 	const float INITIAL_JUMP_VELOCITY = 400.0;
 	const float TERMINAL_VELOCITY_Y = 400.0;
 	const vec2 GRAVITY = {0.0, 800.0};
-	const int MAX_POWER_PUNCH_DMG = 49;		// +1 (original strength)  !!!FIX THIS, IT DOESNT TAKE INTO ACCOUNT THE FIGHTER TYPE
+	const int MAX_POWER_PUNCH_DMG = 35;		// +1 (original strength)  !!!FIX THIS, IT DOESNT TAKE INTO ACCOUNT THE FIGHTER TYPE
 	const float POWER_PUNCH_CHARGE_RATE = 0.5;
 	const float MAX_PUNCH_COOLDOWN = 20.0;
 	const int FULL_BLOCK_TANK = 4000;

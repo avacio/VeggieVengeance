@@ -7,7 +7,7 @@ Bomb::Bomb(int id, vec2 pos, unsigned int damage, float vert_force, float ms) {
 	//variable bomb attributes
 	this->m_fighter_id = id;
 	this->m_position.x = pos.x;
-	this->m_position.y = pos.y + 40;
+	this->m_position.y = pos.y + 60;
 	this->m_damage = damage;
 
 	//pre-determined bullet attributes
@@ -83,11 +83,13 @@ bool Bomb::init() {
 }
 void Bomb::update(float ms) {
 	m_damageEffect->m_time_remain--;
+	/*
 	if (m_on_the_ground) return;
 	float s = ms / 1000;
 	m_position.y += m_velocity_y * s;
 	m_velocity_y += gravity.y * s;
 	m_damageEffect->m_bounding_box.ypos = m_position.y;
+	*/
 }
 
 void Bomb::draw(const mat3 &projection){

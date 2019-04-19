@@ -92,7 +92,16 @@ void Projectile::update(float ms) {
 
 	m_position.x += m_velocity.x * speed_scale;
 	m_position.y += m_velocity.y * speed_scale;
-
+	/*
+	if (m_on_the_ground) {
+		m_on_the_ground = false;
+		m_velocity.y = -m_velocity.y * m_bounce_loss;
+		m_damageEffect->m_bounding_box.xpos = m_position.x;
+		m_damageEffect->m_bounding_box.ypos = m_position.y;
+		return;
+	}
+	*/
+	
 	if (m_position.y > 630.f) {
 		m_velocity.y = -m_velocity.y * m_bounce_loss;
 		m_position.y = 630.f;
