@@ -1,3 +1,50 @@
+# GRAND FINALE MILESTONE PROGRESS - Apr. 19
+
+
+
+Overview: For this final milestone, we focus on improving the ai and fixing past issues regarding stage hazards, as well as adding final touches and balancing the game.
+
+
+
+## Milestone Requirements
+
+
+- Development: All features implemented in the previous milestones should be working, or improved upon if it’s the case.
+	- all abilities are included, and their damages are tuned
+    
+- Robustness: Sustain progressive, non-repetitive gameplay across one or more levels for 10min including all new features. No verbal explanation should be required at any point during the gameplay
+	- 4 fighters (9 abilities), 2-player/1-player v ai modes, 2 stages (with unique hazards) provide non-repetitive fighting matches
+    
+        
+- Usability: Include a self-explanatory tutorial introducing the player to the game mechanics
+	- tutorial mode includes all controls (player controls, music controls etc.)
+    	- updated to include optional controls for player 2
+        
+- External Integration: Include integration of one or more external tools or libraries (physical simulation (PhysX, Bullet, ODE, etc …), game engines, or alternatives)
+	- freeType library for text rendering
+    
+- Advanced Graphics: Implementation of one or more advanced graphics features including visual effects (Particle Systems, 2.5D(3D) lighting, 2D dynamic shadows) and/or advanced 2D geometric modifications (2D deformations, rigged/skinned motion)
+	- new Particle system
+		- fighters emit particle as visual effects when charging and using power punch
+    - new stage (oven)
+        
+- Advanced Gameplay: Implementation of one or more advanced gameplay features including advanced decision making mechanisms based on goals (path planning, A*, or similar), or some form of group behavior if applicable to the game; more complex physic interactions with the environment (e.g. gravity, bouncing, complex dynamics)
+	- AIs pathfind to approach player in 1-player mode
+	- gravity applies to all fighters
+    - bouncing implemented for projectile (Broccoli's cauliflower)
+    
+- Accessibility: evaluate and optimizing user-game interactions (choice of user gestures, ease of navigation, etc …)
+	- added quit game option in main menu
+	- pause menu (esc)
+	- all player controls should be very comfortable for 2-handed play (refined according to crossplay feedback)
+		- player 1 controls: wasd, cvb, left shift
+		- player 2 controls: arrow keys, ",./" keys, right shift (if keyboard includes numpad: 123 + enter)
+
+- Audio: There should be audio feedback for all meaningful interactions in the game as well as a background music with tones reflecting the current state of the game.
+	- randomly selected background music out of a list of 8 
+	- new sound effects for most fighter abilities (bullets, projectile, bomb, uppercut, dash, heal, emoji-shot)
+    
+
 # ROBUST MILESTONE PROGRESS - Mar. 29
 
 
