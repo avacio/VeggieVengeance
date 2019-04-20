@@ -131,14 +131,11 @@ bool World::init(vec2 screen, GameMode mode)
 	m_broccoli_cauliflower_audio->volume *= 1.2;
 	m_broccoli_uppercut_audio = Mix_LoadWAV(audio_path("uppercut.wav"));
 	m_fight_audio = Mix_LoadWAV(audio_path("fight.wav"));
+	m_knife_audio = Mix_LoadWAV(audio_path("knife_slash.wav"));
 	m_game_audio = Mix_LoadWAV(audio_path("game.wav"));
 	m_yam_dash_audio = Mix_LoadWAV(audio_path("dash.wav"));
 	m_yam_heal_audio = Mix_LoadWAV(audio_path("heal.wav"));
 	m_eggplant_yeet_audio = Mix_LoadWAV(audio_path("yeet.wav"));
-	
-	
-
-
 
 	if (m_bgms[m_background_track] == nullptr)
 	{
@@ -387,7 +384,8 @@ bool World::update(float elapsed_ms)
 						printf("CLEARED KNIVES");
 					}
 				}*/
-				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0 && m_mode == PVP && knife_fall_count <2) { //&& !m_heat_wave_on
+				else if ((int)glfwGetTime() % FALLING_KNIVES_RATE == 0 && ((m_mode == PVP && knife_fall_count <2)
+					|| (m_mode == PVC && knife_fall_count <1))) { //&& !m_heat_wave_on
 					set_falling_knives(true);
 				}
 
@@ -1006,7 +1004,7 @@ bool World::set_mode(GameMode mode) {
 
 	bool initSuccess = true;
 	std::cout << "Mode set to: " << ModeMap[mode] << std::endl;
-
+	m_mode = mode;
 	switch (mode) {
 		case MENU:
 			init_stage(MENUBORDER);
@@ -1084,8 +1082,6 @@ bool World::set_mode(GameMode mode) {
 		default:
 			break;
 	}
-
-	m_mode = mode;
 	if (!is_ui_mode()) {
 		for (Fighter &f : m_fighters)
 			m_bg.addNameplate(f.get_nameplate(), f.get_name());
@@ -1101,24 +1097,28 @@ void World::init_stage(Stage stage) {
 	std::cout << "Init stage to: " << stage << std::endl;
 	switch (stage) { // TODO: set up other stage
 		case KITCHEN: {
-			spawn_platform(14, 546, 100, 8); //toaster platform
-			spawn_platform(1109, 546, 115, 8); //ricecooker platform
-			spawn_platform(225, 400, 155, 8); //left cupboard platform
-			spawn_platform(820, 400, 155, 8); //right cupboard platform
-			spawn_platform(400, 328, 405, 8); //middle cupboard platform
+			spawn_platform(14, 546, 90, 8); //toaster platform
+			spawn_platform(1119, 546, 105, 8); //ricecooker platform
+			if (m_mode == PVP) { // only have top platforms in PVP
+				spawn_platform(240, 400, 140, 8); //left cupboard platform
+				spawn_platform(820, 400, 140, 8); //right cupboard platform
+				spawn_platform(396, 328, 410, 17); //middle cupboard platform
+			}
 			break;
 			}
 		case OVEN: {
-			spawn_platform(14, 546, 100, 8); //toaster platform
-			spawn_platform(1109, 546, 115, 8); //ricecooker platform
-			spawn_platform(225, 400, 155, 8); //left cupboard platform
-			spawn_platform(820, 400, 155, 8); //right cupboard platform
-			spawn_platform(400, 328, 405, 8); //middle cupboard platform
+			spawn_platform(19, 398, 100, 8); //higher left platform
+			spawn_platform(1085, 398, 100, 8); //higher right platform
+			spawn_platform(19, 600, 80, 8); //lower left platform
+			spawn_platform(1105, 600, 80, 8); //lower right platform
+			//spawn_platform(225, 400, 155, 8); //left cupboard platform
+			//spawn_platform(820, 400, 155, 8); //right cupboard platform
+			//spawn_platform(400, 328, 405, 8); //middle cupboard platform
 			break;
 		}
 		case MENUBORDER: {
 			spawn_platform(525, 500, 400, 8); //stage underline //m_screen.x / 2.f + 125.f
-			spawn_platform(400, 725, 380, 3); //vs.
+			spawn_platform(400, 700, 380, 3); //vs.
 			//spawn_platform(0, 200, 1200, 8); //title underline
 			break;
 		}
@@ -1126,6 +1126,7 @@ void World::init_stage(Stage stage) {
 			break;
 		}
 	}
+	//std::cout << "platform size: " << m_platforms_tree->size() << std::endl;
 }
 
 void World::on_mouse_move(GLFWwindow *window, double xpos, double ypos)
@@ -1288,7 +1289,7 @@ bool World::is_game_over() {
 void World::set_falling_knives(bool on) {
 	//std::cout << "Set knives to: " << on << ", currently: " << m_falling_knives_on << std::endl;
 	//if (on && m_knives.size() > 0) { return; } // TEST
-	//if (m_falling_knives_on == on) { return; }
+	if (m_falling_knives_on == on) { return; }
 	if (on) {
 		for (auto &k : m_knives) {
 			k.destroy();
@@ -1312,11 +1313,13 @@ void World::set_falling_knives(bool on) {
 		//m_knives.emplace_back(k3);
 		m_bg.warningText = "!!!";
 		knife_fall_count++;
+		std::cout << "KNIVES FALLING" << std::endl;
 	} else {
 		for (auto &k : m_knives) {
 			k.m_done = true;
 		}
 	}
+	Mix_PlayChannel(1, m_knife_audio, 0);
 	m_falling_knives_on = on;
 }
 

@@ -154,6 +154,7 @@ class Fighter : public Renderable
 
 	float get_heal_animation();
 
+	Mix_Chunk *m_jump_audio;
 
 	FighterCharacter m_fc;
 	// Potato

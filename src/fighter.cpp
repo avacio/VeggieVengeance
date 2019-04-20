@@ -115,6 +115,8 @@ bool Fighter::init(int init_position, std::string name, FighterCharacter fc)
 	m_initial_dir = m_facing_front;
 	m_initial_scale_x = m_scale.x;
 
+	m_jump_audio = Mix_LoadWAV(audio_path("jump.wav"));
+
 	m_nameplate = new TextRenderer(mainFont, 25);
 	m_nameplate->setColor({ 0.4f,0.4f,0.4f });
 
@@ -373,7 +375,9 @@ void Fighter::set_movement(int mov)
 		m_is_idle = false;
 		break;
 	case START_JUMPING:
-		if (!m_is_blocking && !m_tired_out) start_jumping();
+		if (!m_is_blocking && !m_tired_out) {
+			start_jumping();
+		}
 		break;
 	case CROUCHING:
 		m_crouch_state = CROUCH_PRESSED;
@@ -567,6 +571,7 @@ void Fighter::start_jumping()
 {
 	if (!m_is_jumping && m_is_alive)
 	{
+		Mix_PlayChannel(1, m_jump_audio, 0);
 		m_is_jumping = true;
 		m_is_idle = false;
 		m_velocity_y = -INITIAL_JUMP_VELOCITY;
@@ -816,6 +821,9 @@ FighterCharacter Fighter::get_fc() const {
 }
 
 void Fighter::broccoli_set_double_jump() {
+	if (!m_broccoli_is_double_jumping) {
+		Mix_PlayChannel(1, m_jump_audio, 0);
+	}
 	m_broccoli_is_double_jumping = true;
 }
 

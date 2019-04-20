@@ -181,6 +181,7 @@ void MainMenu::draw(const mat3& projection)
 		text[1]->renderString(projection, p2name);
 		text[2]->renderString(projection, "VS.");
 		text[3]->renderString(projection, "PRESS ENTER TO START");
+		text[4]->renderString(projection, "press H in-game for help");
 	}
 }
 
@@ -351,10 +352,12 @@ void MainMenu::init_fight_intro(std::string p1name, FighterCharacter p1fc, std::
 	TextRenderer* t2 = new TextRenderer(mainFont, 70);
 	TextRenderer* t3 = new TextRenderer(mainFontBold, 60);
 	TextRenderer* t4 = new TextRenderer(mainFont, 30);
+	TextRenderer* t5 = new TextRenderer(mainFont, 25);
 
 	t1->setColor({ 0.f,0.f,0.f });
 	t2->setColor({ 0.f,0.f,0.f });
 	t4->setColor(defaultColor);
+	t5->setColor(defaultColor);
 
 	int width = t1->get_width_of_string(p2name);
 	int vWidth = t3->get_width_of_string("vs.");
@@ -362,12 +365,15 @@ void MainMenu::init_fight_intro(std::string p1name, FighterCharacter p1fc, std::
 	t1->setPosition({ p1posn.x + 150.f, p1posn.y });
 	t2->setPosition({ p2posn.x - 150.f - width, p2posn.y});
 	t3->setPosition({ screen.x / 2.f - vWidth, (screen.y / 2.f) -40.f });
-	t4->setPosition({ screen.x / 2.f - pWidth*.5f, (screen.y - 100.f) });
+	t4->setPosition({ screen.x / 2.f - pWidth*.5f, (screen.y - 120.f) });
+	width = t5->get_width_of_string("pressHin-gameforhelpvv");
+	t5->setPosition({ screen.x / 2.f - width*0.5f, (screen.y - 72.f) });
 
 	text.emplace_back(t1);
 	text.emplace_back(t2);
 	text.emplace_back(t3);
 	text.emplace_back(t4);
+	text.emplace_back(t5);
 	this->p1name = p1name;
 	this->p2name = p2name;
 }

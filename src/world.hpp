@@ -128,11 +128,11 @@ class World
 	Mix_Chunk *m_charging_up_audio;
 	Mix_Chunk *m_charged_punch_audio;
 	Mix_Chunk *m_fight_audio;
+	Mix_Chunk *m_knife_audio;
 	Mix_Chunk *m_game_audio;
 	Mix_Chunk *m_yam_dash_audio;
 	Mix_Chunk *m_yam_heal_audio;
 	Mix_Chunk *m_eggplant_yeet_audio;
-
 
 	GameMode m_mode;
 	bool m_paused;
