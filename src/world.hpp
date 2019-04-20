@@ -122,11 +122,17 @@ class World
 	unsigned int m_background_track;
 	std::vector<Mix_Music*> m_bgms;
 	std::vector<Mix_Chunk*> m_grunt_audio;
+	Mix_Chunk *m_potato_fries_audio;
 	Mix_Chunk *m_broccoli_uppercut_audio;
+	Mix_Chunk *m_broccoli_cauliflower_audio;
 	Mix_Chunk *m_charging_up_audio;
 	Mix_Chunk *m_charged_punch_audio;
 	Mix_Chunk *m_fight_audio;
 	Mix_Chunk *m_knife_audio;
+	Mix_Chunk *m_game_audio;
+	Mix_Chunk *m_yam_dash_audio;
+	Mix_Chunk *m_yam_heal_audio;
+	Mix_Chunk *m_eggplant_yeet_audio;
 
 	GameMode m_mode;
 	bool m_paused;

@@ -125,9 +125,17 @@ bool World::init(vec2 screen, GameMode mode)
 	m_charging_up_audio = Mix_LoadWAV(audio_path("charging_up.wav"));
 	m_charging_up_audio->volume *= 0.3;
 	m_charged_punch_audio = Mix_LoadWAV(audio_path("charged_punch.wav"));
+	m_potato_fries_audio = Mix_LoadWAV(audio_path("fries.wav"));
+	m_potato_fries_audio->volume *= 1.2;
+	m_broccoli_cauliflower_audio = Mix_LoadWAV(audio_path("cauliflower.wav"));
+	m_broccoli_cauliflower_audio->volume *= 1.2;
 	m_broccoli_uppercut_audio = Mix_LoadWAV(audio_path("uppercut.wav"));
 	m_fight_audio = Mix_LoadWAV(audio_path("fight.wav"));
 	m_knife_audio = Mix_LoadWAV(audio_path("knife_slash.wav"));
+	m_game_audio = Mix_LoadWAV(audio_path("game.wav"));
+	m_yam_dash_audio = Mix_LoadWAV(audio_path("dash.wav"));
+	m_yam_heal_audio = Mix_LoadWAV(audio_path("heal.wav"));
+	m_eggplant_yeet_audio = Mix_LoadWAV(audio_path("yeet.wav"));
 
 	if (m_bgms[m_background_track] == nullptr)
 	{
@@ -171,6 +179,12 @@ void World::destroy()
 	Mix_FreeChunk(m_broccoli_uppercut_audio);
 	Mix_FreeChunk(m_charging_up_audio);
 	Mix_FreeChunk(m_charged_punch_audio);
+	Mix_FreeChunk(m_potato_fries_audio);
+	Mix_FreeChunk(m_broccoli_cauliflower_audio);
+	Mix_FreeChunk(m_game_audio);
+	Mix_FreeChunk(m_yam_dash_audio);
+	Mix_FreeChunk(m_yam_heal_audio);
+	Mix_FreeChunk(m_eggplant_yeet_audio);
 
 	Mix_CloseAudio();
 
@@ -233,6 +247,7 @@ bool World::update(float elapsed_ms)
 	
 	if (!m_game_over && is_game_over()) {
 		m_game_over = is_game_over();
+		Mix_PlayChannel(-1, m_game_audio, 0);
 		m_bg.set_game_over(true, m_winner_name);
 	}
 
@@ -643,34 +658,54 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player1.broccoli_set_double_jump();
 			if (action == GLFW_PRESS && key == GLFW_KEY_S)
 				m_player1.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && key == GLFW_KEY_C) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_C && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
 				m_player1.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_V) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_V && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
 				m_player1.set_movement(ABILITY_1);
 				if (m_player1.get_fc() == BROCCOLI && !m_player1.broccoli_is_uppercut_on_cooldown())
-					Mix_PlayChannel(-1, m_broccoli_uppercut_audio, 0);
+					Mix_PlayChannel(1, m_broccoli_uppercut_audio, 0);
+				if (m_player1.get_fc() == YAM && m_player1.yam_is_start_dashing() && m_player1.yam_dash_on_cooldown())
+					Mix_PlayChannel(1, m_yam_dash_audio, 0);
 			}
-			if (action == GLFW_PRESS && key == GLFW_KEY_B)
+			if (action == GLFW_PRESS && key == GLFW_KEY_B && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
 				m_player1.set_movement(ABILITY_2);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_B)
+				if (m_player1.get_fc() == POTATO && !m_player1.potato_is_fries_on_cooldown()) Mix_PlayChannel(-1, m_potato_fries_audio, 0);
+				if (m_player1.get_fc() == BROCCOLI && !m_player1.broccoli_is_cauliflower_on_cooldown()) Mix_PlayChannel(-1, m_broccoli_cauliflower_audio, 0);
+				if (m_player1.get_fc() == EGGPLANT && m_player1.eggplant_is_shooting() && m_player1.eggplant_shoot_on_cooldown() && m_player1.eggplant_enough_to_shoot())
+					Mix_PlayChannel(1, m_eggplant_yeet_audio, 0);
+				if (m_player1.get_fc() == YAM && m_player1.yam_is_healing() && m_player1.yam_heal_on_cooldown())
+					Mix_PlayChannel(1, m_yam_heal_audio, 0);
+			}
+			if (action == GLFW_REPEAT && key == GLFW_KEY_B && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
 				m_player1.set_movement(HOLDING_ABILITY_2);
-			if (action == GLFW_RELEASE && key == GLFW_KEY_B && (m_player1.broccoli_is_holding_cauliflowers() || m_player1.potato_is_holding_fries()))
-				m_player1.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING) {
-				m_player1.set_movement(HOLDING_POWER_PUNCH);
-				if (!m_player1.is_tired_out()) {
+				if (m_player1.get_fc() == POTATO || m_player1.get_fc() == BROCCOLI) {
 					Mix_PlayChannel(1, m_charging_up_audio, 0);
 					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3, true, 0.f, 5.f);
 				}
-			}	
-			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch()) {
-				m_player1.set_movement(POWER_PUNCHING);
-				if (!m_player1.is_tired_out()) {
-					Mix_PlayChannel(1, m_charged_punch_audio, 0);
+					
+			}
+			if (action == GLFW_RELEASE && key == GLFW_KEY_B && (m_player1.broccoli_is_holding_cauliflowers() || m_player1.potato_is_holding_fries()) && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
+				m_player1.set_movement(CHARGED_ABILITY_2);
+				if (m_player1.get_fc() == POTATO && !m_player1.potato_is_fries_on_cooldown()) {
+					Mix_PlayChannel(-1, m_potato_fries_audio, 0);
 					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 				}
+				if (m_player1.get_fc() == BROCCOLI && !m_player1.broccoli_is_cauliflower_on_cooldown()) {
+					Mix_PlayChannel(-1, m_broccoli_cauliflower_audio, 0);
+					emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
+				}	
+			}
+			if (action == GLFW_REPEAT && key == GLFW_KEY_C && m_player1.get_crouch_state() != IS_CROUCHING && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
+				m_player1.set_movement(HOLDING_POWER_PUNCH);
+				Mix_PlayChannel(1, m_charging_up_audio, 0);
+				emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), 3, true, 0.f, 5.f);
+			}	
+			if (action == GLFW_RELEASE && key == GLFW_KEY_C && m_player1.is_holding_power_punch() && !m_player1.is_tired_out() && !m_player1.is_blocking()) {
+				m_player1.set_movement(POWER_PUNCHING);
+				Mix_PlayChannel(1, m_charged_punch_audio, 0);
+				emit_particles(m_player1.get_position(), get_particle_color_for_fc(m_player1.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 			}
 			if (action == GLFW_PRESS && key == GLFW_KEY_LEFT_SHIFT)
 				m_player1.set_movement(BLOCKING);
@@ -700,34 +735,53 @@ void World::on_key(GLFWwindow *, int key, int, int action, int mod)
 				m_player2.broccoli_set_double_jump();
 			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN)
 				m_player2.set_movement(CROUCHING);
-			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH)) {
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
 				m_player2.set_movement(PUNCHING);
 				play_grunt_audio();
 			}
-			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD)) {
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_2 || key == GLFW_KEY_PERIOD) && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
 				m_player2.set_movement(ABILITY_1);
 				if (m_player2.get_fc() == BROCCOLI && !m_player2.broccoli_is_uppercut_on_cooldown())
-					Mix_PlayChannel(-1, m_broccoli_uppercut_audio, 0);
+					Mix_PlayChannel(2, m_broccoli_uppercut_audio, 0);
+				if (m_player2.get_fc() == YAM && m_player2.yam_is_start_dashing() && m_player2.yam_dash_on_cooldown())
+					Mix_PlayChannel(2, m_yam_dash_audio, 0);
 			}
-			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
+			if (action == GLFW_PRESS && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
 				m_player2.set_movement(ABILITY_2);
-			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA))
+				if (m_player2.get_fc() == POTATO && !m_player2.potato_is_fries_on_cooldown()) Mix_PlayChannel(-1, m_potato_fries_audio, 0);
+				if (m_player2.get_fc() == BROCCOLI && !m_player2.broccoli_is_cauliflower_on_cooldown()) Mix_PlayChannel(-1, m_broccoli_cauliflower_audio, 0);
+				if (m_player2.get_fc() == EGGPLANT && m_player2.eggplant_is_shooting() && m_player2.eggplant_shoot_on_cooldown() && m_player2.eggplant_enough_to_shoot())
+					Mix_PlayChannel(2, m_eggplant_yeet_audio, 0);
+				if (m_player2.get_fc() == YAM && m_player2.yam_is_healing() && m_player2.yam_heal_on_cooldown())
+					Mix_PlayChannel(2, m_yam_heal_audio, 0);
+			}
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
 				m_player2.set_movement(HOLDING_ABILITY_2);
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && (m_player2.broccoli_is_holding_cauliflowers() || m_player2.potato_is_holding_fries()))
-				m_player2.set_movement(CHARGED_ABILITY_2);
-			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING) {
-				m_player2.set_movement(HOLDING_POWER_PUNCH);
-				if (!m_player2.is_tired_out()) {
+				if (m_player2.get_fc() == POTATO || m_player2.get_fc() == BROCCOLI) {
 					Mix_PlayChannel(2, m_charging_up_audio, 0);
 					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3, true, 0.f, 5.f);
 				}
 			}
-			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch()) {
-				m_player2.set_movement(POWER_PUNCHING);			
-				if (!m_player2.is_tired_out()) {
-					Mix_PlayChannel(2, m_charged_punch_audio, 0);
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_3 || key == GLFW_KEY_COMMA) && (m_player2.broccoli_is_holding_cauliflowers() || m_player2.potato_is_holding_fries()) && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
+				m_player2.set_movement(CHARGED_ABILITY_2);
+				if (m_player2.get_fc() == POTATO && !m_player2.potato_is_fries_on_cooldown()) {
+					Mix_PlayChannel(-1, m_potato_fries_audio, 0);
 					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 				}
+				if (m_player2.get_fc() == BROCCOLI && !m_player2.broccoli_is_cauliflower_on_cooldown()) {
+					Mix_PlayChannel(-1, m_broccoli_cauliflower_audio, 0);
+					emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
+				}
+			}
+			if (action == GLFW_REPEAT && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.get_crouch_state() != IS_CROUCHING && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
+				m_player2.set_movement(HOLDING_POWER_PUNCH);
+				Mix_PlayChannel(2, m_charging_up_audio, 0);
+				emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), 3, true, 0.f, 5.f);
+			}
+			if (action == GLFW_RELEASE && (key == GLFW_KEY_KP_1 || key == GLFW_KEY_SLASH) && m_player2.is_holding_power_punch() && !m_player2.is_tired_out() && !m_player2.is_blocking()) {
+				m_player2.set_movement(POWER_PUNCHING);			
+				Mix_PlayChannel(2, m_charged_punch_audio, 0);
+				emit_particles(m_player2.get_position(), get_particle_color_for_fc(m_player2.m_fc), POWER_PUNCH_PARTICLES, true, 0.f, 10.f);
 			}
 			if (action == GLFW_RELEASE && key == GLFW_KEY_RIGHT)
 				m_player2.set_movement(STOP_MOVING_FORWARD);
