@@ -395,11 +395,11 @@ void Fighter::set_movement(int mov)
 			m_broccoli_is_uppercutting = true;
 			m_is_idle = false;
 		}
-		else if (m_fc == YAM) {
+		else if (m_fc == YAM && !m_is_blocking && !m_tired_out) {
 			m_yam_start_dashing = true;
 			m_is_idle = false;
 		}
-		else if (m_fc == EGGPLANT) {
+		else if (m_fc == EGGPLANT && !m_is_blocking && !m_tired_out) {
 			m_eggplant_spawn_emoji = true;
 		}
 		break;
@@ -412,11 +412,11 @@ void Fighter::set_movement(int mov)
 			m_broccoli_is_shooting_cauliflowers = true;
 			m_is_idle = false;
 		}
-		else if (m_fc == YAM) {
+		else if (m_fc == YAM && !m_is_blocking && !m_tired_out) {
 			m_yam_is_healing = true;
 			m_is_idle = false;
 		}
-		else if (m_fc == EGGPLANT) {
+		else if (m_fc == EGGPLANT && !m_is_blocking && !m_tired_out) {
 			m_eggplant_shoot_emoji = true;
 			m_is_idle = false;
 		}

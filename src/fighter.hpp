@@ -154,6 +154,7 @@ class Fighter : public Renderable
 
 	float get_heal_animation();
 
+
 	FighterCharacter m_fc;
 	// Potato
 	Attack * potato_update();
@@ -161,6 +162,7 @@ class Fighter : public Renderable
 	Bomb * potato_bomb_update();
 	bool potato_is_holding_fries() const;
 	void potato_charging_up_fries();
+	bool potato_is_fries_on_cooldown() { return m_potato_fries_on_cooldown; }
 	void reset_potato_flags();
 
 	// Broccoli
@@ -173,6 +175,7 @@ class Fighter : public Renderable
 	bool broccoli_is_uppercut_on_cooldown();
 	bool broccoli_is_holding_cauliflowers() const;
 	void broccoli_charging_up_cauliflowers();
+	bool broccoli_is_cauliflower_on_cooldown() { return m_broccoli_cauliflowers_on_cooldown; }
 	void reset_broccoli_flags();
 	
 	//Eggplant
@@ -182,12 +185,19 @@ class Fighter : public Renderable
 	void eggplant_emoji_update();
 	Emoji * eggplant_spawn_emoji_update(float ms);
 	void eggplant_projectile_update(float ms);
+	bool eggplant_is_shooting() { return m_eggplant_shoot_emoji; }
+	bool eggplant_shoot_on_cooldown() { return m_eggplant_shoot_cooldown <= 0; }
+	bool eggplant_enough_to_shoot() { return m_eggplant_emoji_count > 0; }
 
 	//Yam
 	Dash * yam_update(float ms);
 	void reset_yam_flags();
 	Dash * yam_dash_update(float ms);
 	void yam_heal_update(float ms);
+	bool yam_is_start_dashing() { return m_yam_start_dashing; }
+	bool yam_dash_on_cooldown() { return m_yam_dash_cooldown_ms <= 0; }
+	bool yam_is_healing() { return m_yam_is_healing; }
+	bool yam_heal_on_cooldown() { return m_yam_heal_cooldown_ms <= 0; }
 
 	// Helpers
 	Attack * punch_update();
