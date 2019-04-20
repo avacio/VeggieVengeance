@@ -11,6 +11,7 @@ Overview: For this final milestone, we focus on improving the ai and fixing past
 
 - Development: All features implemented in the previous milestones should be working, or improved upon if it’s the case.
 	- all abilities are included, and their damages are tuned
+	- codes are partially refactored to improve readability
     
 - Robustness: Sustain progressive, non-repetitive gameplay across one or more levels for 10min including all new features. No verbal explanation should be required at any point during the gameplay
 	- 4 fighters (9 abilities), 2-player/1-player v ai modes, 2 stages (with unique hazards) provide non-repetitive fighting matches
