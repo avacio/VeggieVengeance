@@ -94,7 +94,7 @@ Attack * AI::update(float ms, QuadTree* platform_tree, vec2 player1Position, boo
 	
 	case INIT:
 	{
-		if (player1HP - this->get_health() >= 10) this->aitype = AVOID;
+		if (player1HP - this->get_health() >= 50) this->aitype = AVOID;
 		else {
 			d.x = abs(player1Position.x - this->get_position().x);
 			d.y = player1Position.y - this->get_position().y;
