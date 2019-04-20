@@ -17,6 +17,7 @@ class AI : public Fighter
   private:
     bool in_play = false; // denotes if a player object is currently in play, false by default
 	bool is_in_Front(int p1Xpos);
+	void Avoid(vec2 pos);
 	void move_Randomly();
 
     AIType aitype;
