@@ -2,7 +2,7 @@
 
 
 
-Overview: For this final milestone, we focus on improving the ai and fixing past issues regarding stage hazards, as well as adding final touches and balancing the game.
+Overview: For this final milestone, we focus on improving the 1-player gameplay and fixing past issues regarding stage hazards, as well as adding final touches and balancing the game.
 
 
 
@@ -30,7 +30,7 @@ Overview: For this final milestone, we focus on improving the ai and fixing past
     - new stage (oven)
         
 - Advanced Gameplay: Implementation of one or more advanced gameplay features including advanced decision making mechanisms based on goals (path planning, A*, or similar), or some form of group behavior if applicable to the game; more complex physic interactions with the environment (e.g. gravity, bouncing, complex dynamics)
-	- AIs pathfind to approach player in 1-player mode
+	- AI fighter dynamically changes its behaviour (i.e aggressiveness) based on game state (Health advantage, position, ability cooldowns etc.)
 	- gravity applies to all fighters
     - bouncing implemented for projectile (Broccoli's cauliflower)
     

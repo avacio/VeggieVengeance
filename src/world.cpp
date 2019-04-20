@@ -1072,13 +1072,13 @@ bool World::set_mode(GameMode mode) {
 		case PVC: // single player
 			init_stage(selected_stage); // DO IN KEY CONTROL?
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
+			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(INIT) && m_bg.init(m_screen, mode, selected_stage);
 			m_fighters.emplace_back(m_player1);
 			break;
 		case TUTORIAL:
 			init_stage(selected_stage); // DO IN KEY CONTROL?
 			m_player1.set_in_play(true);
-			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(AVOID) && m_bg.init(m_screen, mode, selected_stage);
+			initSuccess = initSuccess && m_player1.init(1, p1name, selectedP1) && spawn_ai(RANDOM) && m_bg.init(m_screen, mode, selected_stage);
 			m_fighters.emplace_back(m_player1);
 			break;
 		default:

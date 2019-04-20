@@ -174,6 +174,7 @@ enum AIType
 {
 	CHASE,
 	AVOID,
+	INIT,
 	RANDOM
 };
 

@@ -6,6 +6,8 @@
 #include <random>
 
 #define ABILITY_RATE 10
+#define RESET_RATE 12
+#define DISENGAGE_RATE 2
 
 vec2 d;
 int engagingDistance = 75;
@@ -53,29 +55,34 @@ Attack * AI::update(float ms, QuadTree* platform_tree, vec2 player1Position, boo
 		break;
 	
 	case AVOID:
-	{
+	{	
+		if (time(0) % RESET_RATE == 0) {
+			this->aitype = INIT;
+		}
 		d.x = abs(player1Position.x - this->get_position().x);
 		d.y = player1Position.y - this->get_position().y;
 		bool facingP1 = is_in_Front(player1Position.x);
-		//==================================
-		//If the player is not right in front of AI, do random movements
-		//==================================
-		//std::cout << d.y << std::endl;
 
 		if (d.x > engagingDistance  || !facingP1 || abs(d.y) > 100) {
 			this->set_movement(STOP_PUNCHING);
 			this->set_movement(STOP_ABILITIES);
 			move_Randomly();
 		}
-		else if (d.x <= engagingDistance  && facingP1) {
-			if (abs(d.y) <= verticalEngagingDistance)
-				this->set_movement(PUNCHING);
-			else if (d.y < -70 && d.y > -100) this->set_movement(ABILITY_1);
-		}
-		
-
-		if (time(0) % ABILITY_RATE == 0) {
-			this->set_movement(ABILITY_2);
+		else if (d.x <= engagingDistance ) {
+			this->set_movement(BLOCKING);
+			
+			if (time(0) % DISENGAGE_RATE == 0) {
+				this->set_movement(STOP_BLOCKING);
+				
+				if (d.x <= engagingDistance && facingP1) {
+					if (abs(d.y) <= verticalEngagingDistance)
+						this->set_movement(PUNCHING);
+					else if (d.y < -70 && d.y > -100) this->set_movement(ABILITY_1);
+				}
+				break;
+			}
+			
+			
 		}
 
 		attack = Fighter::update(ms, platform_tree);
@@ -85,6 +92,40 @@ Attack * AI::update(float ms, QuadTree* platform_tree, vec2 player1Position, boo
 	}
 		break;
 	
+	case INIT:
+	{
+		if (player1HP - this->get_health() >= 10) this->aitype = AVOID;
+		else {
+			d.x = abs(player1Position.x - this->get_position().x);
+			d.y = player1Position.y - this->get_position().y;
+			bool facingP1 = is_in_Front(player1Position.x);
+
+			if (d.x > engagingDistance || !facingP1 || abs(d.y) > 100) {
+				this->set_movement(STOP_PUNCHING);
+				this->set_movement(STOP_ABILITIES);
+				move_Randomly();
+			}
+			else if (d.x <= engagingDistance && facingP1) {
+				if (time(0) % DISENGAGE_RATE) move_Randomly();
+
+				else if (abs(d.y) <= verticalEngagingDistance)
+					this->set_movement(PUNCHING);
+				else if (d.y < -70 && d.y > -100) this->set_movement(ABILITY_1);
+				
+			}
+
+
+			if (time(0) % ABILITY_RATE == 0 && facingP1) {
+				this->set_movement(ABILITY_2);
+			}
+
+			attack = Fighter::update(ms, platform_tree);
+			this->set_movement(STOP_MOVING_FORWARD);
+			this->set_movement(STOP_MOVING_BACKWARD);
+		}
+
+	}
+		break;
 	case RANDOM:
 	{
 		move_Randomly();
