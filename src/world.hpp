@@ -126,6 +126,7 @@ class World
 	Mix_Chunk *m_charging_up_audio;
 	Mix_Chunk *m_charged_punch_audio;
 	Mix_Chunk *m_fight_audio;
+	Mix_Chunk *m_knife_audio;
 
 	GameMode m_mode;
 	bool m_paused;
