@@ -15,11 +15,11 @@ Overview: For this final milestone, we focus on improving the ai and fixing past
     
 - Robustness: Sustain progressive, non-repetitive gameplay across one or more levels for 10min including all new features. No verbal explanation should be required at any point during the gameplay
 	- 4 fighters (9 abilities), 2-player/1-player v ai modes, 2 stages (with unique hazards) provide non-repetitive fighting matches
-    
         
 - Usability: Include a self-explanatory tutorial introducing the player to the game mechanics
 	- tutorial mode includes all controls (player controls, music controls etc.)
     	- updated to include optional controls for player 2
+    - can view this in any fight by clicking 'H'
         
 - External Integration: Include integration of one or more external tools or libraries (physical simulation (PhysX, Bullet, ODE, etc …), game engines, or alternatives)
 	- freeType library for text rendering
@@ -27,6 +27,7 @@ Overview: For this final milestone, we focus on improving the ai and fixing past
 - Advanced Graphics: Implementation of one or more advanced graphics features including visual effects (Particle Systems, 2.5D(3D) lighting, 2D dynamic shadows) and/or advanced 2D geometric modifications (2D deformations, rigged/skinned motion)
 	- new Particle system
 		- fighters emit particle as visual effects when charging and using power punch
+        - used in the Fight intro as well to introduce fighters and names
     - new stage (oven)
         
 - Advanced Gameplay: Implementation of one or more advanced gameplay features including advanced decision making mechanisms based on goals (path planning, A*, or similar), or some form of group behavior if applicable to the game; more complex physic interactions with the environment (e.g. gravity, bouncing, complex dynamics)
@@ -40,10 +41,13 @@ Overview: For this final milestone, we focus on improving the ai and fixing past
 	- all player controls should be very comfortable for 2-handed play (refined according to crossplay feedback)
 		- player 1 controls: wasd, cvb, left shift
 		- player 2 controls: arrow keys, ",./" keys, right shift (if keyboard includes numpad: 123 + enter)
+    - help (H)
 
 - Audio: There should be audio feedback for all meaningful interactions in the game as well as a background music with tones reflecting the current state of the game.
 	- randomly selected background music out of a list of 8 
-	- new sound effects for most fighter abilities (bullets, projectile, bomb, uppercut, dash, heal, emoji-shot)
+	- new sound effects for most fighter abilities (bullets, projectile, bomb, uppercut, dash, heal, emoji-shot, jump)
+    - knife slash sound for knife stage effect
+    - "Fight!" audio for fight intro
     
 
 # ROBUST MILESTONE PROGRESS - Mar. 29
