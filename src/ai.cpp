@@ -7,7 +7,7 @@
 
 #define ABILITY_RATE 10
 #define RESET_RATE 12
-#define DISENGAGE_RATE 2
+#define DISENGAGE_RATE 4
 
 vec2 d;
 int engagingDistance = 75;
