@@ -9,7 +9,7 @@ Overview: For this final milestone, we focus on improving the 1-player gameplay 
 ## Milestone Requirements
 
 
-- Development: All features implemented in the previous milestones should be working, or improved upon if itís the case.
+- Development: All features implemented in the previous milestones should be working, or improved upon if it‚Äôs the case.
 	- all abilities are included, and their damages are tuned
 	- codes are partially refactored to improve readability
     
@@ -21,7 +21,7 @@ Overview: For this final milestone, we focus on improving the 1-player gameplay 
     	- updated to include optional controls for player 2
     - can view this in any fight by clicking 'H'
         
-- External Integration: Include integration of one or more external tools or libraries (physical simulation (PhysX, Bullet, ODE, etc Ö), game engines, or alternatives)
+- External Integration: Include integration of one or more external tools or libraries (physical simulation (PhysX, Bullet, ODE, etc ‚Ä¶), game engines, or alternatives)
 	- freeType library for text rendering
     
 - Advanced Graphics: Implementation of one or more advanced graphics features including visual effects (Particle Systems, 2.5D(3D) lighting, 2D dynamic shadows) and/or advanced 2D geometric modifications (2D deformations, rigged/skinned motion)
@@ -35,7 +35,7 @@ Overview: For this final milestone, we focus on improving the 1-player gameplay 
 	- gravity applies to all fighters
     - bouncing implemented for projectile (Broccoli's cauliflower)
     
-- Accessibility: evaluate and optimizing user-game interactions (choice of user gestures, ease of navigation, etc Ö)
+- Accessibility: evaluate and optimizing user-game interactions (choice of user gestures, ease of navigation, etc ‚Ä¶)
 	- added quit game option in main menu
 	- pause menu (esc)
 	- all player controls should be very comfortable for 2-handed play (refined according to crossplay feedback)
@@ -69,7 +69,7 @@ Overview: For this milestone, we continued to introduce new features such as cha
 	- New Fighters
 		- Eggplant: Circling emojis, emoji bullets
 		- Yam: Self-healing, dash
-	- New fighting abilties
+	- New fighting abilities
 		- Potato: Tater tot bomb, chargable bullets (fries)
 		- Broccoli: Uppercut, chargable projectiles (cauliflowers)
 	- balancing states
@@ -89,10 +89,10 @@ Overview: For this milestone, we continued to introduce new features such as cha
 - The gameplay should be real-time (no lag). This included improving your collision handling using effective detection strategies. You should support dozens simultaneously moving main or background assets
 	- smooth collision detection for characters, platforms, spawned assets (bomb, bullets, projectiles)
 
-- The game should allow for some form of state saving for play ìreloadî. Users should be able to pause and restart in a graceful (if not perfect) manner. 
+- The game should allow for some form of state saving for play ‚Äúreload‚Äù. Users should be able to pause and restart in a graceful (if not perfect) manner. 
 	- matches can be paused and restart gracefully
 
-- The physical effects should be correctly integrated in time and should not be locked to the machineís speed by correctly handling the simulation time step and integration.
+- The physical effects should be correctly integrated in time and should not be locked to the machine‚Äôs speed by correctly handling the simulation time step and integration.
 
 - Stable game code supporting continuing execution and graceful termination.
 
@@ -143,7 +143,7 @@ Overview: For this milestone, we focused on improving the gameplay by introducin
 
 - Implement time stepping based physical animation: A subset of the game entities (main or background) should now possess non-trivial physics properties such as linear momentum or angular momentum, and acceleration and 
   act based on those. Specifically, you should implement some form of physical simulation, which can be either background effects (e.g. water, smoke implemented using particles) or active game elements (throwing a ball,
-  swinging a rope, etcÖ)
+  swinging a rope, etc‚Ä¶)
 	- gravity-based acceleration
 	- physical simulation for fighter moves
  		- projectile (parabolic projectile using gravity)
@@ -263,7 +263,7 @@ Overview: For this milestone, we were able to take on more than we had originall
     - Basic movement (translation), fighter flips onto side when dead (rotation) 
 
 - Keyboard/mouse control of one or more character sprites. This can include changes in the set of rendered objects, object geometry, position, orientation, textures, colors, and other attributes. 
-    - Keyboard control of two characters through two different key mappings (player 1 = w,a,s,d,e; player 2 = i,j,k,l,o). †Included regular left and right movement, crouch, jump, and punch. 
+    - Keyboard control of two characters through two different key mappings (player 1 = w,a,s,d,e; player 2 = i,j,k,l,o). ¬†Included regular left and right movement, crouch, jump, and punch. 
     - The jump control took longer to implement than planned, as there was some trouble drawing along the y-axis, but this was eventually done. 
 
 - Random or hard-coded action of (other) characters/assets. 
@@ -273,7 +273,7 @@ Overview: For this milestone, we were able to take on more than we had originall
 - Stable game code supporting continuing execution and graceful termination 
 - Preliminary work on health system (ability to die) 
     - Expected: Depletes player health when position is out of bounds 
-    - Actual: We currently have it so that player 1ís health is depleted when holding the ìEî key, and player 2ís health is depleted using the ìOî key 
+    - Actual: We currently have it so that player 1‚Äôs health is depleted when holding the ‚ÄúE‚Äù key, and player 2‚Äôs health is depleted using the ‚ÄúO‚Äù key 
         - Players are currently attacking themselves as a stub 
 
   
@@ -296,6 +296,6 @@ Creative: You should implement one or more additional creative elements. These c
         - Fighter is coloured red when taking damage 
 
     - Environment shaders 
-        - The entire screen has a wavy distort effect when holding the ìENTERî key
+        - The entire screen has a wavy distort effect when holding the ‚ÄúENTER‚Äù key
      
 
