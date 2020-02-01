@@ -1,8 +1,29 @@
+# VEGGIE VENGEANCE
+
+
+Veggie Vengeance is a 2D fighting game made by Madison Graf, Wesley Yuen, Michael Zhang, Ali Arbabian, Jen Deluz, and Alexis Gervacio. This game won runner-up in the CPSC436D showcase, as judged by industry pros from Electronic Arts, Skybox Labs, etc. :)
+
+Please see below for a video of gameplay!
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/0YJCtSY0wiQ/0.jpg)](https://youtu.be/0YJCtSY0wiQ)
 # OVERVIEW
 
 It is 3019, and with the fatal global food crisis, overpopulation, and unsustainable habits, humans have laid waste to both themselves, and the planet. In retaliation, Mother Nature has granted its babies — its vegetables from vast valleys — sentience. That’s right! These legumes and roots have gained intelligence, and this time, they are back with a vengeance! With humans down for the count, it’s time to establish a new world order. There is only room for one vegetable at the top of this food chain, and those who can’t take the heat must get out of the kitchen! Which vegetable will prevail among the seeds? Play to find out! The game supports multiple fighters and provides selection for multiple stages. Players fight as vegetable characters, each with their own set of unique abilities. Veggie Vengeance is a recipe for trouble.
 
-Veggie Vengeance is a 2D fighting game made by Madison Graf, Wesley Yuen, Michael Zhang, Ali Arbabian, Jen Deluz, and Alexis Gervacio. This game won runner-up in the CPSC436D showcase, as judged by industry pros from Electronic Arts, Skybox Labs, etc.
+Each fighter has their own speed, strength, and health stats. They each have a standard chargeable punch attack, and a limited shield.
+Pick your fighter!
+- Broccoli
+	- ![Imgur](https://i.imgur.com/wZTI5V9.png)
+	- Special Abilities: Uppercut, chargeable cauliflower projectiles
+- Potato
+	- ![Imgur](https://i.imgur.com/sjTUGde.png)
+	- Special Abilities: Tater tot bombs, chargeable french fry projectiles
+- Eggplant
+	- ![Imgur](https://i.imgur.com/2p3vufs.png)
+	- Special Abilities: Emoji barrier, emoji bullets
+- Yam
+	- ![Imgur](https://i.imgur.com/zmhTWPz.png)
+	- Special Abilities: Self-healing, dash
 
 # GRAND FINALE MILESTONE PROGRESS - Apr. 19
 
