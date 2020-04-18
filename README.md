@@ -96,7 +96,7 @@ Overview: For this milestone, we continued to introduce new features such as cha
 	- New Fighters
 		- Eggplant: Circling emojis, emoji bullets
 		- Yam: Self-healing, dash
-	- New fighting abilties
+	- New fighting abilities
 		- Potato: Tater tot bomb, chargable bullets (fries)
 		- Broccoli: Uppercut, chargable projectiles (cauliflowers)
 	- balancing states
